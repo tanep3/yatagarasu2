@@ -1,0 +1,23 @@
+# Rust
+/target/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Web
+node_modules/
+dist/
+
+# Local configuration and secrets
+.env
+config.local.toml
+secrets.toml
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
