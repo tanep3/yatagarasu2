@@ -1,0 +1,30 @@
+# ADR-001: 文書の権威と基準資料
+
+- Status: Accepted
+- Scope: 文書の解釈と2026-08-01の再編
+
+## Context
+
+Yatagarasu 1には実機で検証済みの機能要件があり、2026-08-01に凍結した番号付き資料にはYatagarasu 2の構造要件がある。いずれにも相互に両立しない箇所や、後続資料で訂正された初期案があるが、所有者の評価では双方とも90%超が完成している。
+
+## Decision
+
+Yatagarasu 1は機能要件の基準資料、以前のroot/docs indexと凍結`00`–`06`はY2構造要件の基準資料とする。両者は補完的であり、原則採用する。現在の正本文書は両基準資料を正規化して統合したものである。除外は、実際の矛盾、後続資料による訂正、既知欠陥、意図的延期、Y2範囲外のいずれかを理由とともに[根拠監査台帳](../requirements/source-audit.md)へ記す。
+
+Accepted ADRは記録したscopeにおける実際の矛盾またはsupersession（後継判断）だけを解決する。次に正本要件、アーキテクチャ説明、プロダクト説明、基準資料を参照する。以前のroot/docs indexと`00`–`06`は`docs/drafts/handover-baseline`にbyte-for-byteで保存する。manifestはその完全性だけを示し、内容の真実性または採否を決めない。
+
+## Non-decision / open
+
+これは具体的なproductまたはruntimeの振る舞いを決めません。個別の未決事項は要件トレーサビリティに残します。
+
+## Consequences
+
+矛盾と除外理由は黙って書き換えず、索引化します。新しい要件には観測可能な受入条件が必要です。
+
+## Related requirements
+
+すべての正本要件、トレーサビリティ索引。
+
+## Superseded assumptions
+
+以前の`docs/README.md`による番号付きdraftの「議論用の正本」という説明は、基準資料を正規化して統合する説明へ置き換えます。

@@ -31,7 +31,8 @@ Scope
   -> Final synthesis
 ```
 
-Use `integration_judge` only for structural triggers defined in the root `AGENTS.md`.
+Use `integration_judge` only when the Gate F triggers in
+[`review-gates.md`](review-gates.md#gate-f--structural-acceptance) apply.
 
 ## Adapter-local route
 

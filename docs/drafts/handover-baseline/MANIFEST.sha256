@@ -1,0 +1,11 @@
+# SHA-256 manifest of pre-restructure documentation
+# format: SHA-256  original path -> frozen path
+0f3219610fad9a9e614e263723a2399e12af25274f5cbb7e9757335805fee010  README.md -> docs/drafts/handover-baseline/ROOT-README.md
+88f4fa115f09749fd5980774ec65991a75c50a3c83219153bceb2f8910affe56  docs/README.md -> docs/drafts/handover-baseline/DOCS-README.md
+6df60689104cebb1581fdfc4bf3e5985efdf2d4db517fd4869cee50deaae9197  docs/00-architecture-vision.md -> docs/drafts/handover-baseline/00-architecture-vision.md
+a20af02e41be91e694eea715f0dd33fe865839ce2ef5221f767b64aa8230521c  docs/01-domain-and-execution-model.md -> docs/drafts/handover-baseline/01-domain-and-execution-model.md
+7fb18f730a50517033c043b5d33e825c973962fe3078059906e7fc84822b6bf5  docs/02-boundaries-and-runtime.md -> docs/drafts/handover-baseline/02-boundaries-and-runtime.md
+713a7ecd28f5b2c566913b9cc007c3067bd577cc29bd0b66c7bb041102448b55  docs/03-evolution-plan-and-open-questions.md -> docs/drafts/handover-baseline/03-evolution-plan-and-open-questions.md
+6ee1c05bc7e430c1f0e63cd2a7260efd7d07905c874c2f26f1bb85d03ded3bae  docs/04-agentization-requirements-draft.md -> docs/drafts/handover-baseline/04-agentization-requirements-draft.md
+c835d3f69eb06a7adcf88853b86ef058e2c34bc689cd2750cb289d35014df3d7  docs/05-agentization-architecture-review.md -> docs/drafts/handover-baseline/05-agentization-architecture-review.md
+b661eeb927daf4e3416e710d416dced416b6d4edb86d0dc36968f7a64e412a2d  docs/06-configuration-workspace-and-capability-operations.md -> docs/drafts/handover-baseline/06-configuration-workspace-and-capability-operations.md

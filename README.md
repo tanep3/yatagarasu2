@@ -1,16 +1,21 @@
 # Yatagarasu 2
 
-Yatagarasu 2は、Yatagarasu 1の実機運用で発見したドメインを、
-State、Event、Rule、Transition、Effectとして再構築する次世代実装です。
+## 見守りカメラを、目・耳・口を持つAIロボットへ。
 
-現行Yatagarasuとは別repository、別service、別実機で開発します。
-TC70上のYatagarasu 1を安定運用版として維持し、C210をYatagarasu 2の検証機とします。
+見守りカメラには、カメラがあります。マイクがあります。スピーカーもあります。首を動かせる機種だってある。
 
-現在は要件とアーキテクチャを検討する段階です。
+だったら、そこにAIの頭脳をつないだらどうなるだろう？
 
-設計文書の入口:
+周囲を見て、呼びかけを聞いて、必要なら自分で向きを変え、見たことを自分の言葉で話してくれる。見守りカメラは、目・耳・口を持つAIロボットになれるはずです。
 
-- [docs/README.md](docs/README.md)
-- [Agent化要件ドラフト](docs/04-agentization-requirements-draft.md)
-- [Agent化要件のアーキテクチャレビュー](docs/05-agentization-architecture-review.md)
-- [設定・Workspace・Capability運用](docs/06-configuration-workspace-and-capability-operations.md)
+Yatagarasu 2は、その可能性を本気で形にするプロジェクトです。特定のAIや一台のカメラへすべてを縛り付けるのではなく、カメラ、音声認識、記憶、AI、声を交換しながら、一つのロボットとして育てられる基盤を目指しています。
+
+## 今は、どこまでできているの？
+
+Yatagarasu 2は、まだ要件と設計を作っている段階です。今すぐ導入して使える完成品ではありません。
+
+ただし、原型となるYatagarasu 1は、すでに実機で動いています。Yatagarasu 2はそこで見つけた成功も失敗も受け継ぎながら、未完成なコードを運用中の環境へ混ぜず、別の場所でじっくり育てていきます。
+
+設計の入口は[ドキュメント案内](docs/README.md)です。体験の目標は[プロダクト概要](docs/product/README.md)、現在の要件は[要件](docs/requirements/README.md)、設計上の約束は[アーキテクチャ](docs/architecture/README.md)と[ADR](docs/adr/README.md)で読めます。
+
+第三者コンポーネントとデータ境界は[法務・ライセンス情報](docs/legal/README.md)を参照してください。

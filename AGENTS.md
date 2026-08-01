@@ -44,6 +44,9 @@ Delegation is proportional to risk; agent count is not a quality metric.
 
 Before a non-trivial change, classify it as one of these routes:
 
+Before structural design, read `docs/architecture/design-philosophy.md` and the
+canonical requirements and Accepted ADRs relevant to the affected scope.
+
 ### Mechanical route
 
 Use for documentation, formatting, configuration metadata, generated-file refreshes, and other changes
@@ -76,7 +79,8 @@ recovery, provider routing, physical-world assumptions, or Rust/Python/local/rem
 4. Assign exactly one write owner per code area: `rust_core_implementer` or `python_adapter_implementer`.
 5. Use `test_engineer` to derive and run tests from the acceptance criteria.
 6. Use `implementation_reviewer` after implementation and tests exist.
-7. Use `integration_judge` only for the structural acceptance triggers defined in the workflow document.
+7. Use `integration_judge` only when the Gate F triggers in
+   `docs/development/review-gates.md` apply.
 
 For the detailed routes, handoff contract, review gates, and model economy, read:
 

@@ -4,7 +4,7 @@ These gates apply according to the route selected in the root `AGENTS.md`.
 
 - Mechanical route: no formal gate; run artifact-relevant checks.
 - Local route: Gate C is required; Gates D and E are risk-based.
-- Structural route: Gates A through E are required; Gate F is conditional on its structural triggers.
+- Structural route: Gates A through E are required; Gate F is required when its triggers below apply.
 
 Selecting fewer gates must never be used to disguise a structural change as a local one.
 
@@ -62,7 +62,15 @@ Pass conditions:
 
 ## Gate F — Structural Acceptance
 
-Conditional final gate for high-impact changes.
+Gate F is required when a change alters any of the following:
+
+- state ownership or a bounded context;
+- a cross-context or public Command, Event, Effect, Policy, or Port contract;
+- persistence, schema, migration, outbox, recovery, or idempotency;
+- concurrency, cancellation, retry, or resource scheduling;
+- physical uncertainty, safety, security, or privacy;
+- provider routing or a Rust/Python/Mimy/local/remote contract; or
+- compatibility or rollout of deployed state.
 
 Pass conditions:
 
