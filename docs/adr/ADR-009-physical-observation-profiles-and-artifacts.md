@@ -15,7 +15,7 @@ profileの外側schemaは中立にし、dispatch時のimmutable effective profil
 
 ## Non-decision / open
 
-calibrationの証拠水準、現在poseの照合、timing margin、reconciliation、profile候補とProvider routingは未決である。
+calibrationの証拠水準、現在poseの照合、timing margin、reconciliation、具体profile集合とProvider routing機構は未決である。動的LLM／Provider選択の必須性はADR-011が定める。
 
 ## Consequences
 
@@ -23,7 +23,7 @@ camera/LLM/TTS Adapter、profile、worker、Provider、Projectionは物理観測
 
 ## Related requirements
 
-REQ-ARC-003、REQ-ARC-006、REQ-PER-001、REQ-PHY-001、REQ-PHY-003。
+REQ-PRD-003、REQ-ARC-003、REQ-ARC-006、REQ-PER-001、REQ-PHY-001、REQ-PHY-003。
 
 ## Superseded assumptions
 

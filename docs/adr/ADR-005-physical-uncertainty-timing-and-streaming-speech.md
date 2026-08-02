@@ -21,7 +21,7 @@ Recovery、timer、Adapterの実装は、仮定した物理完了をObservedと�
 
 ## Related requirements
 
-REQ-PHY-001、REQ-PHY-002、REQ-PHY-003、REQ-OPS-004、REQ-OPS-008。
+REQ-PRD-003、REQ-PHY-001、REQ-PHY-002、REQ-PHY-003、REQ-OPS-004、REQ-OPS-008。
 
 ## Superseded assumptions
 

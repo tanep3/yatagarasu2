@@ -13,7 +13,7 @@
 
 ## Non-decision / open
 
-Provider routing、利用者同意、privacy/memory policy、Web authentication/TLS、IPCとprocess managementは未決です。Skillの具体形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針も未決です。
+Provider routingの具体機構、利用者同意、privacy/memory policy、Web authentication/TLS、IPCとprocess managementは未決です。動的LLM／Provider選択の必須性はADR-011が定めます。Skillの具体形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針も未決です。
 
 ## Consequences
 

@@ -16,3 +16,5 @@ Yatagarasu 1の実機機能要件と、凍結済みYatagarasu 2構造要件は�
 | [ADR-008](ADR-008-contributors-and-policy-resolution.md) | SBERT反射、規則、LLM提案を固定三段階や中央Intent登録簿へしない |
 | [ADR-009](ADR-009-physical-observation-profiles-and-artifacts.md) | 移動要求、姿勢、校正、成果物、profileを一つの成功へ畳まない |
 | [ADR-010](ADR-010-interaction-cancellation-and-durable-revocation.md) | 取消要求、停止結果、物理結果、遅延結果を区別する |
+| [ADR-011](ADR-011-sbert-driven-inference-routing.md) | SBERTによる動的LLM／Provider選択を製品の必須positioningとして固定する |
+| [ADR-012](ADR-012-configuration-workspace-and-upgrade.md) | 設定、Workspace、Upgrade、Capability配置を正本契約へ戻す |

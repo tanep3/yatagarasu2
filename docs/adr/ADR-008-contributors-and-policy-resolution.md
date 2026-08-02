@@ -15,15 +15,15 @@ Y1のSBERT routerは、意味空間を使う反射が実機体験を大きく高
 
 ## Non-decision / open
 
-具体的な動作候補の集合、閾値、gate語彙、profileの選択規則、Provider routingは未決である。
+具体的な動作候補の集合、閾値、gate語彙、profileの選択規則は未決である。動的LLM／Provider選択の必須性はADR-011が定め、具体routing機構は同ADRの未決事項とする。
 
 ## Consequences
 
-SBERT、Python worker、LLM、ProviderはDecision Policy version、Interaction、Graph、profileを所有しない。routing fixtureはgray candidate+keyword gateによるcalibrationのLLM request/Proposalなしdirect path、候補なし、曖昧、競合、合成、拒否Proposal、rule-only、LLM-proposal-onlyを検証する。
+SBERT、Python worker、LLM、ProviderはDecision Policy version、Interaction、Graph、profileを所有しない。routing fixtureはgray Candidateとgate、候補なし、曖昧、競合、合成を検証する。Contributor構成、信頼境界、calibration反射は分割した要件で検証する。
 
 ## Related requirements
 
-REQ-ARC-004、REQ-ARC-005、REQ-ARC-006。
+REQ-PRD-004、REQ-FR-004、REQ-ARC-004、REQ-ARC-005、REQ-ARC-006、REQ-ARC-008、REQ-ARC-009。
 
 ## Superseded assumptions
 

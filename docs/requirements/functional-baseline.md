@@ -19,13 +19,17 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | --- | --- | --- |
 | テキストInteraction | CLI等からAIへ依頼できる | REQ-PRD-001, REQ-FR-001 |
 | 常時音声、WakeWord、VAD、STT、stop word | 耳は一回限りの録音ではなく生存期間を持つ | REQ-PRD-001, ADR-006 |
-| SBERT意味ルーティング | 意味の反射がLLM待ちを避け、実機体験を大きく改善する | REQ-ARC-005, ADR-008 |
+| SBERT意味ルーティング | 意味の反射がLLM待ちを避け、実機体験を大きく改善する | REQ-ARC-005, REQ-ARC-008, ADR-008 |
 | 相対カメラ操作と校正 | 身体操作はLLMなしでも決定でき、姿勢の事実とは分ける必要がある | REQ-PHY-003, ADR-009 |
 | 撮影と画像解釈 | 撮影成果物が有効な場合だけAIへ渡す | REQ-PER-001, ADR-009 |
 | 複合要求 | 移動、撮影、解釈は一つの関数ではなく依存する仕事群である | REQ-PER-001 |
+| 実機End-to-End | Fake境界だけでなく、本物の目・耳・口を一つの因果列として動かす必要がある | REQ-PRD-003 |
+| 区間別遅延計測 | 反射速度を守るには、総時間だけでなくwake、STT、routing、dispatch等を分けて測る必要がある | REQ-NFR-001 |
 | 音声promptと応答再生 | 口には再生時間、取消、成果物の生存期間がある | REQ-OPS-004, REQ-OPS-006 |
 | Skillによる能力拡張 | AIがロボット外のアプリ、データ、能力へ接続できる | REQ-PRD-002, REQ-ARC-007 |
-| 設定と能力診断 | 外部能力は交換・診断でき、秘密情報を漏らさない必要がある | REQ-OPS-005, REQ-SEC-001 |
+| 動的LLM／Provider選択 | SBERTの反射で用途に合うlocal／external推論能力を選び分ける | REQ-PRD-004, ADR-011 |
+| 設定と能力診断 | 設定、Workspace、状態、cacheを分け、採用元と能力を診断する | REQ-CFG-001, REQ-CFG-004 |
+| 安全な設定変更とUpgrade | 型検証、原子的保存、反映範囲、利用者資産保護が必要である | REQ-CFG-002, REQ-CFG-003 |
 
 ## 契約未決の継承基準
 
@@ -35,7 +39,6 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | memorize | 利用者の明示依頼で記憶を保存する | 同意、削除、保存期間、migration |
 | search / fetch | 現在の外部情報を取得して考える | network許可、取得先、citation、Failure、同意 |
 | Skill作成 | 新しいAI接続面を増やす | 作成権限、検証、配備、rollback、安全方針 |
-| 複数Agent/Provider | 用途に応じて推論能力を交換する | route、切替、同意、会話継続、Recovery |
 | 長期会話文脈 | 「もう少し」など前の行動を踏まえる | Conversation保持、privacy、Provider越境 |
 
 これらを未決とするのは、機能を捨てるためではありません。価値を継承したまま、危険な前提を実装前に確定しないためです。

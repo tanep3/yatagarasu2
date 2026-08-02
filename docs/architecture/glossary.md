@@ -18,6 +18,10 @@
 | Proposal（提案） | LLMや外部能力が返す、まだPolicyで許可されていない実行候補。 |
 | Policy（方針） | 候補や提案を受理、拒否、確認、合成する版付きの判断基準。 |
 | Contributor（候補提供者） | SBERT、純粋Rule、LLMなど、意味解決へ候補や材料を寄与するもの。 |
+| Candidate（意味候補） | Contributorが返す、scoreと出所を持つ未解決の候補。Command、Decision、Effectではない。 |
+| Capability Catalog（能力目録） | 利用可能な候補種別、能力広告、Proposal schema、Effect型を発見する目録。意味の正解やStateを所有しない。 |
+| logical profile（論理プロファイル） | 速度重視、画像理解、高性能推論など、具体的なモデル名・Provider名から分離した能力選択単位。 |
+| preferred / effective route（希望／実効経路） | 利用者・Policyが希望したrouteと、可用性・同意・縮退適用後に実際に選ばれたroute。 |
 | Skill（AI接続面） | 人が使うアプリ、データ、能力をAIへ公開し、同じ世界へ関われるようにする境界。 |
 | Port（抽象接続口） | Applicationが外部能力へ要求する、具体製品に依存しない契約。 |
 | Adapter（変換境界） | Portの値と具体製品・通信・入出力の表現を相互に翻訳するもの。 |

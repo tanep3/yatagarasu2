@@ -11,7 +11,7 @@ RuleとTransitionは決定論的でI/Oを含まない。RuleはStateとEventを�
 受入条件:
 
 - AC-ARC-001: 具体的Adapterを構築せずに、焦点を絞ったテストがRuleを評価しTransitionを適用できる。
-- AC-ARC-002: 静的依存チェックにより、domainコードがadapter、bootstrap、network、filesystem、clock、具体Providerをimportしないことを示せる。
+- AC-ARC-002: 機械生成した依存グラフまたはarchitecture testが、domain package／crateからadapter、bootstrap、I/O実装、FFI、具体Providerへの依存経路が存在しないことを、実装言語に依存しない形で示す。
 
 ### REQ-ARC-002 — 単一のState所有者と汎用Kernel
 
@@ -21,6 +21,7 @@ RuleとTransitionは決定論的でI/Oを含まない。RuleはStateとEventを�
 
 - AC-ARC-003: 導入されるState型ごとに、契約上ちょうど一つの所有Contextを記す。
 - AC-ARC-004: 新しいAdapterがWorldStateを直接変更せずに結果Eventを返せる。
+- AC-ARC-017: 全State型がownership registryへ一度だけ登録され、重複・未登録がなく、非所有moduleから変更用constructor／reducerへ到達できないことをarchitecture testが示す。他ContextはEventまたは読取viewだけを利用する。
 
 ### REQ-ARC-003 — 不変の仕事としてのEffectと結果Event
 
@@ -40,26 +41,35 @@ LLM、Codex、Skillを介した外部主体、その他外部能力のProposal�
 - AC-ARC-007: 未承認のProposed EffectがPolicyにより拒否される、またはdispatchされないまま残る。
 - AC-ARC-008: 承認済みProposalが、そこから生じる許可済みEffectと別の値として表現される。
 
-### REQ-ARC-005 — 意味の反射と複数候補を純粋に解決する
+### REQ-ARC-005 — 意味候補の生成と解決を分離する
 
-通常の意味routing機能では、SBERT（文埋め込み）を最初のcandidate（候補）生成とし、gray band（閾値間の帯域）の候補は
-accept（受理）前に決定論的なkeyword/rule filter（キーワード/規則による絞込み）を通す。これは全機能に強いる滝型処理ではない。
-機能はSBERT、純粋Rule、LLMなど一つ以上のcontributor（候補提供者）を明示capability Policyにより任意に組み合わせてよく、
-rule-onlyまたはLLM-proposal-onlyの経路も有効である。すべての概念を正式Intentへ集約する中央登録簿は置かない。SBERT Adapterは候補、score、
-provenance（出所）だけを返す。動作候補ごとのthresholdとgateは、名前を持つDecision Policy所有者のversion付きPolicy dataとする。
-純粋なresolution Policyが候補なし、曖昧、競合、合成可能を区別する。
+通常の意味routingでは、SBERT（文埋め込み）を最初のCandidate（意味候補）生成に用いる。SBERT AdapterはCandidate、score、provenance（出所）だけを返し、State変更、Graph確定、dispatchを行わない。gray band（閾値間の帯域）のCandidateは、受理前に動作候補固有の決定論的keyword／Rule gateを通す。動作候補ごとのthresholdとgateはDecision Policy Contextが唯一所有するversion付きPolicy dataとし、純粋なresolution Policyが候補なし、曖昧、競合、合成可能を区別する。
 
-決定論的で承認済みのcontributorは許可済みEffect Graph断片を作ってよい。LLM、Codex、またはSkillを介した信頼できない外部主体は
-Proposalを返し、Policy前にStateを変更、Effectをdispatch、Graphを確定してはならない。camera calibrationは、SBERT candidateと
-校正候補に固有のkeyword/rule gateが決定論的Policyに一致した場合、LLM request/Proposalを作らずに完了しなければならない。これはGraphと
-安全・capability Policyを迂回しない。
+すべての概念を正式Intentへ集約する中央の意味所有者は置かない。ただし、Candidate種別、Capability advertisement（能力広告）、Proposal schema、Effect型を発見するcatalogは持ってよい。catalogは発見と型互換性を扱い、意味の正解、State、Decision Policyを所有しない。
 
 受入条件:
 
-- AC-ARC-009: gray bandのSBERT candidateを校正候補に固有のkeyword gateが決定論的Policyにより受理するcamera calibration fixtureが、LLM request/Proposalを一切作らず、Policy承認済みGraph断片だけを作る。
+- AC-ARC-009: gray bandのCandidateに対し、動作候補固有gateが受理するfixtureと拒否するfixtureが、異なる明示的resolution結果を返す。
 - AC-ARC-010: 競合、曖昧、候補なし、合成可能の各fixtureがresolution Policyの異なる明示的結果を得る。
-- AC-ARC-011: LLM Proposalを拒否するfixtureが、State変更もdispatchも生まないことを示す。
-- AC-ARC-013: 明示capability Policyでrule-onlyまたはLLM-proposal-onlyに割り当てたfixtureが、SBERTの必須実行を要求しないことを示す。
+
+### REQ-ARC-008 — Contributor構成をCapability Policyで決める
+
+機能は、SBERT、純粋Rule、LLMなど一つ以上のContributor（候補提供者）を、明示的なCapability Policyにより組み合わせる。通常のSBERT-first経路を全機能へ強いる滝型処理にはしない。rule-only、SBERT-only、LLM-proposal-only、複数Contributorの合成を選べなければならない。
+
+受入条件:
+
+- AC-ARC-013: 明示Capability Policyでrule-onlyまたはLLM-proposal-onlyに割り当てたfixtureが、SBERTの必須実行を要求しないことを示す。
+- AC-ARC-018: 同じ要求を異なるversionのCapability Policyへ与えるfixtureが、宣言されたContributor構成だけを起動し、Kernelへの条件分岐追加を要求しない。
+
+### REQ-ARC-009 — 信頼境界によりGraph生成権限を制限する
+
+決定論的で承認済みのContributorは、Policyが許可したEffect Graph断片を作ってよい。LLM、Codex、またはSkillを介した信頼できない外部主体はProposalを返し、Policy検証前にState変更、Effect確定、Graph確定、dispatchを行ってはならない。Skill自体をProposal生成者に限定しない。
+
+受入条件:
+
+- AC-ARC-011: LLM Proposalを拒否するfixtureが、State変更、Effect確定、Graph変更、dispatchのいずれも生まないことを示す。
+- AC-ARC-019: 承認済み決定論Contributorと信頼できない外部主体へ同等のGraph断片を提案させるfixtureが、前者だけを宣言権限の範囲で受理し、後者にはPolicy検証を要求する。
+- AC-ARC-020: Skillの読取観測、決定論的能力、AI由来Proposalの三経路が、それぞれObservation、許可済みGraph断片、未承認Proposalとして区別される。
 
 ### REQ-ARC-006 — 実効profileをdispatch時に固定する
 

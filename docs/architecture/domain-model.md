@@ -89,6 +89,12 @@ MoveCamera(right)
 
 カメラ校正は、SBERT候補と校正に固有のキーワード／規則が決定論的方針に一致すれば、LLMへ送らずEffect Graphを作れます。ただし、安全方針、能力方針、資源要求を迂回しません。
 
+### LLM／Provider routeも候補として解く
+
+推論能力は、具体モデル名を直接Domainへ持ち込まず、速度重視、Vision、高性能推論などの論理profileとして扱います。SBERTは入力からroute候補を返し、Decision Policyが利用可能性、privacy、利用者同意、能力広告を踏まえて解決します。
+
+preferred route（希望経路）とeffective route（実効経路）を分けます。希望した外部Vision profileが使えない場合、拒否、利用者確認、許可済み縮退のどれを選ぶかはPolicyです。外部Providerやworkerはroute方針、会話状態、WorldStateを所有しません。
+
 ## Skill、Proposal、Effectを分ける
 
 Skillは、人間が使うアプリ、データ、外部能力をAIへ公開する接続面です。Skillを追加することで、Coreへ製品固有の分岐を足さずに、AIが新しい世界へ触れられるようにします。
@@ -111,7 +117,7 @@ LLM、Codex、Skill内の外部主体が返すProposalは、命令ではあり�
 
 ## Profile、取消、通知
 
-機能と機種ごとのprofileは、外側の中立なschemaから選びます。Effectをdispatchする時点で、実効profileと版を不変値としてEffectと永続待機記録へ固定します。後から設定が変わっても、すでに送った仕事の意味を変えません。
+機能、機種、推論routeごとのprofileは、外側の中立なschemaから選びます。Effectをdispatchする時点で、実効profileと版を不変値としてEffectと永続待機記録へ固定します。後から設定が変わっても、すでに送った仕事の意味を変えません。
 
 `CancelRequested`は共通Inbound境界へ入るCommandです。Interaction Contextが受理した結果は`CancellationAccepted` Eventとして記録します。さらに、待機中仕事の永続取消、実行中仕事の取消結果、物理結果を別々のEventとStateで表します。取消後に遅れて届いたProposalは適用しません。止められない物理動作を、止めたことにはしません。
 

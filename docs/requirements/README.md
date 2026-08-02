@@ -6,6 +6,7 @@
 - [プロダクト要件](product-requirements.md) — 利用者に届ける体験と機能
 - [アーキテクチャ要件](architecture-requirements.md) — 世界の法則と、破ってはいけない境界
 - [運用要件](operational-requirements.md) — 永続化、取消、音声、秘密情報、分離運用
+- [設定・Workspace要件](configuration-requirements.md) — 設定層、原子的変更、Upgrade、Capability配置
 - [トレーサビリティ](traceability.md) — 要件、受入条件、判断、未決事項の対応
 - [根拠監査台帳](source-audit.md) — Y1と凍結ドラフトからの採用・保留・不採用
 
@@ -19,3 +20,5 @@
 理論、soukoban、Yatagarasu 1、Yatagarasu 2という導出の連鎖は[設計思想](../architecture/design-philosophy.md)で扱います。要件本文では、そこから導かれた義務と受入条件だけを記します。
 
 既存の要件IDと受入条件IDは意味を保ったまま維持します。変更する場合は、トレーサビリティと根拠監査台帳を同時に更新します。未決事項は、説明が深まったことを理由に確定事項へ変えません。
+
+IDは一度割り当てた意味の安定性を優先するため、本文の掲載順と数値順が一致しない場合があります。欠番は要件漏れを意味しません。

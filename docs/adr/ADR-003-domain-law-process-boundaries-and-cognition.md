@@ -21,7 +21,7 @@ Domain境界は設計判断であり、process境界はdeployment判断です。
 
 ## Related requirements
 
-REQ-FR-001、REQ-ARC-001、REQ-ARC-002、REQ-ARC-003、REQ-ARC-004、REQ-PER-001、REQ-OPS-005。
+REQ-FR-001、REQ-ARC-001、REQ-ARC-002、REQ-ARC-003、REQ-ARC-004、REQ-ARC-008、REQ-ARC-009、REQ-PER-001、REQ-OPS-005。
 
 ## Superseded assumptions
 

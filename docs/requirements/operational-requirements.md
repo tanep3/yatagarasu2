@@ -4,6 +4,8 @@
 
 仕事を失わず、勝手に再実行せず、物理事実・取消・通知を根拠なく言い過ぎない形で安全に進化する。
 
+要件IDは意味の安定性を優先するため、本文順と数値順が一致しない場合がある。
+
 ### REQ-OPS-001 — Yatagarasu 1の分離
 
 Yatagarasu 2の開発中もYatagarasu 1は稼働を継続し、別系統として保つ。未完成のYatagarasu 2コードを本番ロボット環境へ混在させない。Yatagarasu 1は旧版ではなく、実機機能要件を検証し続ける基準系として扱う。
@@ -31,9 +33,9 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 - AC-OPS-005: dispatcherが、永続pending recordを持たないready Effectを拒否する。
 - AC-OPS-006: fixtureのRecoveryが、選択されたidempotency/照合Policyのもとでpending recordを一度dispatchし、journal replayをside effectの源にしない。
 
-### REQ-OPS-004 — 音声sessionと再生時刻
+### REQ-OPS-004 — 音声再生の開始・仮定完了・取消結果
 
-ストリーミング音声の採用と優先度はOPENであり、必須実装ではない。採用した場合だけ、再生Adapterが返しCoreが受理した`EffectExecutionStarted`から、PlaybackCompletionAssumedはClockPortの単調audio durationとmarginを測る。このEventは再生の試行/開始を示すだけで、音が聞こえたことや再生完了の観測ではない。Event前のqueue時間は消費せず、EventがなければtimerベースのAssumed completionは起こらない。start Event不達時のtimeout/Failure Policyと数値境界は未決である。
+一括再生かストリーミング再生かにかかわらず、再生Adapterが返しCoreが受理した`EffectExecutionStarted`から、PlaybackCompletionAssumedはClockPortの単調audio durationとmarginを測る。このEventは再生の試行／開始を示すだけで、音が聞こえたことや再生完了の観測ではない。Event前のqueue時間は消費せず、EventがなければtimerベースのAssumed completionは起こらない。取消結果と物理的な再生停止も区別する。start Event不達時のtimeout／Failure Policyと数値境界は未決である。ストリーミングTTS固有の追加条件はREQ-OPS-008だけに置く。
 
 受入条件:
 
@@ -88,7 +90,7 @@ secretをEvent、Projection、prompt、journal、通常ログへ含めない。W
 
 受入条件:
 
-- AC-SEC-001: redaction test fixtureが、設定したsecretが記録済みEventとProjectionに含まれないことを確認する。
+- AC-SEC-001: canary secretを入力するredaction fixtureが、Event、Projection、永続journal、診断Artifact、Providerへ送信直前のRequest／prompt、通常ログの全検査面に、平文または既知の派生表現を含まないことを確認する。
 
 ### REQ-OPS-005 — capability bindingをdomain外に保つ
 

@@ -82,25 +82,25 @@
 | 03 §5 | Y1から移植する単位 | covered | 下のY1機能監査へ分解 | Y1各AC |
 | 03 §6 | 言語選択 | open | Rust/Python境界は保持、言語選択は未決 | ADR-003 |
 | 03 §7（Q1–Q10） | Open Questions | open | [未決事項](traceability.md#未決事項一覧)へ正規化 | 個別設計時 |
-| 03 §8 | Architecture Invariants | accepted | ADR-003–010, 設計思想 | AC-ARC/PER/PHY |
+| 03 §8 | Architecture Invariants | accepted | ADR-003–012, 設計思想 | AC-ARC/PER/PHY |
 | 03 §9 | 最後に | legacy | 結語であり独立契約でない | 台帳参照 |
 | [04 §1–§2](../drafts/handover-baseline/04-agentization-requirements-draft.md) | 目的・背景 | covered | 功能/構造の補完基準として保持 | 台帳全件 |
 | 04 §3（§3.1–3.2） | プロダクトコンセプト | covered | [プロダクト](../product/README.md), REQ-PRD-001 | AC-PRD-001–002 |
-| 04 §4（§4.1–4.6） | 起動、文脈、CLI、service、routing課題 | covered | contributor、profile、Web、provider未決へ分解 | AC-ARC-009–012 |
-| 04 §5 | 目的 | covered | REQ-PRD-001, REQ-FR-001–003 | AC-PRD-001–002 |
+| 04 §4（§4.1–4.6） | 起動、文脈、CLI、service、routing課題 | covered | Contributor、profile、Web、動的Provider、区間別遅延へ分解 | AC-ARC-009–013, AC-PRD-009–011, AC-NFR-001–003 |
+| 04 §5 | 目的 | covered | REQ-PRD-001–004, REQ-FR-001–004, REQ-NFR-001 | AC-PRD-001–011 |
 | 04 §6（§6.1–6.2） | 一般利用者・開発者 | covered | プロダクト要件 | AC-PRD-001 |
 | 04 §7（UC-01–03） | 音声質問、連続命令、Web chat | covered | REQ-PRD-001, REQ-FR-001 | AC-PRD-001, AC-FR-001–002 |
-| 04 §7（UC-04–08） | model/provider切替 | open | profile固定はREQ-ARC-006、routing/consentは未決 | AC-ARC-012 |
+| 04 §7（UC-04–08） | model/provider切替 | accepted | 動的LLM／Provider選択を製品positioningとしてREQ-PRD-004、ADR-011へ採用。具体routing／consentは未決 | AC-PRD-009–011, AC-ARC-012 |
 | 04 §7（UC-09–10） | Web切替・構成照会 | open | Web境界は採用、操作権限とroutingは未決 | AC-FR-005 |
 | 04 §7（UC-11–12） | provider間会話継続・縮退 | open | conversation/privacy/provider Recoveryは未決 | 未決事項 |
 | 04 §8.1 | listend supervisor | rejected | 凍結05訂正とADR-003。supervisorでなくInbound Adapter | AC-FR-001 |
 | 04 §8.2 | SBERT Router | accepted | ADR-008。候補/score/provenanceのみ返す | AC-ARC-009–010 |
 | 04 §8.3 | yatagarasu-agent司令塔 | rejected | ADR-003。Kernel/ContextがStateを所有 | AC-ARC-003 |
-| 04 §8.4–§8.7 | profile、model/provider切替状態 | covered | REQ-ARC-006。実効profile/version固定 | AC-ARC-012 |
+| 04 §8.4–§8.7 | profile、model/provider切替状態 | covered | REQ-PRD-004、REQ-ARC-006。希望／実効routeとprofile/version固定 | AC-PRD-009–011, AC-ARC-012 |
 | 04 §8.8 | 会話文脈引継ぎ | open | 会話保持、privacy、provider routing未決 | 未決事項 |
 | 04 §8.9 | yatagarasu-web | covered | REQ-FR-001/003。直接Provider接続は禁止 | AC-FR-005 |
 | 04 §9（§9.1–9.4） | 固定Unix JSONL IPC | rejected | 凍結05訂正、ADR-003。transportはdomain型でない | 未決事項: IPC |
-| 04 §10 | 非機能要件 | covered | Failure/secret/運用要件へ分解 | AC-FR-004, AC-SEC-001 |
+| 04 §10 | 非機能要件 | covered | 区間別latency、Failure、secret、運用要件へ分解 | AC-NFR-001–003, AC-FR-004, AC-SEC-001 |
 | 04 §11 | 制約 | covered | capability bindingとY1分離 | AC-OPS-001, AC-OPS-009 |
 | 04 §12 | 対象外 | open | 意図的延期は未決事項として追跡 | 未決事項 |
 | 04 §13（Phase 1–9） | 実装フェーズ・優先順位 | legacy | roadmap。機能/構造契約は上記へ採用 | planning時再評価 |
@@ -112,29 +112,29 @@
 | 05 §3.1 | listend非supervisor | accepted | ADR-003 | AC-FR-001 |
 | 05 §3.2 | Agent非司令塔 | accepted | ADR-003 | AC-ARC-003 |
 | 05 §3.3 | Unix socketを前提にしない | accepted | ADR-003 | 未決事項: IPC |
-| 05 §3.4 | Codex Thread IDを会話IDにしない | accepted | ADR-003 | AC-ARC-011 |
+| 05 §3.4 | Codex Thread IDを会話IDにしない | accepted | ADR-003。Conversation IDはYatagarasu所有、具体保持契約は未決 | 未決事項: privacyとmemory |
 | 05 §3.5 | model切替を一Stateにしない | accepted | ADR-008, REQ-ARC-006 | AC-ARC-012 |
 | 05 §4 | 更新後論理構成 | covered | architecture documents | AC-ARC-002–004 |
-| 05 §5（§5.1–5.2） | SBERT/LLM拡張 | accepted | ADR-008 | AC-ARC-009–011 |
-| 05 §6 | model/provider State | covered | profile固定、routingはopen | AC-ARC-012 |
+| 05 §5（§5.1–5.2） | SBERT/LLM拡張 | accepted | ADR-008/011。意味候補、Contributor、信頼境界、動的routeへ分割 | AC-ARC-009–011, AC-ARC-013, AC-ARC-018–020, AC-PRD-009–011 |
+| 05 §6 | model/provider State | accepted | ADR-011。動的選択は必須、具体routingはopen、profile固定はREQ-ARC-006 | AC-PRD-009–011, AC-ARC-012 |
 | 05 §7 | 会話と記憶 | open | privacy/memory/provider継続は未決 | 未決事項 |
 | 05 §8 | Web GUI | covered | 共通Inbound境界 | AC-FR-001, AC-FR-005 |
 | 05 §9（§9.1–9.3） | Rust/Pythonと境界 | accepted | ADR-003。Python非所有 | AC-ARC-002 |
 | 05 §10 | 改訂実装順 | legacy | roadmap | planning時再評価 |
 | 05 §11 | 次に決めること | open | 未決事項一覧 | 個別設計時 |
 | 05 §12 | 判定 | accepted | 本台帳の採否へ反映 | 台帳全件 |
-| [06 §1](../drafts/handover-baseline/06-configuration-workspace-and-capability-operations.md) | 目的 | covered | REQ-OPS-005 | AC-OPS-009 |
-| 06 §2（§2.1–2.3） | Workspaceとprofile | covered | 中立schema/実効profile固定 | AC-ARC-012 |
-| 06 §3（§3.1–3.3） | 設定、優先順位、secret | covered | REQ-SEC-001。secretをState/ログへ入れない | AC-SEC-001 |
-| 06 §4 | Web GUI設定変更 | open | 権限、監査、profile更新は未決 | AC-ARC-012 |
-| 06 §5（§5.1–5.3） | Capability配置/binding | accepted | ADR-007 | AC-OPS-009 |
+| [06 §1](../drafts/handover-baseline/06-configuration-workspace-and-capability-operations.md) | 目的 | accepted | ADR-012、REQ-CFG-001–004 | AC-CFG-001–011 |
+| 06 §2（§2.1–2.3） | Workspaceとprofile | accepted | ADR-012、REQ-CFG-001/003。XDG role分離、利用者資産保護、実効profile固定 | AC-CFG-001–003, AC-CFG-007–008, AC-ARC-012 |
+| 06 §3（§3.1–3.3） | 設定、優先順位、secret | accepted | ADR-012、REQ-CFG-001、REQ-SEC-001。型付きconfig、Layer出所診断、secret全検査面 | AC-CFG-002–003, AC-SEC-001 |
+| 06 §4 | Web GUI設定変更 | accepted | REQ-CFG-002。Command、schema／安全検証、atomic write、apply modeを採用。認証は未決 | AC-CFG-004–006 |
+| 06 §5（§5.1–5.3） | Capability配置/binding | accepted | ADR-007/012、REQ-CFG-004 | AC-CFG-009–011, AC-OPS-009 |
 | 06 §6 | 初期Capability方針 | covered | source-agnostic Mimy、Adapter/binding | AC-OPS-009 |
 | 06 §6.1 | Mimy STT | accepted | ADR-006 | Mimy境界テスト |
 | 06 §6.2 | 自作projectの扱い | covered | 外部capabilityはPort/Adapter、所有なし | AC-ARC-004 |
-| 06 §7 | Capability状態と縮退 | open | provider routing/consent/privacy、Failure正規化未決 | 未決事項 |
+| 06 §7 | Capability状態と縮退 | covered | 能力広告、希望／実効route、配置modeを採用。具体fallback、consent/privacyは未決 | AC-PRD-009–011, AC-CFG-009–011 |
 | 06 §8 | systemd/process管理 | open | process管理は配備判断 | 未決事項 |
-| 06 §9 | セットアップ体験 | covered | Y1/Y2分離とprofile運用 | AC-OPS-001 |
-| 06 §10 | Upgrade/Migration | open | schema migration/Recovery機構未決 | 未決事項 |
+| 06 §9 | セットアップ体験 | covered | Y1/Y2分離、標準Workspace、Capability配置 | AC-OPS-001, AC-CFG-001, AC-CFG-009–011 |
+| 06 §10 | Upgrade/Migration | accepted | 利用者資産保護と明示migrationをREQ-CFG-003へ採用。具体engineは未決 | AC-CFG-007–008 |
 | 06 §11 | 受入条件 | covered | 正本ACへ再割当 | traceability |
 | 06 §12 | 未決事項 | open | traceability未決事項一覧 | 個別設計時 |
 | [DOCS README](../drafts/handover-baseline/DOCS-README.md) §Documents | 文書導線 | covered | [docs README](../README.md) | markdown link check |
@@ -151,7 +151,7 @@ Y1のprimary sourceは`/home/tane/tools/yatagarasu` revision `66f73ec9bbfee4fdf5
 | `README.md`, `bin/yatagarasu` | テキストInteraction | covered | REQ-PRD-001, REQ-FR-001 | AC-PRD-001, AC-FR-001 |
 | `python/listend.py`, `wakeword.py`, `listen_state.py` | 常時音声、wake、VAD/STT、turn確定/stop word | covered | REQ-PRD-001, ADR-006; Adapterは非所有 | AC-PRD-001 |
 | `README.md:48–56`, `python/intent_router.py` | SBERT routingのmove-camera、view、recall | accepted | ADR-008。通常routingはSBERT候補生成から始める。Y1はkeyword gateをband分類前に適用しmiddle候補をLLMへ送るが、Y2のgrayはkeyword/rule gate後にresolution PolicyがLLMなし受理または別Decisionを決める | AC-ARC-009–010, AC-ARC-013 |
-| `workspace/.codex/skills/move-camera`, `README.md:50–54` | move-camera（相対PTZ、calibration） | covered | ADR-008/009。calibrationはgray candidate+校正候補固有gateが決定論的Policyに一致するとき、LLM request/ProposalなしでGraphへ解決する。絶対poseの証明にはしない | AC-ARC-009, AC-PHY-007–009 |
+| `workspace/.codex/skills/move-camera`, `README.md:50–54` | move-camera（相対PTZ、calibration） | covered | ADR-008/009。calibrationはgray Candidate+校正候補固有gateが決定論的Policyに一致するとき、LLM request/ProposalなしでGraphへ解決する。絶対poseの証明にはしない | AC-FR-007–008, AC-PHY-007–009 |
 | `workspace/.codex/skills/view`, `README.md:50–55` | view（captureしてLLM入力） | covered | ADR-009。capture/ArtifactRef guardを持つGraph | AC-PER-001–002, AC-PHY-009 |
 | `workspace/.codex/skills/recall`, `README.md:50–55` | recall（過去記憶検索） | open | 機能基準として保持するが、Conversation/privacy/memory契約は未決 | 未決事項: privacyとmemory |
 | `workspace/.codex/skills/memorize`, `workspace/AGENTS.md:15–16` | 明示依頼によるmemorizeと保存結果確認 | open | 機能基準として保持するが、保存同意、retention、version/migration、privacyは未決 | 未決事項: privacyとmemory |
@@ -163,9 +163,9 @@ Y1のprimary sourceは`/home/tane/tools/yatagarasu` revision `66f73ec9bbfee4fdf5
 | `bin/zunda` | VOICEVOX TTS、並列生成/再生 | covered | REQ-OPS-004、REQ-OPS-008（採用時）。並列synthesisでも順序付きplayback、上限、取消後非admission、OutcomeUnknown非resendを要求する | AC-OPS-007–008, 017, 020–021, 023 |
 | `python/audio_prompt.py`, `tapovoice*` | prompt/playback | covered | Adapter結果Eventと取消境界。supported target別cancel、artifact cleanup/restart orphan cleanupを型付き結果で扱う | AC-OPS-014, 019–023 |
 | `bin/memorize.sh`, `bin/recall-context.sh`, `external/SemanticMemory`, `README.md:40–47` | 記憶の保存/検索、Ruri v2/v3 migration/versioning | open | 機能基準として保持するが、既存記憶migration、schema/version、retention、privacyは未決。通常更新で自動移行しないというY1運用を根拠に明示移行を要する | 未決事項: privacyとmemory, 永続化 |
-| `README.md:115–145` | Codex/Claude/opencode実行engine | open | 機能基準として保持するが、Provider選択、route、consent、Recoveryは未決。EngineはAdapter/Providerでありdomain Stateを所有しない | 未決事項: model/provider routing |
-| `README.md:131–143` | Hoshikage profile、Token、readiness、network access | open | profileのdispatch固定はREQ-ARC-006。secretは複製せずREQ-SEC-001で保護。Provider readinessは候補で、routing/consent/privacy/network Policyは未決 | AC-ARC-012, AC-SEC-001 |
-| `bin/yatagarasu-doctor`, `workspace/.env.example`, deploy files | capability診断、設定、配備 | covered | REQ-OPS-005、REQ-SEC-001 | AC-OPS-009, AC-SEC-001 |
+| `README.md:115–145` | Codex/Claude/opencode実行engine | accepted | 複数推論能力の動的選択をREQ-PRD-004/ADR-011へ採用。EngineはAdapter/Providerでありdomain Stateを所有しない。具体route、consent、Recoveryは未決 | AC-PRD-009–011 |
+| `README.md:131–143` | Hoshikage profile、Token、readiness、network access | covered | ADR-011。local route候補と能力広告、profile固定を採用。secretはREQ-SEC-001。具体network/consent/privacyは未決 | AC-PRD-009–011, AC-ARC-012, AC-SEC-001 |
+| `bin/yatagarasu-doctor`, `workspace/.env.example`, deploy files | capability診断、設定、配備 | covered | REQ-CFG-001/004、REQ-OPS-005、REQ-SEC-001 | AC-CFG-001–003, AC-CFG-009–011, AC-OPS-009, AC-SEC-001 |
 | Y1の直接subprocess/network/filesystem制御 | 既存実装方式 | rejected | Y2 Coreへ移植しない。Port/Adapterに隔離 | AC-ARC-002, AC-ARC-004 |
 
 ## 補助的な既存事例

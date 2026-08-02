@@ -46,6 +46,8 @@ Python推論workerや外部能力は、Portを通じて型付き要求を受け�
 
 Hoshikageからは、稼働確認と受付可能性の分離、能力広告、待ち行列受付失敗と推論失敗の分離、stream終端と切断の分離、secretの伏せ字、世代・貸出し管理といったProvider境界の候補を学びます。ただし、具体Providerの内部契約やルーティング、同意、privacy、transportはまだY2の決定ではありません。
 
+Yatagarasu 2は、SBERTとDecision Policyにより論理LLM／Provider profileを動的選択します。これは必須の製品能力です。一方、同一Provider内のmodel指定、Provider process再構成、active turnの扱い、会話の再bindingはAdapter／運用契約であり未決です。preferred routeとeffective route、能力広告、選択根拠は型付き値として観測可能にします。
+
 ## Skillと人間のアプリ
 
 Skillは、AIが人間のアプリ、データ、機能へ触れるための接続面です。外部能力を何でもSkillと呼ぶわけでも、Skillを一つのprocessやtransportへ固定するわけでもありません。
