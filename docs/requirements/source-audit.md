@@ -11,7 +11,7 @@
   -> Yatagarasu 2で外部作用と結果Eventを含む開いた世界へ再抽象化する
 ```
 
-このレンズは、理論文書やsoukobanを新しい要求源へ昇格させるものではない。Y1の機能基準と凍結Y2構造基準を、なぜその形で正規化するのかを説明するためのものである。今回の再解釈によって、凍結資料の採否、Y1分離、物理不確実性、SBERTの通常経路は変更していない。Skillについては、作業指示に限定しないAIとアプリの接続面として、既存の能力拡張方針をREQ-PRD-002/REQ-ARC-007へ明文化した。
+このレンズは、理論文書やsoukobanを新しい要求源へ昇格させるものではない。Y1の機能基準と凍結Y2構造基準を、なぜその形で正規化するのかを説明するためのものである。今回の再解釈によって、凍結資料の採否、Y1分離、物理不確実性、SBERTの通常経路は変更していない。Skillについては、作業指示に限定しないAIとアプリの接続面として、既存の能力拡張方針をREQ-PRD-002/REQ-ARC-007へ明文化した。単一Qualia、Web身体面、API優先、正式version updateによるBehavior拡張は、凍結資料を黙って書き換えず、アプリオーナーの後続判断としてADR-013–015と正本要件へ記録した。
 
 ## 判定規則
 
@@ -70,7 +70,7 @@
 | 02 §8.3 | Cancellation | accepted | ADR-010; 単純な一結果分類は置換 | AC-FR-005–006, AC-OPS-012–014 |
 | 02 §9 | Event Journal and Recovery | accepted | ADR-004 | AC-OPS-002–006 |
 | 02 §10 | Observability | covered | Projectionと型付きFailure | AC-FR-003–004 |
-| 02 §11 | Security | open | secret redactionはREQ-SEC-001、認証/TLSは未決 | AC-SEC-001 |
+| 02 §11 | Security | covered | secret redactionはREQ-SEC-001、Owner認証と取消可能tokenはREQ-API-004。具体session／TLSは未決 | AC-SEC-001, AC-API-011–014 |
 | 02 §12 | Configuration | covered | profile外側schemaと実効version固定 | AC-ARC-012 |
 | 02 §13 | Model Residency | open | process/worker配置は未決、所有禁止はADR-003 | AC-ARC-002 |
 | 02 §14（Phase A–B） | Deployment Shape | open | process分離は配備判断、IPC未決 | 未決事項: IPC |
@@ -82,31 +82,32 @@
 | 03 §5 | Y1から移植する単位 | covered | 下のY1機能監査へ分解 | Y1各AC |
 | 03 §6 | 言語選択 | open | Rust/Python境界は保持、言語選択は未決 | ADR-003 |
 | 03 §7（Q1–Q10） | Open Questions | open | [未決事項](traceability.md#未決事項一覧)へ正規化 | 個別設計時 |
-| 03 §8 | Architecture Invariants | accepted | ADR-003–012, 設計思想 | AC-ARC/PER/PHY |
+| 03 §8 | Architecture Invariants | accepted | ADR-003–015, 設計思想 | AC-ARC/PER/PHY/API |
 | 03 §9 | 最後に | legacy | 結語であり独立契約でない | 台帳参照 |
 | [04 §1–§2](../drafts/handover-baseline/04-agentization-requirements-draft.md) | 目的・背景 | covered | 功能/構造の補完基準として保持 | 台帳全件 |
-| 04 §3（§3.1–3.2） | プロダクトコンセプト | covered | [プロダクト](../product/README.md), REQ-PRD-001 | AC-PRD-001–002 |
+| 04 §3（§3.1–3.2） | プロダクトコンセプト | covered | [プロダクト](../product/README.md), REQ-PRD-001/005/006。会話中心から複数BehaviorとWeb身体面へ拡張 | AC-PRD-001–002, AC-PRD-012–015 |
 | 04 §4（§4.1–4.6） | 起動、文脈、CLI、service、routing課題 | covered | Contributor、profile、Web、動的Provider、区間別遅延へ分解 | AC-ARC-009–013, AC-PRD-009–011, AC-NFR-001–003 |
-| 04 §5 | 目的 | covered | REQ-PRD-001–004, REQ-FR-001–004, REQ-NFR-001 | AC-PRD-001–011 |
+| 04 §5 | 目的 | covered | REQ-PRD-001–006, REQ-FR-001–007, REQ-NFR-001, REQ-API-001–004 | AC-PRD-001–015 |
 | 04 §6（§6.1–6.2） | 一般利用者・開発者 | covered | プロダクト要件 | AC-PRD-001 |
-| 04 §7（UC-01–03） | 音声質問、連続命令、Web chat | covered | REQ-PRD-001, REQ-FR-001 | AC-PRD-001, AC-FR-001–002 |
+| 04 §7（UC-01–03） | 音声質問、連続命令、Web chat | covered | REQ-PRD-001/005/006, REQ-FR-001, REQ-API-001/002。Webは公開APIを使う身体面 | AC-PRD-001, AC-FR-001–002, AC-API-001–007 |
 | 04 §7（UC-04–08） | model/provider切替 | accepted | 動的LLM／Provider選択を製品positioningとしてREQ-PRD-004、ADR-011へ採用。具体routing／consentは未決 | AC-PRD-009–011, AC-ARC-012 |
-| 04 §7（UC-09–10） | Web切替・構成照会 | open | Web境界は採用、操作権限とroutingは未決 | AC-FR-005 |
+| 04 §7（UC-09–10） | Web切替・構成照会 | accepted | Web操作は公開APIから共通Commandへ入り、状態はProjection同期で参照。具体transportは未決 | AC-API-001–007, AC-PRD-014–015 |
 | 04 §7（UC-11–12） | provider間会話継続・縮退 | open | conversation/privacy/provider Recoveryは未決 | 未決事項 |
 | 04 §8.1 | listend supervisor | rejected | 凍結05訂正とADR-003。supervisorでなくInbound Adapter | AC-FR-001 |
 | 04 §8.2 | SBERT Router | accepted | ADR-008。候補/score/provenanceのみ返す | AC-ARC-009–010 |
 | 04 §8.3 | yatagarasu-agent司令塔 | rejected | ADR-003。Kernel/ContextがStateを所有 | AC-ARC-003 |
 | 04 §8.4–§8.7 | profile、model/provider切替状態 | covered | REQ-PRD-004、REQ-ARC-006。希望／実効routeとprofile/version固定 | AC-PRD-009–011, AC-ARC-012 |
 | 04 §8.8 | 会話文脈引継ぎ | open | 会話保持、privacy、provider routing未決 | 未決事項 |
-| 04 §8.9 | yatagarasu-web | covered | REQ-FR-001/003。直接Provider接続は禁止 | AC-FR-005 |
+| 04 §8.9 | yatagarasu-web | accepted | ADR-014、REQ-PRD-006、REQ-API-001–004。管理画面に限定せずWeb身体面へ拡張し、直接Provider接続は禁止 | AC-API-001–014 |
 | 04 §9（§9.1–9.4） | 固定Unix JSONL IPC | rejected | 凍結05訂正、ADR-003。transportはdomain型でない | 未決事項: IPC |
-| 04 §10 | 非機能要件 | covered | 区間別latency、Failure、secret、運用要件へ分解 | AC-NFR-001–003, AC-FR-004, AC-SEC-001 |
+| 04 §10 | 非機能要件 | covered | 区間別latency、Failure、secret、API認証、Web継続同期へ分解 | AC-NFR-001–003, AC-FR-004, AC-SEC-001, AC-API-004–007, AC-API-011–014 |
 | 04 §11 | 制約 | covered | capability bindingとY1分離 | AC-OPS-001, AC-OPS-009 |
-| 04 §12 | 対象外 | open | 意図的延期は未決事項として追跡 | 未決事項 |
+| 04 §12 | 複数ユーザー認証、Internet公開 | accepted | Y2は一Server・一Workspace・一Owner。複数利用者RBACと認証なしの直接Internet公開は範囲外。Tailscale等を想定 | AC-API-011–014 |
+| 04 §12 | その他の対象外項目 | open | スマホ専用app、並列Turn、料金routing、長期記憶刷新等は未決または延期として追跡 | 未決事項 |
 | 04 §13（Phase 1–9） | 実装フェーズ・優先順位 | legacy | roadmap。機能/構造契約は上記へ採用 | planning時再評価 |
 | 04 §14 | 優先順位根拠 | legacy | roadmap根拠であり独立契約でない | planning時再評価 |
 | 04 §15 | 受入条件 | covered | 正本ACへ再割当 | traceability |
-| 04 §16–§17 | 最終構成・定義 | covered | productとruntime boundaries。ただし固定構成は採用しない | AC-PRD-001 |
+| 04 §16–§17 | 最終構成・定義 | covered | productとruntime boundaries。ただし会話Agentや固定構成を中心にせず、単一Qualiaの複数Behavior基盤へ再抽象化 | AC-PRD-001, AC-PRD-012–015, AC-FR-009–017 |
 | [05 §1](../drafts/handover-baseline/05-agentization-architecture-review.md) | 結論 | accepted | ADR-003, ADR-007 | AC-ARC-002–004 |
 | 05 §2 | 採用する価値 | covered | contributor/profile/Webの各要件 | AC-ARC-009–012 |
 | 05 §3.1 | listend非supervisor | accepted | ADR-003 | AC-FR-001 |
@@ -118,15 +119,15 @@
 | 05 §5（§5.1–5.2） | SBERT/LLM拡張 | accepted | ADR-008/011。意味候補、Contributor、信頼境界、動的routeへ分割 | AC-ARC-009–011, AC-ARC-013, AC-ARC-018–020, AC-PRD-009–011 |
 | 05 §6 | model/provider State | accepted | ADR-011。動的選択は必須、具体routingはopen、profile固定はREQ-ARC-006 | AC-PRD-009–011, AC-ARC-012 |
 | 05 §7 | 会話と記憶 | open | privacy/memory/provider継続は未決 | 未決事項 |
-| 05 §8 | Web GUI | covered | 共通Inbound境界 | AC-FR-001, AC-FR-005 |
+| 05 §8 | Web GUI | accepted | 共通Inbound境界をAPI優先のWeb身体面へ拡張。標準Webも同じAPIを使用 | AC-FR-001, AC-API-001–010 |
 | 05 §9（§9.1–9.3） | Rust/Pythonと境界 | accepted | ADR-003。Python非所有 | AC-ARC-002 |
 | 05 §10 | 改訂実装順 | legacy | roadmap | planning時再評価 |
 | 05 §11 | 次に決めること | open | 未決事項一覧 | 個別設計時 |
 | 05 §12 | 判定 | accepted | 本台帳の採否へ反映 | 台帳全件 |
 | [06 §1](../drafts/handover-baseline/06-configuration-workspace-and-capability-operations.md) | 目的 | accepted | ADR-012、REQ-CFG-001–004 | AC-CFG-001–011 |
-| 06 §2（§2.1–2.3） | Workspaceとprofile | accepted | ADR-012、REQ-CFG-001/003。XDG role分離、利用者資産保護、実効profile固定 | AC-CFG-001–003, AC-CFG-007–008, AC-ARC-012 |
+| 06 §2（§2.1–2.3） | Workspaceとprofile | accepted | ADR-012/014、REQ-CFG-001/003、REQ-API-004。XDG role分離、利用者資産保護、一Server・一Workspace・一Owner、実効profile固定 | AC-CFG-001–003, AC-CFG-007–008, AC-ARC-012, AC-API-013 |
 | 06 §3（§3.1–3.3） | 設定、優先順位、secret | accepted | ADR-012、REQ-CFG-001、REQ-SEC-001。型付きconfig、Layer出所診断、secret全検査面 | AC-CFG-002–003, AC-SEC-001 |
-| 06 §4 | Web GUI設定変更 | accepted | REQ-CFG-002。Command、schema／安全検証、atomic write、apply modeを採用。認証は未決 | AC-CFG-004–006 |
+| 06 §4 | Web GUI設定変更 | accepted | REQ-CFG-002、REQ-API-001/004。Command、schema／安全検証、atomic write、apply mode、Owner認証を採用。具体session方式は未決 | AC-CFG-004–006, AC-API-001–003, AC-API-011–014 |
 | 06 §5（§5.1–5.3） | Capability配置/binding | accepted | ADR-007/012、REQ-CFG-004 | AC-CFG-009–011, AC-OPS-009 |
 | 06 §6 | 初期Capability方針 | covered | source-agnostic Mimy、Adapter/binding | AC-OPS-009 |
 | 06 §6.1 | Mimy STT | accepted | ADR-006 | Mimy境界テスト |
@@ -140,14 +141,13 @@
 | [DOCS README](../drafts/handover-baseline/DOCS-README.md) §Documents | 文書導線 | covered | [docs README](../README.md) | markdown link check |
 | DOCS README §Status | 実装状態を言い過ぎない | covered | architecture README | 文書レビュー |
 | DOCS README §One Sentence | 一文の方針 | legacy | 要件ではなく要約 | 文書レビュー |
-| [ROOT README](../drafts/handover-baseline/ROOT-README.md) | repository入口 | covered | root README（本タスク外） | markdown link check |
+| [ROOT README](../drafts/handover-baseline/ROOT-README.md) | repository入口 | covered | root READMEを会話に閉じないBehavior基盤とWeb身体面の現在定義へ更新 | markdown link check |
 
 ## Yatagarasu 1実機機能要件
 
 Y1のprimary sourceは`/home/tane/tools/yatagarasu` revision `66f73ec9bbfee4fdf5726d2869d6932771ccb5e6`（監査時worktree clean）、Zundaは`/home/tane/tools/yatagarasu/bin/zunda`である。同名またはwrapperの呼出しは重複であり、primary機能数に加算しない。このrevisionをY1機能基準の再現可能なinventoryとして固定し、可変pathの内容だけで採否を変更しない。
 
 | Primary source / 機能群 | 正規化した機能 | 状態 | 正本の行先・理由 | 検証 |
-| --- | --- | --- | --- | --- |
 | `README.md`, `bin/yatagarasu` | テキストInteraction | covered | REQ-PRD-001, REQ-FR-001 | AC-PRD-001, AC-FR-001 |
 | `python/listend.py`, `wakeword.py`, `listen_state.py` | 常時音声、wake、VAD/STT、turn確定/stop word | covered | REQ-PRD-001, ADR-006; Adapterは非所有 | AC-PRD-001 |
 | `README.md:48–56`, `python/intent_router.py` | SBERT routingのmove-camera、view、recall | accepted | ADR-008。通常routingはSBERT候補生成から始める。Y1はkeyword gateをband分類前に適用しmiddle候補をLLMへ送るが、Y2のgrayはkeyword/rule gate後にresolution PolicyがLLMなし受理または別Decisionを決める | AC-ARC-009–010, AC-ARC-013 |

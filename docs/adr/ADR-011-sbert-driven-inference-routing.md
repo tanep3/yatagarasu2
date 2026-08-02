@@ -9,7 +9,7 @@ Yatagarasu 1は、SBERTによる意味の反射が、LLMへすべてを委ねる
 
 ## Decision
 
-SBERTによる動的LLM／Provider選択をYatagarasu 2の必須製品能力とする。少なくともlocal推論能力とexternal推論能力を、具体製品名から分離したlogical profileとして構成できるようにする。SBERTは意味候補を返し、version付きDecision Policyが能力広告、可用性、privacy、同意を踏まえてrouteを解決する。route選択のためにLLM requestを必須にしない。
+SBERTによる動的LLM／Provider選択をYatagarasu 2の必須製品能力とする。少なくともlocal推論能力とexternal推論能力を、具体製品名から分離したlogical profileとして構成できるようにする。SBERTは意味候補を返し、version付きDecision Policyが能力広告、可用性、privacy、同意を踏まえてrouteを解決する。route選択のためにLLM requestを必須にしない。この推論route Decisionは、ADR-008のBehavior選択Decisionと分ける。
 
 preferred routeとeffective routeを別の型付き値とし、縮退、拒否、選択根拠を観測可能にする。dispatch時のeffective profileとversionはEffect／pending recordへ固定する。
 
@@ -23,7 +23,7 @@ preferred routeとeffective routeを別の型付き値とし、縮退、拒否�
 
 ## Related requirements
 
-REQ-PRD-004、REQ-NFR-001、REQ-ARC-005、REQ-ARC-006、REQ-ARC-008、REQ-CFG-004。
+REQ-PRD-004、REQ-FR-007、REQ-NFR-001、REQ-ARC-005、REQ-ARC-006、REQ-ARC-008、REQ-CFG-004。
 
 ## Superseded assumptions
 

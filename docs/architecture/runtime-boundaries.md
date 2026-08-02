@@ -40,6 +40,16 @@ go2rtc、PCのマイク、エッジデバイスはAudio Source Adapterの候補�
 
 一つの物理マイクを複数が読む場合はfan-outが必要です。すべてのAdapterが同時に独立消費できると仮定しません。具体的なbuffer、API、IPCは未決です。
 
+通常のWakeWordと、活動中に割り込むHome／Stop制御語は意味を分けます。検知実装を共有しても、Home制御語は通常Behavior routingの候補なしfallbackへ流さず、共通の`ReturnToHomeRequested`へ変換します。文字起こし等がマイク入力を利用中でも、この制御経路は自律神経として生存します。
+
+## Webは公開APIを使う身体面である
+
+Web Gatewayは、標準Web画面だけの特権的な司令塔ではありません。標準画面、利用者HTML／CSS、将来の外部clientは、認証された公開APIから共通Command／Query境界へ入ります。公開APIは内部Effect、Adapter、Providerへ直接接続しません。
+
+Webへの状態同期は、現在Projectionとrevision、その後の更新で構成します。Web切断はActive Qualiaを終了せず、再接続時は現在Projectionから再同期します。live映像・音声は状態更新と異なるtransportに配置できます。具体方式はprocess境界と同じく技術検証後に決めます。
+
+初期運用単位は一Server、一Workspace、一Ownerです。複数browser、access token、cameraは同じOwnerの接続・身体能力であり、別Qualiaや別Workspaceを意味しません。
+
 ## 外部能力、Python worker、Provider
 
 Python推論workerや外部能力は、Portを通じて型付き要求を受け、型付き観測、Proposal、Failureを返します。WorldState、Effect Graph、Provider状態、会話状態を所有しません。

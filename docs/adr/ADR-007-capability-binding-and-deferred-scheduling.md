@@ -13,7 +13,7 @@
 
 ## Non-decision / open
 
-Provider routingの具体機構、利用者同意、privacy/memory policy、Web authentication/TLS、IPCとprocess managementは未決です。動的LLM／Provider選択の必須性はADR-011が定めます。Skillの具体形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針も未決です。
+Provider routingの具体機構、利用者同意、privacy/memory policy、Web session／TLS、IPCとprocess managementは未決です。Owner認証と取消可能tokenの必須性はADR-014、動的LLM／Provider選択の必須性はADR-011が定めます。Skillの具体形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針も未決です。Skill作成はY2 runtimeへ信頼済みBehavior codeを注入することを意味しません。
 
 ## Consequences
 
@@ -21,7 +21,7 @@ Provider routingの具体機構、利用者同意、privacy/memory policy、Web 
 
 ## Related requirements
 
-REQ-PRD-002、REQ-ARC-004、REQ-ARC-005、REQ-ARC-007、REQ-OPS-005、REQ-SEC-001、REQ-FUT-001。
+REQ-PRD-002、REQ-ARC-004、REQ-ARC-005、REQ-ARC-007、REQ-OPS-005、REQ-SEC-001、REQ-API-004、REQ-FUT-001。
 
 ## Superseded assumptions
 

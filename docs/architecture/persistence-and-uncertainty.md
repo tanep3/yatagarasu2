@@ -45,6 +45,12 @@ Recoveryは、commit済みsnapshotと永続pending workから内部状態を再�
 
 プロセスが再起動したという内部事実から、カメラ移動、再生停止、発話完了などの物理事実を導きません。
 
+Starting、Active、Terminatingの非Home qualia sessionが復元された場合は、同じsessionをRecoveringとして公開します。安全なcheckpointと明示Policyがない既定Behaviorを自動再開せず、Homeへ終了するか、Owner判断を待つか、資源を隔離するかを型付き結果で決めます。
+
+Qualiaは、未解決の外部作用を永続Recoveryへ引き渡した後にHomeへ戻れます。Homeは現在の非Home qualia sessionがない状態であり、すべての物理結果が観測済みという意味ではありません。遅い結果は元のqualia sessionへ相関して記録し、その後に始まったsessionのState、Effect、確定Projection、物理確認へ混入させません。
+
+OutcomeUnknownの資源を再利用できるかは、物理結果の確かさとは別に判断します。例えばTapo相当の首振りは保守的なcooldown後にモーターを再利用できても、姿勢をObservedにしません。将来のmanipulatorは照合やOwner確認まで利用不能にできます。
+
 ## Artifactと通知も推測しない
 
 Artifact Contextは、画像、音声、その他ArtifactRefの作成、利用可能性、参照中、削除、孤立成果物の回収を所有します。撮影失敗や無効なArtifactRefは、LLM Effectを実行可能にしません。cleanupは明示Effectと結果Eventで監査します。

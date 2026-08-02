@@ -2,7 +2,7 @@
 
 ## 目的
 
-目・耳・口は部品一覧ではありません。利用者が頼み、Yatagarasuが必要な観測や身体操作を選び、確認できた事実に基づいて応答する、一つのロボット体験として結びます。
+目・耳・口とWebは部品一覧ではありません。Yatagarasu 2は、物理世界、利用者、AI、アプリを結び、交換・追加可能な振る舞いを実行するロボット基盤です。会話は中心手順ではなく、選択できる振る舞いの一つです。
 
 ### REQ-PRD-001 — 目・耳・口を一つのInteractionに結ぶ
 
@@ -43,6 +43,24 @@
 - AC-PRD-010: 速度重視、Vision、高性能推論の代表入力が、SBERT候補とversion付きPolicyにより異なる論理プロファイルへ解決され、route選択のためのLLM requestを生成しない。
 - AC-PRD-011: 選択したpreferred route（希望経路）と、可用性・Policy適用後のeffective route（実効経路）が別々に参照でき、縮退または拒否理由を型付き結果として示す。
 
+### REQ-PRD-005 — 会話に閉じない振る舞いを提供する
+
+製品は会話を中心手順に固定せず、文字起こし、同時通訳、見守り、身体操作、Webだけで完結する機能など、性質の異なる振る舞いを同じ実行法則の上へ正式version updateで追加できなければならない。振る舞いはTapo等の物理デバイスだけ、Webだけ、または両方を組み合わせて成立してよい。会話、LLM request、音声応答を全振る舞いの必須段階にしてはならない。この例示は、列挙した機能すべてを初期実装の必須範囲にするものではない。
+
+受入条件:
+
+- AC-PRD-012: Tapoだけで完結する振る舞い、Webだけで完結する振る舞い、TapoとWebを組み合わせる振る舞いの各fixtureが、同じQualia（クオリア）・Command・Event・Effect Graphの法則を利用し、会話またはLLMを不要な経路では生成しない。
+- AC-PRD-013: 会話、長時間文字起こし、人物見守りについて、version付きBehavior適合manifestとarchitecture conformance fixtureが存在し、有限Interaction、長時間活動、センサー起点という差を保ったまま、単一クオリアの共通Lifecycle、State所有、終了、Recovery契約への適合を検証できる。
+
+### REQ-PRD-006 — WebをYatagarasuの身体面として提供する
+
+Webは管理画面だけではなく、文字、ボタン、タッチ、画像、映像、状態、成果物を利用者とYatagarasuの間で交換する正式な身体面である。標準Web画面はPCとスマートフォンへ対応し、利用者向け全機能の公開APIを使用する。複数の対応デバイスを一人の利用者の身体能力として参照・選択できなければならない。
+
+受入条件:
+
+- AC-PRD-014: 標準Web画面が、スマートフォンとPCの表示幅で、現在のクオリア、進行、型付き結果、成果物、利用可能デバイス、常設Home操作を表示または操作できる。
+- AC-PRD-015: 対応する複数カメラをWebから選択しても、Workspace、Owner、またはクオリアを増やさず、選択したdevice identityを型付きCommandへ含められる。一つの振る舞いが複数deviceを明示的に使うことも妨げない。
+
 ### REQ-FR-001 — 受理後の入力意味は等価
 
 入力を受理した後、システムは音声、Web、CLIの要求を同じInteraction意味論で表現する。入力元はチャネル方針へ影響してよいが、別のドメイン処理経路を作ってはならない。
@@ -78,6 +96,36 @@
 
 - AC-FR-007: gray bandの校正候補を校正固有gateが受理するfixtureが、LLM request／Proposalなしに校正Effect Graphを生成する。
 - AC-FR-008: 同じ入力が安全方針またはCapability方針で拒否された場合、校正Effectをdispatchせず、型付き拒否結果を返す。
+
+### REQ-FR-005 — Activeなクオリアを一つに保つ
+
+Qualia（クオリア）は、Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表す。システム全体で現在の非Home qualia sessionは0または1とする。ここでいう「一つ」はLifecycleのActive phaseだけでなく、Starting、Active、Terminating、Recoveringにある現在session全体を指す。Homeは現在sessionがない基本待受状態とし、非Homeの間に別クオリアの開始要求を受理してはならない。Home／Stop検知、永続化、Recovery、診断、認証、Web状態同期などの自律神経は並行稼働してよいが、第二のクオリアまたは製品固有の司令塔になってはならない。
+
+受入条件:
+
+- AC-FR-009: table-driven fixtureがHome、Starting、Active、Terminating、Recoveringの各状態で開始要求を評価し、Homeからだけ開始を受理する。
+- AC-FR-010: Activeまたは終了途中で別クオリアを要求するfixtureが型付きBusy結果を返し、新しいクオリアState、Effect Graph、Effect、dispatchを一切生成しない。
+- AC-FR-011: 自律神経の一つを停止・再開してもActive Qualiaの唯一性を破らず、そのserviceがQualia Stateを直接変更しないことを示す。
+
+### REQ-FR-006 — Home復帰を独立制御経路にする
+
+音声の設定可能な制御語とWebの常設Home操作は、共通の型付き`ReturnToHomeRequested` Commandを投入する。音声の既定語句は「ヤタガラス、ホーム」とする。要求は現在のクオリアへ終了を求め、終了処理、成果物確定、取消結果、物理結果と区別する。Home復帰の受理またはクオリア終了を、停止不能な外部作用が停止した証拠にしてはならない。
+
+受入条件:
+
+- AC-FR-012: 既定音声制御語とWebの常設Home操作が、出所情報以外は同じ`ReturnToHomeRequested` Commandを生む。
+- AC-FR-013: Home要求fixtureが新規仕事のadmissionを止め、pending仕事を永続取消し、対応可能なin-flight取消と成果物確定を要求した後、`TerminationCompleted`、`TerminationPending`、`TerminationFailed`、`TerminationOutcomeUnknown`を区別する。
+- AC-FR-014: 文字起こし中もHome制御語の検知経路が生存し、通常音声は文字起こしへ、Home制御語はQualia終了要求へ別々に渡る。
+
+### REQ-FR-007 — 振る舞い選択と推論能力選択を分離する
+
+HomeでYatagarasuを起点とする通常のBehavior routing構成は、独立制御語の評価後、SBERTの意味候補とversion付きDecision Policyにより振る舞い候補を解決する。ただしCapability Policyは、REQ-ARC-008に従いrule-only、LLM-proposal-only等のContributor構成を明示できる。振る舞い選択と、その振る舞いが必要とするLLM／Providerの推論route選択は別のDecisionとして表す。宣言されたContributorを評価して有効な振る舞い候補がない場合は会話クオリアへfallbackする。安全・権限・能力方針で拒否された候補を、会話またはLLM経由で迂回してはならない。
+
+受入条件:
+
+- AC-FR-015: 既知の文字起こし開始入力がSBERT候補とPolicyにより文字起こしクオリアへ解決され、機能選択のためのLLM requestを生成しない。
+- AC-FR-016: 通常SBERT構成と明示rule-only構成の候補なしfixtureが、各構成で宣言されたContributorを評価した後にだけ`FallbackToConversation` Decisionを返し、会話クオリアを開始する。Policy拒否fixtureは同じfallbackを返さず、拒否結果と無Effectを示す。
+- AC-FR-017: 画像を伴う会話fixtureが、振る舞いとして会話を選ぶDecisionと、Vision用論理プロファイルを選ぶDecisionを別々に記録する。
 
 ### REQ-NFR-001 — Interaction遅延を因果区間ごとに測定可能にする
 

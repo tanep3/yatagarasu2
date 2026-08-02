@@ -11,6 +11,8 @@
 
 `CancelRequested`は共通Inbound境界のCommandであり、Webのcancelは直ちにここへ投入する。Interaction Contextは取消受理を所有し、受理した事実を`CancellationAccepted` Eventとして記録する。Execution Contextはpending Graph workをdurable revokedにし、dispatcherはrestart後もrevoked recordをdispatchしない。cancelled Interactionは遅延Proposalを拒否する。
 
+`ReturnToHomeRequested`はQualia終了を求める別Commandである。一つのQualiaに属する複数Interactionのadmission停止と終了処理を開始してよいが、Home要求の受理を各Interaction取消結果または物理停止結果と同一視しない。
+
 dispatch済みphysical moveはnon-cancellableであり、下流をrevokedにして遅延したphysical resultを記録する。voice stopはLLM、pending TTS、queued playback、current chunkのうちAdapterが対応する範囲だけに要求し、停止の観測を捏造しない。in-flight cancellation resultとphysical outcomeは別の型付き結果Eventである。OutcomeUnknownは自動retryしない。
 
 ## Non-decision / open
@@ -23,7 +25,7 @@ fixtureはWeb cancel、durable cancel/restart、dispatch済みmoveの下流revoc
 
 ## Related requirements
 
-REQ-FR-003、REQ-OPS-003、REQ-OPS-004、REQ-OPS-006、REQ-OPS-008。
+REQ-FR-003、REQ-FR-006、REQ-OPS-003、REQ-OPS-004、REQ-OPS-006、REQ-OPS-008、REQ-OPS-009。
 
 ## Superseded assumptions
 

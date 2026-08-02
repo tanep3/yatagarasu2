@@ -50,6 +50,8 @@ UpdateConfiguration Command
 
 配布Defaultと、利用者が変更したWorkspace、AGENTS、Skill、人格、media、記憶、設定を分けます。Upgradeは利用者資産を黙って上書きしません。schema変更はbackupまたは復旧点を持つ明示migrationとして扱います。
 
+初期製品の運用単位は一Server、一Workspace、一Ownerです。複数camera、browser、access tokenは同じWorkspaceとOwnerへ属し、複数利用者や複数Workspaceの選択機構を要求しません。
+
 Yatagarasu 1の環境はY2のUpgrade対象にしません。
 
 ## Capability配置

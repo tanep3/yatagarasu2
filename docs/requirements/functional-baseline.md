@@ -30,6 +30,12 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | 動的LLM／Provider選択 | SBERTの反射で用途に合うlocal／external推論能力を選び分ける | REQ-PRD-004, ADR-011 |
 | 設定と能力診断 | 設定、Workspace、状態、cacheを分け、採用元と能力を診断する | REQ-CFG-001, REQ-CFG-004 |
 | 安全な設定変更とUpgrade | 型検証、原子的保存、反映範囲、利用者資産保護が必要である | REQ-CFG-002, REQ-CFG-003 |
+| 会話に閉じない振る舞い | Tapo完結、Web完結、Hybridの機能を会話やLLM必須にせず実行する | REQ-PRD-005, ADR-015 |
+| Web身体面と公開API | 文字、操作、映像、状態をWebで扱い、標準画面も公開APIを使う | REQ-PRD-006, REQ-API-001–003, ADR-014 |
+| 単一Active Qualia | 一度に一つの振る舞いへ集中し、自律神経だけを並行稼働する | REQ-FR-005, ADR-013 |
+| Home復帰 | 音声制御語とWeb常設操作から現在Qualiaへ終了を要求する | REQ-FR-006, ADR-013 |
+| SBERTによるBehavior選択 | 既知機能を反射的に選び、候補なしだけを会話へfallbackする | REQ-FR-007, ADR-008 |
+| 一Server・一Workspace・一Owner | 一人のOwnerが複数browser、token、deviceを利用する | REQ-API-004, ADR-014 |
 
 ## 契約未決の継承基準
 

@@ -18,3 +18,6 @@ Yatagarasu 1の実機機能要件と、凍結済みYatagarasu 2構造要件は�
 | [ADR-010](ADR-010-interaction-cancellation-and-durable-revocation.md) | 取消要求、停止結果、物理結果、遅延結果を区別する |
 | [ADR-011](ADR-011-sbert-driven-inference-routing.md) | SBERTによる動的LLM／Provider選択を製品の必須positioningとして固定する |
 | [ADR-012](ADR-012-configuration-workspace-and-upgrade.md) | 設定、Workspace、Upgrade、Capability配置を正本契約へ戻す |
+| [ADR-013](ADR-013-single-active-qualia-and-home.md) | Active Qualiaを一つにし、Home・終了・Recoveryと自律神経を分ける |
+| [ADR-014](ADR-014-api-first-web-body-and-owner-model.md) | WebをAPI優先の身体面とし、一Server・一Workspace・一Ownerで運用する |
+| [ADR-015](ADR-015-behavior-extension-by-version-update.md) | 振る舞いを実行時pluginではなく正式version updateで各Layerへ追加する |

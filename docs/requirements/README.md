@@ -6,6 +6,7 @@
 - [プロダクト要件](product-requirements.md) — 利用者に届ける体験と機能
 - [アーキテクチャ要件](architecture-requirements.md) — 世界の法則と、破ってはいけない境界
 - [運用要件](operational-requirements.md) — 永続化、取消、音声、秘密情報、分離運用
+- [API・Web要件](api-and-web-requirements.md) — 公開API、Web身体面、継続同期、画面カスタマイズ、Owner認証
 - [設定・Workspace要件](configuration-requirements.md) — 設定層、原子的変更、Upgrade、Capability配置
 - [トレーサビリティ](traceability.md) — 要件、受入条件、判断、未決事項の対応
 - [根拠監査台帳](source-audit.md) — Y1と凍結ドラフトからの採用・保留・不採用

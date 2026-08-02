@@ -91,6 +91,27 @@ Skillは、人が使うアプリ、データ、能力をAIへ公開する接続�
 - AC-ARC-015: 試験用Skillを介したAIの書込み提案が、Policy承認前にState変更、Effect確定、dispatchのいずれも起こさない。
 - AC-ARC-016: 同じSkill契約を別の試験用Adapterへ再bindingしても、Kernelとdomain Ruleを変更しない。
 
+### REQ-ARC-010 — Qualia Contextは活動身份とLifecycleだけを所有する
+
+Qualia Contextは、Home、Starting、Active、Terminating、RecoveringのLifecycleと、現在のqualia session、behavior identity／version、開始・終了理由、適用Policy／profile version、機能固有Stateへの型付き参照を唯一所有する。この参照は、所有Context名とsession／correlation identityだけから成る不変かつ不透明な値であり、State値、可変参照、reducer、dispatch handleを含めてはならない。文字起こし本文、監視対象、会話履歴、device状態、Effect Graph、Artifact本体などをQualia Stateへ集約してはならない。機能固有Stateは名前を持つ別Contextが唯一所有する。
+
+受入条件:
+
+- AC-ARC-021: ownership registryがQualia Stateと三つの代表Behavior固有Stateの所有者を別々に一度だけ記録し、Qualia Contextから各Behavior reducerへ到達できないことをarchitecture testが示す。
+- AC-ARC-022: Home、Starting、Active、Terminating、Recovering間の許可Transitionをtable-driven pure testで評価できる。永続化された非Home phaseは同じsessionのRecoveringへ入り、明示checkpointによるResumeだけが同じsessionをActiveへ戻せる。Owner判断待ちはRecoveringを維持し、終了／資源隔離は責任移管後にTerminatingを経てHomeへ進む。どの経路も二つのqualia sessionを非Homeにできない。
+- AC-ARC-023: Qualia Stateが機能固有本文、media、device内部状態、Effect Graphを値として所有せず、識別子、version、Lifecycle、理由、所有Context名とsession／correlation identityだけの不変・不透明な型付き参照で構成されること、およびその参照からBehavior reducerやdispatchへ到達できないことを契約試験が示す。
+
+### REQ-ARC-011 — 振る舞いを各Layerへの明示的な寄与として追加する
+
+Yatagarasu 2の振る舞い追加は正式なversion updateとして行い、実行時pluginまたはエンドユーザーコードとして読み込まない。一つの振る舞いを巨大なBehavior objectまたは機能ごとのTraitへ閉じ込めず、必要な場合だけ、識別情報、意味候補、Command／Event／State／Rule／Transition／Policy／Effect、Application contributor、Projection、Port、Adapter、Bootstrap binding、設定schema、Web部品、migration、testを各Layerへ寄与する。既存能力の組合せだけで作れる振る舞いは新しいPort Traitを要求しない。新しい外部能力の抽象境界が必要な場合だけPort Traitを追加する。
+
+受入条件:
+
+- AC-ARC-024: 既存のカメラ、Artifact、Web表示能力だけを組み合わせる試験Behaviorが、Kernel条件分岐、新しいPort Trait、既存State所有者の変更なしに、意味候補、Policy、Graph contributor、Projection、API操作として追加できる。
+- AC-ARC-025: 新しい試験外部能力を必要とするBehaviorが、domainから具体製品へ依存せず、Port Trait、Adapter、Bootstrap binding、結果Eventを追加して同じBehavior契約へ適合する。
+- AC-ARC-026: 新しいBehaviorの適合検査が、identity／version、必要Capability、入力・出力面、routing contribution、State ownership、termination、Recovery、API、Web表示、設定、migration、traceabilityのうち該当項目を列挙し、該当しないLayerへの装飾的変更を要求しない。
+- AC-ARC-027: エンドユーザーのHTML／CSS変更がownership registry、routing catalog、Rule、Policy、Effect型、Port、Adapter、Bootstrap bindingを増減できない。
+
 ### REQ-PER-001 — Graphから導く順序
 
 Effectの順序は命令的な主手順ではなく、Effect Graphの依存関係とresource claimで表す。

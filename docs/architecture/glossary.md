@@ -6,6 +6,10 @@
 | --- | --- |
 | WorldState（世界状態） | 判断時点でCoreが知っている状態の集合。すべての外部データを持つ巨大な袋ではない。 |
 | Context（文脈境界） | 一つの意味領域と、その状態を唯一所有する境界。processとは限らない。 |
+| Qualia（クオリア） | Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表す製品状態。現在の非Home sessionは全体で0または1。 |
+| Home（基本待受） | 現在の非Home qualia sessionがない状態。すべての物理作用が観測済みという意味ではない。 |
+| Behavior（振る舞い） | 会話、文字起こし、見守りなど、必要なLayerへ構造を寄与する製品能力。万能objectやprocessではない。 |
+| 自律神経 | Home／Stop検知、永続化、Recovery、診断、認証、Web同期など、Qualiaを支えて並行稼働する基盤機能。第二のQualiaではない。 |
 | Command（要求） | 受理、拒否、確認要求の対象となる依頼。まだ起きた事実ではない。 |
 | Event（事実） | 過去に起きたことを表す不変値。結果Eventも含む。 |
 | CancelRequested（取消要求） | 共通Inbound境界へ入るCommand。取消が受理された事実ではない。 |
@@ -22,6 +26,7 @@
 | Capability Catalog（能力目録） | 利用可能な候補種別、能力広告、Proposal schema、Effect型を発見する目録。意味の正解やStateを所有しない。 |
 | logical profile（論理プロファイル） | 速度重視、画像理解、高性能推論など、具体的なモデル名・Provider名から分離した能力選択単位。 |
 | preferred / effective route（希望／実効経路） | 利用者・Policyが希望したrouteと、可用性・同意・縮退適用後に実際に選ばれたroute。 |
+| revision（更新版） | Webが現在Projectionと後続更新の連続性を確認する単調増加値。domain Eventの通し番号と同一とは限らない。 |
 | Skill（AI接続面） | 人が使うアプリ、データ、能力をAIへ公開し、同じ世界へ関われるようにする境界。 |
 | Port（抽象接続口） | Applicationが外部能力へ要求する、具体製品に依存しない契約。 |
 | Adapter（変換境界） | Portの値と具体製品・通信・入出力の表現を相互に翻訳するもの。 |

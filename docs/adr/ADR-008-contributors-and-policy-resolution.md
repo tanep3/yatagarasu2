@@ -13,6 +13,8 @@ Y1のSBERT routerは、意味空間を使う反射が実機体験を大きく高
 
 承認済みの決定論的contributorは許可済みEffect Graph断片を作ってよい。camera calibrationはSBERT candidateと校正候補に固有のkeyword gateが決定論的Policyに一致した場合、gray bandからLLM request/Proposalを作らずに完了しなければならないが、safety/capability Policy、Graph dependency、resource claimを迂回しない。LLM、Codex、またはSkillを介した信頼できない外部主体はProposalを返し、Policy前にState変更、Graph確定、dispatchをしない。Skill自体はProposal生成者に限定されない。
 
+HomeでのBehavior選択と、選択済みBehavior内のLLM／Provider route選択は別Decisionとする。有効なBehavior候補がない場合だけ`FallbackToConversation`を返せる。Policy拒否を会話へfallbackして迂回しない。独立Home／Stop制御語は通常Behavior routingより先に解決する。
+
 ## Non-decision / open
 
 具体的な動作候補の集合、閾値、gate語彙、profileの選択規則は未決である。動的LLM／Provider選択の必須性はADR-011が定め、具体routing機構は同ADRの未決事項とする。
@@ -23,7 +25,7 @@ SBERT、Python worker、LLM、ProviderはDecision Policy version、Interaction�
 
 ## Related requirements
 
-REQ-PRD-004、REQ-FR-004、REQ-ARC-004、REQ-ARC-005、REQ-ARC-006、REQ-ARC-008、REQ-ARC-009。
+REQ-PRD-004、REQ-FR-004、REQ-FR-007、REQ-ARC-004、REQ-ARC-005、REQ-ARC-006、REQ-ARC-008、REQ-ARC-009。
 
 ## Superseded assumptions
 

@@ -34,6 +34,7 @@ WorldStateは外部データを何でも詰め込む巨大な袋ではありま�
 | 状態 | 唯一の所有者 | 所有しないもの |
 | --- | --- | --- |
 | wake受理と発話入力の生存期間 | Acoustic Context | Yata Wake、Mimy、音声Adapter |
+| Active QualiaのidentityとLifecycle | Qualia Context | Behavior固有State、Web、音声、device、Effect Graph |
 | Interactionの生存期間と取消 | Interaction Context | Web、音声、CLI、LLM |
 | 意味解決方針の版 | Decision Policy Context | SBERT、LLM、profile |
 | Effect Graph、永続待機、取消済み仕事 | Execution Context | dispatcher、Adapter、journal再生 |
@@ -42,6 +43,16 @@ WorldStateは外部データを何でも詰め込む巨大な袋ではありま�
 | 通知の方針 | Notification Policy Context | 通知チャネル、Projection |
 
 Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、profile、ProjectionはWorldStateを所有しません。
+
+## クオリア、振る舞い、Interactionを分ける
+
+Qualia（クオリア）は、Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表します。現在の非Home qualia sessionは全体で0または1です。これはLifecycleのActive phaseだけでなく、Starting、Active、Terminating、Recoveringにある現在session全体を指します。Homeは現在sessionがない基本待受状態です。
+
+会話、文字起こし、同時通訳、見守りはBehavior（振る舞い）です。BehaviorはQualiaとして開始される場合がありますが、一つの万能objectやprocessを意味しません。必要なContext、Rule、Effect、Projection、Port、Adapterへ構造を寄与します。
+
+Interactionは一つの入力から生じる有限の因果単位です。一つの文字起こしQualiaが複数の音声Eventを受け取れるように、QualiaとInteractionは同じ生存期間ではありません。ConversationもBehaviorの一つであり、Qualia、Interaction、Kernelの別名ではありません。
+
+Home／Stop検知、永続化、Recovery、診断、認証、Web状態同期は自律神経として並行稼働しますが、第二のQualiaにならず、Qualia Stateを直接変更しません。
 
 ## Effect Graphは、手順書ではなく因果構造である
 
@@ -94,6 +105,12 @@ MoveCamera(right)
 推論能力は、具体モデル名を直接Domainへ持ち込まず、速度重視、Vision、高性能推論などの論理profileとして扱います。SBERTは入力からroute候補を返し、Decision Policyが利用可能性、privacy、利用者同意、能力広告を踏まえて解決します。
 
 preferred route（希望経路）とeffective route（実効経路）を分けます。希望した外部Vision profileが使えない場合、拒否、利用者確認、許可済み縮退のどれを選ぶかはPolicyです。外部Providerやworkerはroute方針、会話状態、WorldStateを所有しません。
+
+### Behavior routeと推論routeを分ける
+
+HomeでYatagarasuを起点とする通常構成は、独立制御語の後に、SBERT候補とDecision Policyから使用するBehaviorを解決します。ただしCapability Policyがrule-only、LLM-proposal-only等を宣言した機能へSBERTを強制しません。BehaviorがLLMを必要とする場合だけ、別のDecisionとして論理LLM／Provider profileを解決します。
+
+宣言されたContributorの評価後に有効なBehavior候補がなければ`FallbackToConversation`を明示的に返せます。安全、権限、能力方針で拒否された候補は、会話へfallbackして迂回しません。Starting、Active、Terminating、Recoveringでは、別Qualiaの開始要求をBusyとして拒否します。
 
 ## Skill、Proposal、Effectを分ける
 

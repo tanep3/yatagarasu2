@@ -86,7 +86,7 @@ journalへ無制限のraw provider chunkを記録しない。
 
 ### REQ-SEC-001 — secretとデータ露出
 
-secretをEvent、Projection、prompt、journal、通常ログへ含めない。Web authentication/TLS、memory保持、privacy policyは暗黙の保証ではなく、未決の設計作業である。
+secretをEvent、Projection、prompt、journal、通常ログへ含めない。WebはREQ-API-004のOwner認証と取消可能tokenを要求する。具体session方式、TLS／reverse proxy、memory保持、privacy policyは暗黙の保証ではなく、未決の設計作業である。
 
 受入条件:
 
@@ -99,3 +99,14 @@ secretをEvent、Projection、prompt、journal、通常ログへ含めない。W
 受入条件:
 
 - AC-OPS-009: 試験用Port実装を再bindingしてもdomain RuleまたはTransitionが変わらない。
+
+### REQ-OPS-009 — Qualia終了と物理Recoveryを分離する
+
+クオリアは、新規仕事のadmission停止、pending仕事のdurable revocation、成果物確定、資源解放または永続Recoveryへの責任移管を終えた場合にHomeへ戻れる。HomeはActive Qualiaがないことを意味し、すべての外部作用が観測済みであることを意味しない。OutcomeUnknownの外部作用は自動再送せず、自律神経のRecoveryが追跡する。該当資源の再利用条件はeffect／device profileのversion付きRecovery Policyが`ImmediatelyReusable`、`ReusableAfterCooldown`、`ReusableAfterReconciliation`、`OwnerConfirmationRequired`、`Unavailable`から決める。資源の再利用可能性と、物理結果・姿勢の確かさを混同しない。
+
+受入条件:
+
+- AC-OPS-024: restart fixtureが永続化されたStarting、Active、Terminatingと永続仕事を同じqualia sessionのRecoveringとして復元し、明示的に安全なcheckpointを持たない既定Behaviorを自動再開しない。`ResumeFromCheckpoint`は同じsessionをActiveへ戻し、`AwaitOwnerDecision`はRecoveringを維持し、`TerminateToHome`または`QuarantineResource`は責任移管後にTerminatingを経てHomeへ解決する。
+- AC-OPS-025: `旧sessionをHomeへ終了 -> 新sessionを開始 -> 旧Effectの遅い結果を受信`するfixtureが、OutcomeUnknownを自動retryせず、遅い結果を旧sessionのRecovery／Physical Observation記録だけへ相関する。その結果は、現在sessionのState、Effect Graph、Effect、確定Projection、物理確認状態を変更または生成しない。
+- AC-OPS-026: Tapo相当の移動profile fixtureが、保守的なcooldown後にモーター資源を再利用可能にしても、姿勢または移動結果をObservedへ昇格せず、必要時に校正または照合を要求する。
+- AC-OPS-027: `OwnerConfirmationRequired`または`Unavailable`のresourceを必要とする新しいQualia開始fixtureが、HomeであってもCapability不足として拒否される一方、そのresourceを使わないQualiaは開始できる。
