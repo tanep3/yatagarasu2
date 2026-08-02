@@ -9,7 +9,7 @@
 
 ## Decision
 
-`CancelRequested`は共通Inbound境界のCommand/Eventであり、Webのcancelは直ちにここへ投入する。Interaction Contextは取消受理を所有する。Execution Contextはpending Graph workをdurable revokedにし、dispatcherはrestart後もrevoked recordをdispatchしない。cancelled Interactionは遅延Proposalを拒否する。
+`CancelRequested`は共通Inbound境界のCommandであり、Webのcancelは直ちにここへ投入する。Interaction Contextは取消受理を所有し、受理した事実を`CancellationAccepted` Eventとして記録する。Execution Contextはpending Graph workをdurable revokedにし、dispatcherはrestart後もrevoked recordをdispatchしない。cancelled Interactionは遅延Proposalを拒否する。
 
 dispatch済みphysical moveはnon-cancellableであり、下流をrevokedにして遅延したphysical resultを記録する。voice stopはLLM、pending TTS、queued playback、current chunkのうちAdapterが対応する範囲だけに要求し、停止の観測を捏造しない。in-flight cancellation resultとphysical outcomeは別の型付き結果Eventである。OutcomeUnknownは自動retryしない。
 

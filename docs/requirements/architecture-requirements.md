@@ -1,6 +1,8 @@
 # アーキテクチャ要件
 
-## 目的: 外部能力を交換可能にしながら、検証可能なドメインモデルを保つ
+## 目的
+
+閉じた世界の「状態と遷移」を、外部作用と不確実性を持つ現実世界へ拡張しながら、世界の法則を純粋・検証可能に保つ。外部能力を交換しても、Coreの意味と状態所有を変えない。
 
 ### REQ-ARC-001 — 純粋なドメイン判断
 
@@ -31,30 +33,30 @@ RuleとTransitionは決定論的でI/Oを含まない。RuleはStateとEventを�
 
 ### REQ-ARC-004 — ProposalはCommandではない
 
-LLM、Codex、その他外部能力のProposalはProposalとして戻り、Effect Graphを変更またはEffectをdispatchする前にPolicy検証を通る。
+LLM、Codex、Skillを介した外部主体、その他外部能力のProposalはProposalとして戻り、Effect Graphを変更またはEffectをdispatchする前にPolicy検証を通る。Skill自体をProposalと同一視してはならない。
 
 受入条件:
 
 - AC-ARC-007: 未承認のProposed EffectがPolicyにより拒否される、またはdispatchされないまま残る。
 - AC-ARC-008: 承認済みProposalが、そこから生じる許可済みEffectと別の値として表現される。
 
-### REQ-ARC-005 — 複数の意味候補を純粋に解決する
+### REQ-ARC-005 — 意味の反射と複数候補を純粋に解決する
 
 通常の意味routing機能では、SBERT（文埋め込み）を最初のcandidate（候補）生成とし、gray band（閾値間の帯域）の候補は
 accept（受理）前に決定論的なkeyword/rule filter（キーワード/規則による絞込み）を通す。これは全機能に強いる滝型処理ではない。
 機能はSBERT、純粋Rule、LLMなど一つ以上のcontributor（候補提供者）を明示capability Policyにより任意に組み合わせてよく、
-rule-onlyまたはLLM-proposal-onlyの経路も有効である。単一のintent registry（意図登録簿）は置かない。SBERT Adapterは候補、score、
-provenance（出所）だけを返す。意図別thresholdとgateは、名前を持つDecision Policy所有者のversion付きPolicy dataとする。
+rule-onlyまたはLLM-proposal-onlyの経路も有効である。すべての概念を正式Intentへ集約する中央登録簿は置かない。SBERT Adapterは候補、score、
+provenance（出所）だけを返す。動作候補ごとのthresholdとgateは、名前を持つDecision Policy所有者のversion付きPolicy dataとする。
 純粋なresolution Policyが候補なし、曖昧、競合、合成可能を区別する。
 
-決定論的で承認済みのcontributorは許可済みEffect Graph断片を作ってよい。LLMまたはCodex SkillsはProposalを
-返すだけであり、Policy前にStateを変更、Effectをdispatch、Graphを確定してはならない。camera calibrationは、SBERT candidateと
-intent固有keyword/rule gateが決定論的Policyに一致した場合、LLM request/Proposalを作らずに完了しなければならない。これはGraphと
+決定論的で承認済みのcontributorは許可済みEffect Graph断片を作ってよい。LLM、Codex、またはSkillを介した信頼できない外部主体は
+Proposalを返し、Policy前にStateを変更、Effectをdispatch、Graphを確定してはならない。camera calibrationは、SBERT candidateと
+校正候補に固有のkeyword/rule gateが決定論的Policyに一致した場合、LLM request/Proposalを作らずに完了しなければならない。これはGraphと
 安全・capability Policyを迂回しない。
 
 受入条件:
 
-- AC-ARC-009: gray bandのSBERT candidateをintent固有keyword gateが決定論的Policyにより受理するcamera calibration fixtureが、LLM request/Proposalを一切作らず、Policy承認済みGraph断片だけを作る。
+- AC-ARC-009: gray bandのSBERT candidateを校正候補に固有のkeyword gateが決定論的Policyにより受理するcamera calibration fixtureが、LLM request/Proposalを一切作らず、Policy承認済みGraph断片だけを作る。
 - AC-ARC-010: 競合、曖昧、候補なし、合成可能の各fixtureがresolution Policyの異なる明示的結果を得る。
 - AC-ARC-011: LLM Proposalを拒否するfixtureが、State変更もdispatchも生まないことを示す。
 - AC-ARC-013: 明示capability Policyでrule-onlyまたはLLM-proposal-onlyに割り当てたfixtureが、SBERTの必須実行を要求しないことを示す。
@@ -68,6 +70,16 @@ domain Stateの所有者ではない。
 受入条件:
 
 - AC-ARC-012: profile更新後も、既にdispatchされたEffectが記録済みのprofile/versionを保持する。
+
+### REQ-ARC-007 — SkillをAIとアプリの接続面として分離する
+
+Skillは、人が使うアプリ、データ、能力をAIへ公開する接続面として表現する。Skill、Contributor、Proposal、Effect、Adapterを同一概念へ畳んではならない。アプリが所有する状態をYatagarasu Coreへ移さず、読出しは型付き観測境界、AI由来の書込み・行動はProposalとPolicy検証、承認済み外部作業はEffectとAdapter結果Eventを通す。Skillの追加はKernelへの製品固有分岐を要求してはならない。
+
+受入条件:
+
+- AC-ARC-014: 試験用Skillの読出しが、アプリ所有の状態をCoreへ移さず、型付き観測または参照として返る。
+- AC-ARC-015: 試験用Skillを介したAIの書込み提案が、Policy承認前にState変更、Effect確定、dispatchのいずれも起こさない。
+- AC-ARC-016: 同じSkill契約を別の試験用Adapterへ再bindingしても、Kernelとdomain Ruleを変更しない。
 
 ### REQ-PER-001 — Graphから導く順序
 

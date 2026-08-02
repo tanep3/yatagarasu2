@@ -1,10 +1,12 @@
 # 運用要件
 
-## 目的: 仕事を失わず、Recoveryを根拠なく言い過ぎない形で安全に進化する
+## 目的
+
+仕事を失わず、勝手に再実行せず、物理事実・取消・通知を根拠なく言い過ぎない形で安全に進化する。
 
 ### REQ-OPS-001 — Yatagarasu 1の分離
 
-Yatagarasu 2の開発中もYatagarasu 1は稼働を継続し、別系統として保つ。未完成のYatagarasu 2コードを本番ロボット環境へ混在させない。
+Yatagarasu 2の開発中もYatagarasu 1は稼働を継続し、別系統として保つ。未完成のYatagarasu 2コードを本番ロボット環境へ混在させない。Yatagarasu 1は旧版ではなく、実機機能要件を検証し続ける基準系として扱う。
 
 受入条件:
 
@@ -42,7 +44,7 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 
 ### REQ-OPS-006 — durableな取消と遅延結果
 
-`CancelRequested`、Interactionが中止を受理した事実、pending workのdurable revocation（永続取消）、in-flight workの取消結果、
+`CancelRequested` Command、Interactionが中止を受理した`CancellationAccepted` Event、pending workのdurable revocation（永続取消）、in-flight workの取消結果、
 物理結果を区別する。dispatch済みの物理移動はnon-cancellable（取消不可）であり、下流の仕事をrevokedにし、遅い結果は記録する。
 音声のstopは必要であり、LLM、保留TTS、queued playback、現在chunkのうちAdapterが対応するものだけへ適用する。停止を捏造してはならない。
 中止済みInteractionは遅いProposalを拒否し、revoked recordはrestart後も残りdispatcherはdispatchしない。OutcomeUnknownは自動retryしない。

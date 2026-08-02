@@ -1,15 +1,26 @@
 # プロダクト要件
 
-## 目的: 日常のやり取りでロボットを理解しやすく役立つものにする
+## 目的
 
-### REQ-PRD-001 — 目・耳・口
+目・耳・口は部品一覧ではありません。利用者が頼み、Yatagarasuが必要な観測や身体操作を選び、確認できた事実に基づいて応答する、一つのロボット体験として結びます。
+
+### REQ-PRD-001 — 目・耳・口を一つのInteractionに結ぶ
 
 製品は、利用者が音声またはテキストでInteractionを依頼し、必要に応じて利用可能な観測または身体操作を用い、利用可能な出力チャネルから応答を受け取れることを目指す。
 
 受入条件:
 
 - AC-PRD-001: デモ実装が、音声起点とテキスト起点を各一つ受理し、共通のInteraction状態を公開できる。
-- AC-PRD-002: Interactionに起因する応答が、観測、仮定、または物理観測なしのいずれに基づくかを示す。
+- AC-PRD-002: Interactionに起因する応答が、Observed（観測済み）、Assumed（仮定済み）、または物理観測なしのいずれに基づくかを示す。これは表示上の装飾ではなく、利用者へ物理世界について嘘をつかないための証拠である。
+
+### REQ-PRD-002 — Skillによって人とAIがアプリの世界を共有する
+
+製品は、Skillを通して人が使うアプリ、データ、能力をAIへ接続できなければならない。Skillは作業指示書だけを意味せず、人とAIが同じアプリ所有の世界へ異なる入口から関われる接続面である。Skill追加のためにKernelへ製品固有の主手順を追加してはならない。
+
+受入条件:
+
+- AC-PRD-003: 試験用アプリの同じデータを、人向け入口とSkill入口から参照でき、データの所有者がYatagarasu Coreへ移らないことを示す。
+- AC-PRD-004: 試験用Skillを一つ追加しても、Kernelにそのアプリ名または製品固有の条件分岐を追加せず、能力一覧と境界契約から利用可能にできる。
 
 ### REQ-FR-001 — 受理後の入力意味は等価
 
@@ -17,7 +28,7 @@
 
 受入条件:
 
-- AC-FR-001: 二つの対応Inbound Adapterから同じテキストを投入すると、source provenance以外は同じ受理済みInteraction Event形状になる。
+- AC-FR-001: 二つの対応Inbound Adapterから同じテキストを投入すると、入力元の出所情報以外は同じ受理済みInteraction Event形状になる。
 - AC-FR-002: 適合テストにより、PlanningがAdapter固有の業務ロジックではなく受理済みInteractionから選ばれることを示せる。
 
 ### REQ-FR-002 — Interaction進行を参照可能にする
@@ -26,18 +37,16 @@
 
 受入条件:
 
-- AC-FR-003: Projectionが、試験用Interactionの accepted、executing、completed、cancelled、failed の状態を表示する。
+- AC-FR-003: Projectionが、試験用Interactionのaccepted、executing、completed、cancelled、failedの状態を表示する。
 - AC-FR-004: 外部処理の失敗が、未解析の例外文字列ではなく型付きFailure分類として表示される。
 
 ### REQ-FR-003 — 中止の要求と結果を混同しない
 
-利用者は共通のInteraction境界から中止を要求できる。Webの中止操作は直ちに同じ境界へ
-`CancelRequested`を投入する。中止の受理、保留仕事の取消、実行中の取消結果、物理結果は別々に
-参照可能でなければならない。
+利用者は共通のInteraction境界から中止を要求できる。Webの中止操作は直ちに同じ境界へ`CancelRequested` Commandを投入する。中止の受理は`CancellationAccepted` Eventとし、保留仕事の取消、実行中の取消結果、物理結果と別々に参照可能でなければならない。
 
 受入条件:
 
-- AC-FR-005: Webと別のInbound Adapterの中止要求は、同じ型付き`CancelRequested`事実を生む。
+- AC-FR-005: Webと別のInbound Adapterの中止要求は、同じ型付き`CancelRequested` Commandを生み、受理時は別の`CancellationAccepted` Eventを生む。
 - AC-FR-006: Projectionは取消要求を外部処理の停止または物理結果の証拠として表示しない。
 
 ### REQ-FUT-001 — 定時自律はInboundの関心事
@@ -48,4 +57,4 @@
 
 - AC-FUT-001: 実装前に、スケジュールAdapterの契約と、共通Inbound境界から投入されることを示すテストが承認される。
 
-プロダクト説明の例は説明用であり、要件を追加しない。
+説明文書の体験例は、ここにIDを持つ要件を自動的に追加しない。

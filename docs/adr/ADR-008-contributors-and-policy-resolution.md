@@ -5,17 +5,17 @@
 
 ## Context
 
-Y1のSBERT routerは実機で有用な高速経路を示す一方、Y2は一つの意図登録簿または必須の滝型処理へ固定してはならない。
+Y1のSBERT routerは、意味空間を使う反射が実機体験を大きく高速化することを示しました。一方、Y2はすべての概念を一つの正式Intent登録簿へ集約したり、SBERT→規則→LLMを必須の滝型処理へしたりしてはなりません。
 
 ## Decision
 
-通常の意味routing機能はSBERT candidate生成を第一段とし、gray band候補をaccept前に決定論的keyword/rule filterへ渡す。これは普遍的な滝型処理ではない。明示capability Policyにより、機能はSBERT、純粋Rule、LLMなど一つ以上のcontributorを用い、rule-onlyまたはLLM-proposal-onlyの経路も選べる。SBERT Adapterはcandidate、score、provenanceだけを返す。intent別thresholdとgateはDecision Policy Contextが唯一所有するversion付きPolicy dataである。純粋resolution Policyが候補なし、曖昧、競合、合成可能を明示Decisionにする。
+通常の意味routing機能はSBERT candidate生成を第一段とし、gray band候補をaccept前に決定論的keyword/rule filterへ渡す。これは普遍的な滝型処理ではない。明示capability Policyにより、機能はSBERT、純粋Rule、LLMなど一つ以上のcontributorを用い、rule-onlyまたはLLM-proposal-onlyの経路も選べる。SBERT Adapterはcandidate、score、provenanceだけを返す。動作候補ごとのthresholdとgateはDecision Policy Contextが唯一所有するversion付きPolicy dataである。これは中央の正式Intent登録簿ではない。純粋resolution Policyが候補なし、曖昧、競合、合成可能を明示Decisionにする。
 
-承認済みの決定論的contributorは許可済みEffect Graph断片を作ってよい。camera calibrationはSBERT candidateとintent固有keyword gateが決定論的Policyに一致した場合、gray bandからLLM request/Proposalを作らずに完了しなければならないが、safety/capability Policy、Graph dependency、resource claimを迂回しない。LLM/Codex SkillsはProposalだけを返し、Policy前にState変更、Graph確定、dispatchをしない。
+承認済みの決定論的contributorは許可済みEffect Graph断片を作ってよい。camera calibrationはSBERT candidateと校正候補に固有のkeyword gateが決定論的Policyに一致した場合、gray bandからLLM request/Proposalを作らずに完了しなければならないが、safety/capability Policy、Graph dependency、resource claimを迂回しない。LLM、Codex、またはSkillを介した信頼できない外部主体はProposalを返し、Policy前にState変更、Graph確定、dispatchをしない。Skill自体はProposal生成者に限定されない。
 
 ## Non-decision / open
 
-具体的なintent集合、閾値、gate語彙、profileの選択規則、Provider routingは未決である。
+具体的な動作候補の集合、閾値、gate語彙、profileの選択規則、Provider routingは未決である。
 
 ## Consequences
 

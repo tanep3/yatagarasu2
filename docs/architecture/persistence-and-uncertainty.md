@@ -1,36 +1,54 @@
-# 永続化と不確実性
+# 永続化と不確実性 — 現実について嘘をつかない
 
-## Snapshot、journal、pending dispatch
+soukobanの閉じた世界では、Transitionを適用すれば次の世界が確定します。現実のロボットでは、Effectを送っても外界が変わったとは限らず、その結果を観測できないこともあります。さらに、送信と記録の途中でプロセスが止まる可能性があります。
 
-初期の永続Source of Truthはcommit済みsnapshotです。journalは監査とProjection再構築を支えます。journalのreplayは外部side effectを再実行しません。
+したがってYatagarasu 2の永続化は、単に状態を保存する機能ではありません。「仕事を失わない」「勝手に二重実行しない」「分からない結果を成功へ変えない」を同時に守るための構造です。
 
-重要なintegrity invariantは次のとおりです。
+## Snapshot、journal、durable pending
 
-> commit済みsnapshotがEffectをreadyにするなら、そのEffectのdispatch可能なpending recordはsnapshotとともにdurableである。
+初期の永続Source of Truth（正となる情報源）は、commit済みsnapshotです。journalは監査とProjectionの再構築を支えますが、journalの再生から外部作用を再実行しません。
 
-dispatcherはこのdurable pending recordだけを読みます。Recovery時に仕事を黙って失わず、journal replayで再生成もしません。transaction、outbox、idempotency、reconciliationの具体機構は未決です。将来の作業は特定database機能を仮定せず、このinvariantを示さなければなりません。
+重要な不変条件は次です。
 
-pending recordが取消対象になると、Execution Contextはdurable revocationを同じRecovery境界で記録する。dispatcherはrevoked recordをdispatchしない。dispatch済みphysical Effectの遅い結果は記録するが、restartや取消を根拠に停止・未適用・成功を推測しない。cancelled Interactionへ遅れて届くProposalは拒否する。OutcomeUnknownは自動retryしない。
+> commit済みsnapshotがEffectを実行可能にするなら、そのEffectのdispatch可能なpending recordも、snapshotとともに永続化されている。
 
-`EffectExecutionStarted`はAdapterが返しCoreが受理する、dispatch/実行開始の試行を表す結果Eventです。`ExpectedActionDuration`と再生のaudio durationは、このEventをCoreが受理した後にだけ測ります。queue時間は測定に含めず、このEventを受理しなければtimerベースのAssumed readiness/completionは生じません。このEventは物理的な適用または完了の証拠ではありません。Event不達時のtimeout/Failure Policyは未決です。RecoveryがEventを推測して生成してはなりません。
+Dispatcherは、この永続pending recordだけを読みます。これにより、commit後・dispatch前に停止しても仕事を失いません。一方で、journalからEffectを作り直して二重実行することも防ぎます。
+
+transaction、outbox、idempotency、reconciliation、databaseの具体方式は未決です。どの方式を選んでも、この不変条件を満たす必要があります。
+
+## 取消も永続化する
+
+待機中の仕事が取り消された場合、Execution Contextはrevocation（取消済み状態）を同じ復旧境界で永続化します。再起動後もDispatcherはそれを送信しません。
+
+すでに送信した物理Effectは止められないことがあります。遅れて届く結果は記録しますが、再起動や取消だけを理由に「止まった」「実行されなかった」「成功した」と推測しません。取消済みInteractionへ遅れて届いたProposalも適用しません。
+
+## 開始Eventは、完了Eventではない
+
+`EffectExecutionStarted`は、Adapterが実行を試みた、または開始したことを示す結果Eventです。物理的に適用されたこと、完了したことの証拠ではありません。
+
+想定動作時間や音声時間は、CoreがこのEventを受理した後にだけ測ります。queueで待った時間は含めません。開始Eventが届かなければ、timerに基づくAssumedの準備完了・再生完了を作りません。Recoveryが開始Eventを推測して補ってもいけません。
 
 ## 物理世界の結果語彙
 
-| 結果 | 意味 |
-| --- | --- |
-| Observed | 証拠が物理結果を確認している。 |
-| Assumed | Policy/timerにより進行してよいが、確認観測はない。 |
-| DefinitelyNotApplied | 証拠が要求した物理作業は適用されなかったと示す。 |
-| OutcomeUnknown | 適用済み/未適用のいずれにも安全に分類できない。 |
+| 結果 | 意味 | 言ってよいこと |
+| --- | --- | --- |
+| Observed（観測済み） | 証拠が物理結果を確認した | 確認できた |
+| Assumed（仮定済み） | 方針や時間により進行を許せるが、確認観測はない | 完了したと仮定して進む |
+| DefinitelyNotApplied（未適用確定） | 証拠が、要求した作業は適用されなかったと示す | 実行されなかった |
+| OutcomeUnknown（結果不明） | 適用済み・未適用のどちらにも安全に分類できない | 結果を確認できない |
 
-`OutcomeUnknown`は成功完了ではなく、明示的Policyまたはreconciliationなしに自動retryしてはなりません。durationに基づくreadiness結果は`Assumed`であり、`Observed`ではありません。
+時間が過ぎただけの結果はAssumedであり、Observedではありません。OutcomeUnknownは成功ではなく、明示的なPolicyまたは照合なしに自動再試行しません。物理作用の重複は、元に戻せない結果を生む可能性があるからです。
 
 ## Recovery境界
 
-Recoveryはcommit済みsnapshotとdurable pending workからStateを再構築します。物理deviceを照合するか、Interactionを安全に失敗させてよいものとします。processがrestartしただけでcamera movement、playback stop、その他の物理完了を推論しません。
+Recoveryは、commit済みsnapshotと永続pending workから内部状態を再構築します。その後、必要なら物理deviceとの照合を要求するか、Interactionを安全に失敗させます。
 
-## Artifactと通知の監査境界
+プロセスが再起動したという内部事実から、カメラ移動、再生停止、発話完了などの物理事実を導きません。
 
-Artifact Contextが`ArtifactRef`の作成、利用可能性、cleanup、orphan cleanupのlifecycleを所有する。capture Failureまたは無効・不適用な`ArtifactRef`はLLM Effectをreadyにしない。cleanupは明示Effectと型付き結果Eventで監査し、OutcomeUnknown artifactを自動再送しない。streaming TTSを採用する場合もjournalには有界な監査参照と結果だけを保存し、無制限のraw provider chunkを保存しない。
+## Artifactと通知も推測しない
 
-通知の成功、Failure、未確認配達は結果Eventである。Projectionは通知を表示しても、外部への配達を証明しない。
+Artifact Contextは、画像、音声、その他ArtifactRefの作成、利用可能性、参照中、削除、孤立成果物の回収を所有します。撮影失敗や無効なArtifactRefは、LLM Effectを実行可能にしません。cleanupは明示Effectと結果Eventで監査します。
+
+通知も同じです。通知を試みた、外部へ届いた、届いたか分からないを分けます。Projectionに「通知済み」と表示したことは、利用者の端末へ届いた証拠ではありません。
+
+ストリーミングTTSを採用する場合も、journalへ無制限の生chunkを保存せず、有界な監査参照と結果だけを残します。結果不明の音声やArtifactを自動再送しません。

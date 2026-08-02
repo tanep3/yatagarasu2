@@ -1,5 +1,18 @@
 # 根拠監査台帳
 
+## 読み解きのレンズ
+
+この台帳の採否は、次の導出を理解した上で読む。
+
+```text
+構造と変化の法則を記述する理論
+  -> soukobanで閉じた世界の実行可能な構造にする
+  -> Yatagarasu 1で現実の機能・失敗・時間・不確実性を発見する
+  -> Yatagarasu 2で外部作用と結果Eventを含む開いた世界へ再抽象化する
+```
+
+このレンズは、理論文書やsoukobanを新しい要求源へ昇格させるものではない。Y1の機能基準と凍結Y2構造基準を、なぜその形で正規化するのかを説明するためのものである。今回の再解釈によって、凍結資料の採否、Y1分離、物理不確実性、SBERTの通常経路は変更していない。Skillについては、作業指示に限定しないAIとアプリの接続面として、既存の能力拡張方針をREQ-PRD-002/REQ-ARC-007へ明文化した。
+
 ## 判定規則
 
 この台帳は二つの補完的な基準資料を扱う。Yatagarasu 1は実機で検証済みの機能要件、凍結`00`–`06`、DOCS README、ROOT READMEはYatagarasu 2の構造要件である。いずれも**原則採用、除外理由を明記**とする。Accepted ADRは実際の矛盾だけで優先し、後続凍結資料は先行資料の明示的訂正として扱う。外部製品・既存実装の振る舞いは設計根拠であり、Y2のStateやPortの権威ではない。
@@ -27,7 +40,7 @@
 | 00 §3（§3.1–3.8） | 構造、単一所有、純粋Rule、不変Effect、汎用Kernel | accepted | [設計思想](../architecture/design-philosophy.md), ADR-003 | AC-ARC-001–006 |
 | 00 §4 | State/Event/Rule/Transition/Decision/Effect観 | covered | [ドメインモデル](../architecture/domain-model.md) | AC-ARC-001–006 |
 | 00 §5 | 一人のオーケストレーターを置かない | accepted | ADR-003 | AC-PER-001–002 |
-| 00 §6（§6.1–6.8） | Context分割と所有 | accepted | [ドメインモデル](../architecture/domain-model.md#stateの所有者) | AC-ARC-003 |
+| 00 §6（§6.1–6.8） | Context分割と所有 | accepted | [ドメインモデル](../architecture/domain-model.md#状態の所有者は一つ) | AC-ARC-003 |
 | 00 §7 | 入力同格、意味一つ | covered | REQ-FR-001 | AC-FR-001–002 |
 | 00 §8 | process境界は配備判断 | accepted | ADR-003 | AC-ARC-002, AC-OPS-009 |
 | 00 §9 | Y1を稼働維持し混在させない | accepted | ADR-002, REQ-OPS-001 | AC-OPS-001 |
@@ -41,7 +54,7 @@
 | 01 §7（§7.1–7.4） | Effect Graph例と順序 | accepted | REQ-PER-001, ADR-009; 無条件逐次例はguardへ訂正 | AC-PER-001–002, AC-PHY-009 |
 | 01 §8 | Planner | covered | contributor/resolution Policyへ正規化 | AC-ARC-009–011 |
 | 01 §9 | Scheduler | covered | Graph ready/claim scheduler | AC-PER-001–002 |
-| 01 §10 | Artifact | accepted | ADR-009, [永続化と不確実性](../architecture/persistence-and-uncertainty.md#artifactと通知の監査境界) | AC-OPS-018 |
+| 01 §10 | Artifact | accepted | ADR-009, [永続化と不確実性](../architecture/persistence-and-uncertainty.md#artifactと通知も推測しない) | AC-OPS-018 |
 | 01 §11 | ContextBundle | covered | 名前付きContextのsnapshot view | AC-ARC-003 |
 | 01 §12 | Conversation | open | 会話Stateの詳細、保持、privacyは未決 | 未決事項: privacyとmemory |
 | 01 §13（Projection各節） | Conversation/Runtime/Diagnostic Projection | covered | REQ-FR-002; Projectionは配達証拠でない | AC-FR-003–004, AC-OPS-016 |
@@ -64,7 +77,7 @@
 | 02 §15 | Suggested Source Shape | legacy | 実装配置例であり依存方向のみ採用 | AC-ARC-002 |
 | [03 §1](../drafts/handover-baseline/03-evolution-plan-and-open-questions.md) | 移行計画ではない | covered | REQ-OPS-001 | AC-OPS-001 |
 | 03 §2 | 最初に実装しないもの | open | 項目別に台帳と未決事項へ移送 | 未決事項一覧 |
-| 03 §3 | Architecture Test Scenario | covered | [設計思想](../architecture/design-philosophy.md#将来の実行可能scenario形式) | 全AC |
+| 03 §3 | Architecture Test Scenario | covered | [設計思想](../architecture/design-philosophy.md#将来の実行可能シナリオ) | 全AC |
 | 03 §4（M0–M6） | Milestones | legacy | roadmapであり受入契約ではない | planning時再評価 |
 | 03 §5 | Y1から移植する単位 | covered | 下のY1機能監査へ分解 | Y1各AC |
 | 03 §6 | 言語選択 | open | Rust/Python境界は保持、言語選択は未決 | ADR-003 |
@@ -138,13 +151,14 @@ Y1のprimary sourceは`/home/tane/tools/yatagarasu` revision `66f73ec9bbfee4fdf5
 | `README.md`, `bin/yatagarasu` | テキストInteraction | covered | REQ-PRD-001, REQ-FR-001 | AC-PRD-001, AC-FR-001 |
 | `python/listend.py`, `wakeword.py`, `listen_state.py` | 常時音声、wake、VAD/STT、turn確定/stop word | covered | REQ-PRD-001, ADR-006; Adapterは非所有 | AC-PRD-001 |
 | `README.md:48–56`, `python/intent_router.py` | SBERT routingのmove-camera、view、recall | accepted | ADR-008。通常routingはSBERT候補生成から始める。Y1はkeyword gateをband分類前に適用しmiddle候補をLLMへ送るが、Y2のgrayはkeyword/rule gate後にresolution PolicyがLLMなし受理または別Decisionを決める | AC-ARC-009–010, AC-ARC-013 |
-| `workspace/.codex/skills/move-camera`, `README.md:50–54` | move-camera（相対PTZ、calibration） | covered | ADR-008/009。calibrationはgray candidate+intent固有gateが決定論的Policyに一致するとき、LLM request/ProposalなしでGraphへ解決する。絶対poseの証明にはしない | AC-ARC-009, AC-PHY-007–009 |
+| `workspace/.codex/skills/move-camera`, `README.md:50–54` | move-camera（相対PTZ、calibration） | covered | ADR-008/009。calibrationはgray candidate+校正候補固有gateが決定論的Policyに一致するとき、LLM request/ProposalなしでGraphへ解決する。絶対poseの証明にはしない | AC-ARC-009, AC-PHY-007–009 |
 | `workspace/.codex/skills/view`, `README.md:50–55` | view（captureしてLLM入力） | covered | ADR-009。capture/ArtifactRef guardを持つGraph | AC-PER-001–002, AC-PHY-009 |
 | `workspace/.codex/skills/recall`, `README.md:50–55` | recall（過去記憶検索） | open | 機能基準として保持するが、Conversation/privacy/memory契約は未決 | 未決事項: privacyとmemory |
 | `workspace/.codex/skills/memorize`, `workspace/AGENTS.md:15–16` | 明示依頼によるmemorizeと保存結果確認 | open | 機能基準として保持するが、保存同意、retention、version/migration、privacyは未決 | 未決事項: privacyとmemory |
 | `workspace/.codex/skills/tanechan-search`, `workspace/AGENTS.md:17,40–43` | tanechan-search（現在情報のURL検索） | open | 機能基準として保持するが、外部network capabilityの許可、citation、Failure/consent Policyは未決 | 未決事項: external network capability |
 | `workspace/.codex/skills/tanechan-fetch`, `workspace/AGENTS.md:18` | tanechan-fetch（URL内容取得） | open | 機能基準として保持するが、外部network capabilityの許可、取得先privacy、Failure Policyは未決 | 未決事項: external network capability |
 | `workspace/.codex/skills/skill-creator`, `README.md:56` | skill-creator（Skill作成） | open | Agent/LLM由来の外部変更はProposalとしてPolicyを通す。Skillの許可範囲は未決 | ADR-008, AC-ARC-011 |
+| `workspace/.codex/skills/*`, `workspace/AGENTS.md` | Skillによるアプリ・データ・能力へのAI接続 | accepted | Skillを作業指示書、Proposal、Adapterのいずれにも限定せず、人とAIがアプリ所有の世界へ触れる接続面として正規化する | REQ-PRD-002, REQ-ARC-007, AC-PRD-003–004, AC-ARC-014–016 |
 | `workspace/AGENTS.md:12–18,45` | compound move+viewと画像分析 | covered | move/capture/LLMを依存Graphとresource claimで表す。無条件手順にはしない | AC-PER-001–002, AC-PHY-009 |
 | `bin/zunda` | VOICEVOX TTS、並列生成/再生 | covered | REQ-OPS-004、REQ-OPS-008（採用時）。並列synthesisでも順序付きplayback、上限、取消後非admission、OutcomeUnknown非resendを要求する | AC-OPS-007–008, 017, 020–021, 023 |
 | `python/audio_prompt.py`, `tapovoice*` | prompt/playback | covered | Adapter結果Eventと取消境界。supported target別cancel、artifact cleanup/restart orphan cleanupを型付き結果で扱う | AC-OPS-014, 019–023 |
@@ -159,4 +173,4 @@ Y1のprimary sourceは`/home/tane/tools/yatagarasu` revision `66f73ec9bbfee4fdf5
 | Source | 観察した契約候補 | 状態 | Y2での扱い | 確認 |
 | --- | --- | --- | --- | --- |
 | `/home/tane/tools/familiar-ai` revision `d52fe8e0318f34272ad8d39350609b8108809348` | camera、移動、音声、記憶、LLM loop | legacy | 体験上の支持根拠のみ。ReAct主手順や外部状態所有は採用しない | source README |
-| `/tmp/hoshikage-audit-20260802` revision `4faf65f686006c0543f8bdcf5c246d754133dc70` | liveness/readiness、capability広告、queue/admissionとinference Failure、terminal/disconnect、auth/secret redaction、generation/lease | open | [ランタイム境界](../architecture/runtime-boundaries.md#外部capability境界)のProvider boundary候補。内部実装、routing、consent、privacy、process、transportは未採用/未決 | source `docs/user-manual.md`, `src/application/responses_service.rs` |
+| `/tmp/hoshikage-audit-20260802` revision `4faf65f686006c0543f8bdcf5c246d754133dc70` | liveness/readiness、capability広告、queue/admissionとinference Failure、terminal/disconnect、auth/secret redaction、generation/lease | open | [ランタイム境界](../architecture/runtime-boundaries.md#外部能力python-workerprovider)のProvider boundary候補。内部実装、routing、consent、privacy、process、transportは未採用/未決 | source `docs/user-manual.md`, `src/application/responses_service.rs` |

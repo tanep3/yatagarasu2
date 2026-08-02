@@ -5,11 +5,11 @@
 
 ## Context
 
-systemは中央の手続き的controllerを再び作らずに、physical deviceとAIを協調させる必要があります。
+Yatagarasu 1が発見した機能世界を継承しながら、知識を中央の時間順controllerへ再集積せず、physical deviceとAIを協調させる必要があります。soukobanの閉じた世界ではRuleとTransitionで世界を記述できましたが、現実では外部作用と結果不明を追加する必要があります。
 
 ## Decision
 
-domain境界は設計判断であり、process境界はdeployment判断です。Stateの所有者はちょうど一つです。RuleとTransitionは純粋で、Effectは不変値、Adapterは結果Eventを返しWorldStateを変更しません。Kernelは汎用のまま保ちます。Effectの順序はGraph依存関係とresource claimで表します。LLM/CodexのProposalは信頼せず、Policy検証を要します。Python inferenceと外部capabilityはWorldState、plan、Provider state、conversation stateを所有しません。
+Domain境界は設計判断であり、process境界はdeployment判断です。Stateの所有者はちょうど一つです。RuleとTransitionは純粋で、Transitionは内部で確定できる世界変換だけを扱います。外界への仕事は不変のEffectとし、Adapterは結果Eventを返しWorldStateを変更しません。Kernelは汎用のまま保ちます。Effectの順序はGraph依存関係とresource claimで表します。LLM/CodexのProposalは信頼せず、Policy検証を要します。Python inferenceと外部capabilityはWorldState、plan、Provider state、conversation stateを所有しません。
 
 ## Non-decision / open
 

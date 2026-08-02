@@ -5,6 +5,7 @@
 | 要件 | 受入条件 | 判断・説明 |
 | --- | --- | --- |
 | REQ-PRD-001 | AC-PRD-001, AC-PRD-002 | ADR-002; Product experience |
+| REQ-PRD-002 | AC-PRD-003, AC-PRD-004 | ADR-007; Skill boundary; Y1 capability baseline |
 | REQ-FR-001 | AC-FR-001, AC-FR-002 | ADR-003; Domain model |
 | REQ-FR-002 | AC-FR-003, AC-FR-004 | Domain model |
 | REQ-FR-003 | AC-FR-005, AC-FR-006 | ADR-010; Domain model |
@@ -14,6 +15,7 @@
 | REQ-ARC-004 | AC-ARC-007, AC-ARC-008 | ADR-007 |
 | REQ-ARC-005 | AC-ARC-009, AC-ARC-010, AC-ARC-011, AC-ARC-013 | ADR-008; Domain model |
 | REQ-ARC-006 | AC-ARC-012 | ADR-008; ADR-009; Domain model |
+| REQ-ARC-007 | AC-ARC-014, AC-ARC-015, AC-ARC-016 | ADR-007; Domain model; Runtime boundaries |
 | REQ-PER-001 | AC-PER-001, AC-PER-002 | ADR-003 |
 | REQ-PHY-001 | AC-PHY-001, AC-PHY-002 | ADR-005 |
 | REQ-PHY-002 | AC-PHY-003, AC-PHY-004, AC-PHY-005, AC-PHY-006 | ADR-005 |
@@ -42,9 +44,21 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | 凍結04 §5、§8.3、§8.6: Agentがmodel/provider/thread/turn制御を所有する | 凍結05 §3.2/§9および新しいdomain判断 | Kernelと名前を持つContextがdomain stateを所有する。Python/外部capabilityはWorldState、plan、provider state、conversation stateを所有しない。ADR-003。 |
 | 凍結04 §9: IPC例を要件として扱う | 新しい要件規律 | 明示的制約でない限り、具体vendor/transport機構は要件にしない。ADR-001。 |
 | 凍結01 §14および凍結04の逐次実行例: move後にcapture/LLMを無条件実行する | ADR-009のGraph guardと物理不確実性 | move Failure/OutcomeUnknown、capture Failure、無効ArtifactRefは下流をblockする。Assumed継続には明示Policyが必要。 |
-| 凍結02 §8.3の取消分類 | ADR-010のdurable revocationと遅延結果 | `CancelRequested`、受理、revocation、in-flight取消結果、physical outcomeを分ける。physical moveはdispatch後non-cancellable。 |
+| 凍結02 §8.3の取消分類 | ADR-010のdurable revocationと遅延結果 | `CancelRequested` Command、`CancellationAccepted` Event、revocation、in-flight取消結果、physical outcomeを分ける。physical moveはdispatch後non-cancellable。 |
 | 凍結04のSBERT単独状態更新・固定Intent経路 | ADR-008の複数contributor解決 | SBERTは候補/score/provenanceを返し、version付きPolicyと純粋resolutionで決める。LLM/CodexはProposal境界を越えない。 |
-| Y1 `intent_router.py`: keyword gateをscore band分類より前に適用し、middle候補をLLMへ送る | ADR-008の通常routing Policy | Y2ではgray candidateをintent固有keyword/rule gateで受理可能にし、LLMへ送るかは純粋resolution Policyが決める。calibrationが決定論的Policyに一致するときはLLM request/Proposalを作らない。rule-only/LLM-proposal-onlyも明示capability Policyで選べる。 |
+| Y1 `intent_router.py`: keyword gateをscore band分類より前に適用し、middle候補をLLMへ送る | ADR-008の通常routing Policy | Y2ではgray candidateを動作候補固有のkeyword/rule gateで受理可能にし、LLMへ送るかは純粋resolution Policyが決める。calibrationが決定論的Policyに一致するときはLLM request/Proposalを作らない。rule-only/LLM-proposal-onlyも明示capability Policyで選べる。 |
+
+## 思想から要件までの導出
+
+この表は要求の権威順を変更せず、設計判断を再生成するための補助索引です。
+
+| 読み解きの起点 | Y2での構造 | 主な要件 |
+| --- | --- | --- |
+| 世界と可能な変化を、中央手順ではなく構造として記述する | 単一状態所有、純粋Rule/Transition、汎用Kernel | REQ-ARC-001, REQ-ARC-002 |
+| soukobanの閉じた世界でRuleとTransitionを分離する | 内部状態変化と外部作用を分離する | REQ-ARC-003, REQ-PER-001 |
+| Y1で物理完了、遅延、取消不能を発見する | 結果語彙、開始Event、永続取消、Recovery | REQ-PHY-001–003, REQ-OPS-002–006 |
+| Y1でSBERTの意味反射を実証する | 意味候補と決定方針を分離する | REQ-ARC-005 |
+| Y1と他アプリでSkillの横断価値を発見する | 人とAIが同じアプリ世界へ触れる接続面 | REQ-PRD-002, REQ-ARC-007 |
 
 ## 未決事項一覧
 
@@ -63,6 +77,7 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | process management | supervisor配置とlocal workerのlifecycle |
 | privacyとmemory | 保持、利用者制御、remote transfer、削除規則 |
 | external network capability | search/fetchの許可、取得先制約、citation、Failure、利用者同意 |
+| Skill運用契約 | Skill形式、transport、認証・認可、Skill作成の検証、配備、rollback、安全方針 |
 | legal inventory | component version、license、notice、distribution obligation |
 
 ## 基準資料の扱い
@@ -71,3 +86,4 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 - 凍結`00`–`06`、DOCS README、ROOT READMEはYatagarasu 2構造要件の基準である。
 - Accepted ADRは実際の矛盾に限り優先し、後続の凍結資料は先行資料の明示的訂正として扱う。
 - manifestは凍結バイト列の完全性を示すだけで、要求内容の真実性や採用を示さない。
+- 「オブジェクト指向はなぜ挫折するのか」とsoukobanは、正本要件の追加権威ではない。正本構造を理解し、新しい設計判断を同じ思考で導くための読み解きの基準である。

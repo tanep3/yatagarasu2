@@ -1,66 +1,126 @@
-# ドメインモデル
+# ドメインモデル — ロボットの世界を記述する語彙
 
-## Coreの値
+## 一つの法則
 
-将来のCoreは、Command、Event、Effect、Failure、Stateにclosed enumと明示的なvalue typeを用いるべきです。以下の名前は契約を説明するもので、言語またはstorage配置を決めるものではありません。
-
-| 値 | 意味 |
-| --- | --- |
-| Command | Policyが受理または拒否できる要求。 |
-| Event | Adapter結果を含む、過去に起きた事実。 |
-| State | 判断に用いる、Context所有のsnapshot。 |
-| Rule | State viewとEventからDecisionまたは無判断を返す純粋関数。 |
-| Transition | StateからStateへの決定論的変換。 |
-| Effect | 依存関係とresource claimを持つ不変の外部作業。 |
-| Failure | 解析済み診断文字列ではない、型付き外部Failureデータ。 |
-
-WorldStateは外部データすべてを詰め込む袋ではありません。大きなaudio、image、model、transcriptは必要に応じて型付きartifactで参照します。各State部分は名前を持つContextが所有し、Adapter、Python worker、LLM Provider、Projectionは所有も直接変更もしません。
-
-## Stateの所有者
-
-| State | 唯一の所有者 | 所有しないもの |
-| --- | --- | --- |
-| wake acceptanceとprompt lifecycle | Acoustic Context | Yata Wake、Mimy、voice Adapter |
-| Interaction lifecycleとcancel | Interaction Context | Web、voice、CLI Adapter、LLM |
-| Decision Policy version | Decision Policy Context | SBERT、LLM、profile |
-| Effect Graph、durable pending、revoked | Execution Context | dispatcher、Adapter、journal replay |
-| physical observationとpose | Physical Observation Context | camera Adapter、calibration capability |
-| artifact lifecycle | Artifact Context | TTS、capture、Provider、filesystem Adapter |
-| notification policy | Notification Policy Context | channel Adapter、Projection |
-
-ここでのContextはStateの可変所有者です。Adapter、profile、Projection、Python worker、外部Providerは値または結果Eventを扱うだけで、いずれの行も所有しません。
-
-## DecisionとEffect Graph
+Yatagarasu 2は、カメラ、会話、Skillごとに別の主手順を持ちません。すべてを次の法則へ入れます。
 
 ```text
 WorldState + Event
-  -> pure Rule
+  -> Rule
   -> Decision(Transition, Effect Graph)
-  -> committed WorldState'
+  -> WorldState'
 ```
 
-Effect Graphのedgeは前提条件を、resource claimは相互排他を表します。たとえばcaptureが完了/時刻の事実に依存するならcamera movementがcaptureに先行しますが、独立したmemory lookupは並行できます。schedulerはclaimの下でGraph上readyな仕事を選び、camera、speech、conversationの主手順を持ちません。
+これは「必ずこの順番で部品を呼ぶ」という処理フローではありません。現在の世界と起きた事実から、適用可能な規則が、内部の状態変化と外界へ依頼する仕事を値として決める、という意味です。
 
-`move -> capture -> LLM`はこのGraphの例です。moveが`Failure`または`OutcomeUnknown`ならcaptureとLLMはguard（条件）によりblockされる。captureのFailureもLLMをblockする。LLM入力は有効で適用可能な`ArtifactRef`だけであり、`Assumed`を越えるedgeは明示Policyの許可が必要です。camera PTZ、capture、LLM requestなどのresource claimは各Effectに残ります。通知は同じGraphから生じても、silent Policyでは通知Effectだけを作らず、内部EventやProjectionを消しません。
+## 基本の値
 
-## PolicyとProposal
+| 値 | 入力と出力 | 責務 |
+| --- | --- | --- |
+| Command（要求） | 外からCoreへ入る | 方針により受理、拒否、確認要求できる依頼。まだ事実ではない。 |
+| Event（事実） | Adapterや内部判断からCoreへ入る | 過去に起きたこと。要求や推測と区別する。 |
+| State（状態） | Ruleが読む | 名前を持つContextが唯一所有する、判断時点の世界の断面。 |
+| Rule（規則） | State view + Event → Decisionまたは無判断 | I/Oを行わず、適用できる法則を純粋に評価する。 |
+| Transition（遷移） | State → State | 内部で確定できる、決定論的な状態変換。 |
+| Decision（決定） | Ruleの出力 | Transitionと、必要ならEffect Graphをまとめた判断値。 |
+| Effect（外部作用） | CoreからPortへ出る | 外界へ依頼する仕事。作成しただけでは実行済みにならない不変値。 |
+| Failure（失敗） | 外部・内部境界から戻る | 例外文字列ではなく、判断可能な型付き失敗データ。 |
+| ArtifactRef（成果物参照） | Context間・Effect間で渡る | 画像、音声、文字列など大きな成果物の存在と利用条件を示す参照。 |
 
-model、Codex tool call、外部workerは`ProposedEffect`を提示してよいものとします。これはデータであり、許可済みCommandではありません。Policyが拒否、確認要求、許可済みEffectへの変換を決めます。これにより、Proposalの出所にかかわらず同じ境界を守ります。
+WorldStateは外部データを何でも詰め込む巨大な袋ではありません。画像、音声、モデル、長い文字列は必要に応じてArtifactRefで参照します。
 
-## Contributorとresolution
+## 状態の所有者は一つ
 
-通常の意味routingはSBERT candidate生成を第一段とし、gray band候補をaccept前に決定論的keyword/rule filterへ通します。これは必須の滝型ではない。capability Policyが明示すれば、一つの機能はSBERT、純粋Rule、LLMなど複数のcontributorを用い、rule-onlyまたはLLM-proposal-onlyにもできます。単一のintent registry（意図登録簿）はありません。SBERT Adapterが返すのはcandidate、score、provenanceだけです。intent別threshold/gateはDecision Policy Contextが所有するversion付きPolicy dataであり、純粋resolution Policyは候補なし、曖昧、競合、合成可能を明示Decisionへ変換します。
+| 状態 | 唯一の所有者 | 所有しないもの |
+| --- | --- | --- |
+| wake受理と発話入力の生存期間 | Acoustic Context | Yata Wake、Mimy、音声Adapter |
+| Interactionの生存期間と取消 | Interaction Context | Web、音声、CLI、LLM |
+| 意味解決方針の版 | Decision Policy Context | SBERT、LLM、profile |
+| Effect Graph、永続待機、取消済み仕事 | Execution Context | dispatcher、Adapter、journal再生 |
+| 物理観測と姿勢 | Physical Observation Context | カメラAdapter、校正能力 |
+| 成果物の生存期間 | Artifact Context | TTS、撮影、Provider、filesystem Adapter |
+| 通知の方針 | Notification Policy Context | 通知チャネル、Projection |
 
-承認済みの決定論的contributorは許可済みGraph断片を作れます。calibrationはSBERT candidateとintent固有keyword gateが決定論的Policyに一致した場合、gray bandからLLM request/Proposalなしに解決しなければならず、安全/capability PolicyとGraphを迂回しません。LLM/Codex SkillsはProposalだけを返し、Policyの前に変更・確定・dispatchをしません。
+Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、profile、ProjectionはWorldStateを所有しません。
+
+## Effect Graphは、手順書ではなく因果構造である
+
+複合動作の順番は、中央の関数へ並べるのではなく、Effect Graphに宣言します。
+
+- **依存関係**: どの結果がそろえば次の仕事を始められるか。
+- **guard（進行条件）**: どの結果なら先へ進み、どの結果なら止めるか。
+- **resource claim（資源要求）**: カメラの首、撮影、音声出力など、同時使用できない資源は何か。
+- **取消状態**: まだ送っていない仕事を、再起動後も含めて止める必要があるか。
+
+Schedulerは、依存関係を満たし、guardが許可し、資源が空いている仕事を選ぶだけです。カメラや会話に固有の主手順を知りません。
+
+### 「右を向いて、何が見える？」
+
+```text
+MoveCamera(right)
+  -> CaptureImage
+  -> RequestInterpretation(valid ArtifactRef)
+  -> PlaySpeech
+```
+
+これは見た目の順序だけでは不十分です。
+
+- 移動がDefinitelyNotAppliedなら、撮影とLLMを進めない。
+- 移動がOutcomeUnknownなら、明示方針がない限り撮影を進めない。
+- 時間に基づくAssumedの後続許可には、専用の方針が必要である。
+- 撮影が失敗した、またはArtifactRefが無効なら、LLMへ画像を渡さない。
+- 通知をしない設定でも、内部の結果Eventは消さない。
+
+この条件がGraphとPolicyに残ることで、別のカメラや身体へ交換しても、世界の法則を失いません。
+
+## 意味を解くContributor
+
+意味解決へ材料を出すものをContributor（候補提供者）と呼びます。
+
+| Contributor | 返すもの | 返さないもの |
+| --- | --- | --- |
+| SBERT Adapter | 意味候補、score、出所 | 実行済み結果、WorldState変更 |
+| 純粋Rule | 決定論的な判断材料またはDecision | I/O結果 |
+| LLM / Codex | 解釈やProposed Effect | 許可済みEffect、確定済みGraph |
+
+通常の意味ルーティングではSBERT候補を先に得て、灰色帯域の候補を動作固有のキーワード／規則で絞り込みます。ただし、全機能に固定された三段階処理ではありません。明示方針により、規則だけ、SBERT、LLM提案だけ、または複数のContributorを組み合わせられます。
+
+ここでいう「動作固有の候補」は、すべてを`calibrate_camera`のような中央の正式Intent登録簿へ集約することを意味しません。Decision Policy Contextが所有するのは、候補の閾値、gate、競合・曖昧・合成可能時の扱いを記した版付き方針です。
+
+カメラ校正は、SBERT候補と校正に固有のキーワード／規則が決定論的方針に一致すれば、LLMへ送らずEffect Graphを作れます。ただし、安全方針、能力方針、資源要求を迂回しません。
+
+## Skill、Proposal、Effectを分ける
+
+Skillは、人間が使うアプリ、データ、外部能力をAIへ公開する接続面です。Skillを追加することで、Coreへ製品固有の分岐を足さずに、AIが新しい世界へ触れられるようにします。
+
+Skillの読出しが観測を返す場合も、AIが書込みを提案する場合も、決定論的な能力を公開する場合もあります。したがってSkillは、Contributor、Proposal、Effect、Adapterのどれか一つと同義ではありません。
+
+```text
+Skillを介した観測
+  -> 型付きObservation/Event候補
+
+Skillを介したAIの行動提案
+  -> Proposal
+  -> Policy検証
+  -> 許可されたEffect Graph
+  -> Adapter実行
+  -> 結果Event
+```
+
+LLM、Codex、Skill内の外部主体が返すProposalは、命令ではありません。Policyが拒否、確認要求、許可済みEffectへの変換を決めます。
 
 ## Profile、取消、通知
 
-中立な外側schemaから選んだeffective profile（実効profile）は、dispatch時に不変値とversionとしてEffect/pending recordへcaptureします。後のprofile更新は既dispatchの値を変えません。
+機能と機種ごとのprofileは、外側の中立なschemaから選びます。Effectをdispatchする時点で、実効profileと版を不変値としてEffectと永続待機記録へ固定します。後から設定が変わっても、すでに送った仕事の意味を変えません。
 
-取消は`CancelRequested`、Interactionの取消受理、durable revocation、in-flight取消結果、physical outcomeを別のEvent/Stateで表します。遅延Proposalはcancelled Interactionへ適用しません。通知のoperation、plan、channel、wording、silentはNotification Policy Contextが所有し、通知Adapterの試行は配達の推測でなく型付き結果Eventを返します。Projectionは外部配達の証拠ではありません。
+`CancelRequested`は共通Inbound境界へ入るCommandです。Interaction Contextが受理した結果は`CancellationAccepted` Eventとして記録します。さらに、待機中仕事の永続取消、実行中仕事の取消結果、物理結果を別々のEventとStateで表します。取消後に遅れて届いたProposalは適用しません。止められない物理動作を、止めたことにはしません。
+
+通知する操作、計画、チャネル、言い回し、無通知はNotification Policy Contextが所有します。Projectionへの表示は、外部へ通知が届いた証拠ではありません。
 
 ## 時刻と物理的事実
 
-時刻はClockPortを通じて導入します。Adapterが返しCoreが受理する`EffectExecutionStarted`は、Effectの実行を試行/開始したという型付き結果Eventです。物理的な適用または完了を確認するEventではありません。`ExpectedActionDuration`はこのEventの受理からeffect/device profileの単調durationを測り、margin後にAssumedのreadiness事実を生んでよいものです。queueで待っていた時間は含めず、`EffectExecutionStarted`がなければtimerベースのAssumed readinessは生みません。要求した移動、音、captureをObserved事実には変えません。結果の語彙は[永続化と不確実性](persistence-and-uncertainty.md)を参照してください。
+時刻はClockPortから導入します。`EffectExecutionStarted`（外部作用の実行開始Event）は、Adapterが実行を試みた、または開始したという事実です。物理的に適用された、完了したという証拠ではありません。
 
-relative motion request（相対移動要求）はposeと別の値です。証拠のないabsolute pose（絶対姿勢・位置）は作りません。calibrationは汎用capabilityであって、成功Eventも現在poseの証明ではありません。
+`ExpectedActionDuration`（想定動作時間）は、Coreがこの開始Eventを受理した時点から、機能・機種profileの単調時間を測ります。待ち行列にいた時間は含めません。開始Eventがなければ、時間に基づくAssumed（仮定済み）の進行事実を作りません。
+
+相対移動の要求と、観測・推定した姿勢も別の値です。証拠のない絶対姿勢を作りません。校正成功は校正能力の結果であって、現在姿勢の観測証明ではありません。
