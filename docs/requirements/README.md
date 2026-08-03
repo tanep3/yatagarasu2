@@ -3,6 +3,7 @@
 要件は、思想を美しく説明する文章ではありません。「何が観測できれば、Yatagarasu 2の要求を満たしたと言えるか」を定める契約です。
 
 - [機能基準](functional-baseline.md) — Yatagarasu 1で発見した能力を、必須・契約未決・延期・非採用に分類する
+- [承認済み境界契約](approved-bounded-contract.md) — 初期音声、記憶、提示、Effect出現、会話、Codex Agent、初期scope、log、導入、品質、データ、networkの追加契約
 - [プロダクト要件](product-requirements.md) — 利用者に届ける体験と機能
 - [アーキテクチャ要件](architecture-requirements.md) — 世界の法則と、破ってはいけない境界
 - [運用要件](operational-requirements.md) — 永続化、取消、音声、秘密情報、分離運用

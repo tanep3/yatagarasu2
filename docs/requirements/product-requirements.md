@@ -13,14 +13,15 @@
 - AC-PRD-001: デモ実装が、音声起点とテキスト起点を各一つ受理し、共通のInteraction状態を公開できる。
 - AC-PRD-002: Interactionに起因する応答が、Observed（観測済み）、Assumed（仮定済み）、または物理観測なしのいずれに基づくかを示す。これは表示上の装飾ではなく、利用者へ物理世界について嘘をつかないための証拠である。
 
-### REQ-PRD-002 — Skillによって人とAIがアプリの世界を共有する
+### REQ-PRD-002 — Codex SkillとY2 Behaviorを分けて人とAIがアプリの世界を共有する
 
-製品は、Skillを通して人が使うアプリ、データ、能力をAIへ接続できなければならない。Skillは作業指示書だけを意味せず、人とAIが同じアプリ所有の世界へ異なる入口から関われる接続面である。Skill追加のためにKernelへ製品固有の主手順を追加してはならない。
+製品は、Codex Skillを通して人が使うアプリ、データ、能力をAIへ接続できなければならない。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、version付きrobot機能であるY2 Behaviorとは別である。初期Codex capabilityにはSkillCreator、Search、Fetchを含める。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成してよく、Y2はその作成に承認/制限層を追加しない。ただし外部資産は正式Y2 Behavior updateなしに信頼済みBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skill追加のためにKernelへ製品固有の主手順を追加してはならない。
 
 受入条件:
 
 - AC-PRD-003: 試験用アプリの同じデータを、人向け入口とSkill入口から参照でき、データの所有者がYatagarasu Coreへ移らないことを示す。
 - AC-PRD-004: 試験用Skillを一つ追加しても、Kernelにそのアプリ名または製品固有の条件分岐を追加せず、能力一覧と境界契約から利用可能にできる。
+- AC-PRD-016: SkillCreator、Search、Fetchが初期Codex capabilityとして存在し、Codex Skillが作る外部ファイルをY2の信頼済みBehavior/Rule/Policy/Port/Effectまたは状態所有へ自動昇格させないことを示す。Search/FetchはREQ-NET-001のallowlist、provenance、transfer authorizationを通る。
 
 ### REQ-PRD-003 — 実機による代表Interaction
 
@@ -35,13 +36,14 @@
 
 ### REQ-PRD-004 — SBERTで推論能力を動的に選択する
 
-製品は、少なくともローカル推論能力と外部推論能力をlogical profile（論理プロファイル）として構成し、SBERTの意味候補と決定方針により、LLMへ選択判断を求めずにLLM modelおよびProvider routeを選択できなければならない。速度重視、Vision、高性能推論などの論理プロファイルを、具体製品名と分離して扱う。具体的なProvider再構成、会話継続、切替中Interaction、利用者同意、privacy、Recovery方式は個別Policyとして未決に保つ。
+製品は、少なくともローカル推論能力と外部推論能力をlogical profile（論理プロファイル）として構成し、SBERTの意味候補と決定方針により、LLMへ選択判断を求めずにLLM modelおよびProvider routeを選択できなければならない。初期Agent adapterはCodexのみであり、Provider choiceはCodex default経由のOpenAI、Hoshikage、Ollama APIだけとする。local/remoteおよびSBERT-policyの選択は明示configured choiceであり、effective routeをdispatch前にbindする。設定変更は次Interactionからのみ適用し、active turnをrebindせず、Provider間/local-remote間/同一Provider内の自動fallbackをしない。失敗はtyped terminal FailureまたはRecoveryとする。
 
 受入条件:
 
 - AC-PRD-009: 対応構成が、利用可能なローカル推論能力と外部推論能力を、能力広告と論理プロファイルとして各一つ以上公開できる。
 - AC-PRD-010: 速度重視、Vision、高性能推論の代表入力が、SBERT候補とversion付きPolicyにより異なる論理プロファイルへ解決され、route選択のためのLLM requestを生成しない。
-- AC-PRD-011: 選択したpreferred route（希望経路）と、可用性・Policy適用後のeffective route（実効経路）が別々に参照でき、縮退または拒否理由を型付き結果として示す。
+- AC-PRD-011: 選択したpreferred route（希望経路）と、configured authorization・可用性・Policy適用後のeffective route（実効経路）が別々に参照でき、selection、rejection、Failureの理由を型付き結果として示す。自動縮退/fallbackを示してはならない。
+- AC-PRD-017: 初期Provider choice以外を要求する、またはeffective route bind後に設定変更/利用不能を注入するfixtureが、active turnをrebindせず自動fallbackもせず、次Interactionへ新設定を適用し、現在turnにはtyped terminal Failure/Recoveryを返す。
 
 ### REQ-PRD-005 — 会話に閉じない振る舞いを提供する
 
@@ -50,7 +52,7 @@
 受入条件:
 
 - AC-PRD-012: Tapoだけで完結する振る舞い、Webだけで完結する振る舞い、TapoとWebを組み合わせる振る舞いの各fixtureが、同じQualia（クオリア）・Command・Event・Effect Graphの法則を利用し、会話またはLLMを不要な経路では生成しない。
-- AC-PRD-013: 会話、長時間文字起こし、人物見守りについて、version付きBehavior適合manifestとarchitecture conformance fixtureが存在し、有限Interaction、長時間活動、センサー起点という差を保ったまま、単一クオリアの共通Lifecycle、State所有、終了、Recovery契約への適合を検証できる。
+- AC-PRD-013: 初期の有限Conversation Behaviorについてversion付きBehavior適合manifestとarchitecture conformance fixtureが存在し、単一クオリアのLifecycle、State所有、終了、Recovery契約への適合を検証できる。long-duration transcription、simultaneous interpretation、surveillance、continuous conversationはREQ-SCP-001により初期scope外であり、対応manifestを初期受入条件にしない。
 
 ### REQ-PRD-006 — WebをYatagarasuの身体面として提供する
 

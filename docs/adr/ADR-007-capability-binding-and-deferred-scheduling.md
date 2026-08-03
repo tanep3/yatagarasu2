@@ -9,11 +9,13 @@
 
 ## Decision
 
-具体capabilityはadapter/bootstrapで抽象Portへbindします。Skillは、人が使うアプリ、データ、能力をAIへ公開する接続面であり、Skill、Contributor、Proposal、Effect、Adapterを分離します。アプリの状態所有をCoreへ移しません。LLM、Codex tool、Skillを介した外部主体、その他外部capabilityからのProposalはPolicy検証を要します。決定論的で承認済みのcontributorは許可済みGraph断片を作れても、外部capabilityはStateを所有しません。cron/scheduled autonomyは延期し、導入時は同じCommand/Event境界を使うInbound Adapterにします。
+具体capabilityはadapter/bootstrapで抽象Portへbindします。Y2 Behaviorはdomain/application/ports/adaptersへ寄与するversion付きrobot機能であり、Codex SkillはCodexの作業能力またはアプリ/AI接続面である。この二つを同じ拡張単位にしない。初期Codex capabilityにはSkillCreator、Search、Fetchを含める。Codexは自身に与えられた権限の範囲で`SKILL.md`、Python、Web、scriptを作成してよいが、Y2はその作成に別の承認層・制限層を加えない。
+
+その外部ファイルは、明示的な正式Y2 Behavior version updateなしに、信頼済みBehavior、Rule、Policy、Port、Effect、ownership registry、catalogを変更しない。Search/FetchもREQ-NET-001のallowlist、provenance、処理場所・移送direction、configured authorizationを通る独立Capabilityである。LLM、Codex tool、Codex Skill、その他外部capabilityからのProposalはPolicy検証を要する。決定論的で承認済みのcontributorは許可済みGraph断片を作れても、外部capabilityはStateを所有しない。cron/scheduled autonomyは延期し、導入時は同じCommand/Event境界を使うInbound Adapterにします。
 
 ## Non-decision / open
 
-Provider routingの具体機構、利用者同意、privacy/memory policy、Web session／TLS、IPCとprocess managementは未決です。Owner認証と取消可能tokenの必須性はADR-014、動的LLM／Provider選択の必須性はADR-011が定めます。Skillの具体形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針も未決です。Skill作成はY2 runtimeへ信頼済みBehavior codeを注入することを意味しません。
+Codexの具体transport候補と互換version範囲はADR-022、Provider routeはADR-011、Owner認証はADR-014が定めます。Codex Skillの形式、実行権限、配布、rollbackはCodexが所有するmechanismであり、Y2 Behavior/plugin設計の未決事項ではない。Y2はそれらを自身に与えられたCodex権限として従い、追加の承認・制限を加えない。Y2側で互換性を実装する必要があるのは、pinしたCodex/app-server versionが新規作成Skillをどうdiscover/reloadしavailabilityをどう報告するかだけであり、これによりY2 Behavior所有権を得ない。
 
 ## Consequences
 

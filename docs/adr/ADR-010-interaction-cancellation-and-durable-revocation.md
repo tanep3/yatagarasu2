@@ -13,11 +13,11 @@
 
 `ReturnToHomeRequested`はQualia終了を求める別Commandである。一つのQualiaに属する複数Interactionのadmission停止と終了処理を開始してよいが、Home要求の受理を各Interaction取消結果または物理停止結果と同一視しない。
 
-dispatch済みphysical moveはnon-cancellableであり、下流をrevokedにして遅延したphysical resultを記録する。voice stopはLLM、pending TTS、queued playback、current chunkのうちAdapterが対応する範囲だけに要求し、停止の観測を捏造しない。in-flight cancellation resultとphysical outcomeは別の型付き結果Eventである。OutcomeUnknownは自動retryしない。
+dispatch済みphysical moveはnon-cancellableであり、下流をrevokedにして遅延したphysical resultを記録する。初期non-streaming音声のstopはLLM、pending TTS、開始済みplaybackのうちAdapterが対応する範囲だけに要求し、停止の観測を捏造しない。in-flight cancellation resultとphysical outcomeは別の型付き結果Eventである。OutcomeUnknownは自動retryしない。streamingのqueued playback/current chunkは次revisionのscopeである。
 
 ## Non-decision / open
 
-Adapter別の現在chunk停止能力、cancel timeout、Interaction完了時刻、streaming TTS採用と数値境界は未決である。
+Adapter別の次revision streaming chunk停止能力、cancel timeout、Interaction完了時刻、streaming TTSの実装・数値境界は未決である。初期releaseでのstreaming TTS採用はしない。
 
 ## Consequences
 

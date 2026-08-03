@@ -33,9 +33,9 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 - AC-OPS-005: dispatcherが、永続pending recordを持たないready Effectを拒否する。
 - AC-OPS-006: fixtureのRecoveryが、選択されたidempotency/照合Policyのもとでpending recordを一度dispatchし、journal replayをside effectの源にしない。
 
-### REQ-OPS-004 — 音声再生の開始・仮定完了・取消結果
+### REQ-OPS-004 — 初期non-streaming音声再生の開始・仮定完了・取消結果
 
-一括再生かストリーミング再生かにかかわらず、再生Adapterが返しCoreが受理した`EffectExecutionStarted`から、PlaybackCompletionAssumedはClockPortの単調audio durationとmarginを測る。このEventは再生の試行／開始を示すだけで、音が聞こえたことや再生完了の観測ではない。Event前のqueue時間は消費せず、EventがなければtimerベースのAssumed completionは起こらない。取消結果と物理的な再生停止も区別する。start Event不達時のtimeout／Failure Policyと数値境界は未決である。ストリーミングTTS固有の追加条件はREQ-OPS-008だけに置く。
+初期releaseはnon-streaming TTSだけを扱う。再生Adapterが返しCoreが受理した`EffectExecutionStarted`から、PlaybackCompletionAssumedはClockPortの単調audio durationとmarginを測る。このEventは再生の試行／開始を示すだけで、音が聞こえたことや再生完了の観測ではない。Event前のqueue時間は消費せず、EventがなければtimerベースのAssumed completionは起こらない。取消結果と物理的な再生停止も区別する。start Event不達時のtimeout／Failure Policyと数値境界は未決である。初期Graphはchunk/queue/backpressureを持たない。
 
 受入条件:
 
@@ -48,7 +48,7 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 
 `CancelRequested` Command、Interactionが中止を受理した`CancellationAccepted` Event、pending workのdurable revocation（永続取消）、in-flight workの取消結果、
 物理結果を区別する。dispatch済みの物理移動はnon-cancellable（取消不可）であり、下流の仕事をrevokedにし、遅い結果は記録する。
-音声のstopは必要であり、LLM、保留TTS、queued playback、現在chunkのうちAdapterが対応するものだけへ適用する。停止を捏造してはならない。
+音声のstopは必要であり、LLM、保留TTS、開始済みnon-streaming playbackのうちAdapterが対応するものだけへ適用する。停止を捏造してはならない。
 中止済みInteractionは遅いProposalを拒否し、revoked recordはrestart後も残りdispatcherはdispatchしない。OutcomeUnknownは自動retryしない。
 
 受入条件:
@@ -56,7 +56,7 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 - AC-OPS-012: durable cancel/restart fixtureがrevoked pending recordを復元し、dispatcherがそれをdispatchしない。
 - AC-OPS-013: dispatched moveの取消fixtureが下流をrevokedにし、遅い物理結果を記録する。
 - AC-OPS-014: cancel後に届いたProposalまたは未対応のplayback stopが、承認済み仕事または架空の停止観測を作らない。
-- AC-OPS-019: table-driven fixtureが、LLM、pending TTS、queued playback、current chunkの各supported targetへ別々のcancel Effect/requestを作り、unsupported targetにはstopを捏造しないこと、cancel結果Eventがphysical outcomeと別であることを示す。
+- AC-OPS-019: table-driven fixtureが、LLM、pending TTS、開始済みnon-streaming playbackの各supported targetへ別々のcancel Effect/requestを作り、unsupported targetにはstopを捏造しないこと、cancel結果Eventがphysical outcomeと別であることを示す。
 
 ### REQ-OPS-007 — 通知は方針と結果Eventで扱う
 
@@ -68,9 +68,9 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 - AC-OPS-015: silent fixtureが内部の完了・Failure Projectionを残し、notification Effectだけを作らない。
 - AC-OPS-016: 通知Adapterの成功、Failure、未確認配達の各結果が型付きEventとして記録される。
 
-### REQ-OPS-008 — 条件付きのストリーミングTTS
+### REQ-OPS-008 — 次revisionのストリーミングTTS（初期scope外）
 
-ストリーミングTTSを採用する場合、句読点・長さ・時間によるsegmentation、並列synthesisと順序付きplayback、bounded queue/backpressure
+これは初期releaseの受入条件ではない。次revisionでストリーミングTTSを採用する場合、句読点・長さ・時間によるsegmentation、並列synthesisと順序付きplayback、bounded queue/backpressure
 （上限付き待ち行列・逆圧）、LLM/chunk上限をPolicyで定める。無言dropは禁止する。cancel後に到着したchunkと後続chunkの扱い、artifact cleanup、
 restart時の安全なorphan cleanup、監査参照をEffect Graphと型付き結果Eventで表す。OutcomeUnknownのartifactまたは音声は再送しない。
 journalへ無制限のraw provider chunkを記録しない。
@@ -86,7 +86,7 @@ journalへ無制限のraw provider chunkを記録しない。
 
 ### REQ-SEC-001 — secretとデータ露出
 
-secretをEvent、Projection、prompt、journal、通常ログへ含めない。WebはREQ-API-004のOwner認証と取消可能tokenを要求する。具体session方式、TLS／reverse proxy、memory保持、privacy policyは暗黙の保証ではなく、未決の設計作業である。
+secretをEvent、Projection、prompt、journal、通常ログへ含めない。WebはREQ-API-004のOwner認証とread/operateだけのrevocable tokenを要求する。MemoryはOwner deleteまで保持し、保存・transferはstanding authorizationで制御する。具体session/hash/暗号化storage実装、trusted proxy設定方式、data residency、法令・契約への適合、外部Providerごとの運用Policy詳細は暗黙の保証ではない。
 
 受入条件:
 

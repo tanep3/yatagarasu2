@@ -25,7 +25,7 @@ Qualiaは、未解決の外部作用を永続Recoveryへ引き渡した後にHom
 
 ## Non-decision / open
 
-Lifecycle Eventの最終型名、Home語句の別名、制御語検知方式、終了timeout、Behavior別checkpoint、資源再利用Policyの具体値、会話Qualiaの一回／継続境界は未決である。
+Lifecycle Eventの最終型名、Home語句の別名、制御語検知方式、終了timeout、Behavior別checkpoint、資源再利用Policyの具体値は未決である。初期Fallback Conversationの一入力・一応答・Home復帰はADR-019で決定済みであり、未決なのはcontinuous conversationの契約である。
 
 ## Related requirements
 

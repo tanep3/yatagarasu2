@@ -24,6 +24,7 @@ WorldState + Event
 | Transition（遷移） | State → State | 内部で確定できる、決定論的な状態変換。 |
 | Decision（決定） | Ruleの出力 | Transitionと、必要ならEffect Graphをまとめた判断値。 |
 | Effect（外部作用） | CoreからPortへ出る | 外界へ依頼する仕事。作成しただけでは実行済みにならない不変値。 |
+| EffectOccurrence（外部作用出現） | Effect Graphの頂点 | 同じEffect値でも区別する、一回の仕事出現の不変identity。 |
 | Failure（失敗） | 外部・内部境界から戻る | 例外文字列ではなく、判断可能な型付き失敗データ。 |
 | ArtifactRef（成果物参照） | Context間・Effect間で渡る | 画像、音声、文字列など大きな成果物の存在と利用条件を示す参照。 |
 
@@ -33,16 +34,19 @@ WorldStateは外部データを何でも詰め込む巨大な袋ではありま�
 
 | 状態 | 唯一の所有者 | 所有しないもの |
 | --- | --- | --- |
-| wake受理と発話入力の生存期間 | Acoustic Context | Yata Wake、Mimy、音声Adapter |
-| Active QualiaのidentityとLifecycle | Qualia Context | Behavior固有State、Web、音声、device、Effect Graph |
-| Interactionの生存期間と取消 | Interaction Context | Web、音声、CLI、LLM |
+| wake受理、session、pre-roll選択window/cursor、保持/discard、prompt guard、空命令 | Acoustic Context | Yata Wake、Mimy、音声Adapter（raw audio bytes/ring bufferはAdapter所有） |
+| Active Qualiaの開始/Home、identityとLifecycle | Qualia Context | Behavior固有State、Web、音声、device、Effect Graph |
+| 入力受理、request idempotency ledger、Interactionの生存期間と取消 | Interaction Context | Web、音声、CLI、LLM、Execution Context |
+| 会話turn履歴 | Conversation Context | Provider thread、Codex Skill app data、LLM |
+| 長期記憶、standing authorization、delete状態 | Memory Context | SemanticMemory等のAdapter、Codex Skill app data、Provider |
+| Codex external binding、connection/status、correlation、rebind/recovery、durable AgentTurnBinding | Agent Session Context | Codex、Provider、Conversation Context、LLM |
 | 意味解決方針の版 | Decision Policy Context | SBERT、LLM、profile |
 | Effect Graph、永続待機、取消済み仕事 | Execution Context | dispatcher、Adapter、journal再生 |
 | 物理観測と姿勢 | Physical Observation Context | カメラAdapter、校正能力 |
 | 成果物の生存期間 | Artifact Context | TTS、撮影、Provider、filesystem Adapter |
 | 通知の方針 | Notification Policy Context | 通知チャネル、Projection |
 
-Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、profile、ProjectionはWorldStateを所有しません。
+Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、Codex Skill、profile、ProjectionはWorldState、plan、provider state、Conversation、Memoryを所有しません。Agent Session ContextもProvider内部stateとconversation textを所有しません。AgentTurnBindingはY2 Interaction ID、exact Thread ID、external turn/operation IDまたはabsence、Y2-issued immutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolだけを持つ耐久外部相関である。
 
 ## クオリア、振る舞い、Interactionを分ける
 
@@ -51,6 +55,8 @@ Qualia（クオリア）は、Yatagarasuが現在どの振る舞いとして世�
 会話、文字起こし、同時通訳、見守りはBehavior（振る舞い）です。BehaviorはQualiaとして開始される場合がありますが、一つの万能objectやprocessを意味しません。必要なContext、Rule、Effect、Projection、Port、Adapterへ構造を寄与します。
 
 Interactionは一つの入力から生じる有限の因果単位です。一つの文字起こしQualiaが複数の音声Eventを受け取れるように、QualiaとInteractionは同じ生存期間ではありません。ConversationもBehaviorの一つであり、Qualia、Interaction、Kernelの別名ではありません。
+
+初期`FallbackToConversation`は、Homeで有効なBehavior候補がない場合だけに限る。一入力・一最終応答の後、型付きterminal結果またはRecoveryへの責任移管を経てHomeへ戻る。履歴はConversation Contextに残るが、連続会話は別の将来Behaviorである。
 
 Home／Stop検知、永続化、Recovery、診断、認証、Web状態同期は自律神経として並行稼働しますが、第二のQualiaにならず、Qualia Stateを直接変更しません。
 
@@ -64,6 +70,8 @@ Home／Stop検知、永続化、Recovery、診断、認証、Web状態同期は�
 - **取消状態**: まだ送っていない仕事を、再起動後も含めて止める必要があるか。
 
 Schedulerは、依存関係を満たし、guardが許可し、資源が空いている仕事を選ぶだけです。カメラや会話に固有の主手順を知りません。
+
+Effect値と一回の仕事を同一視しない。Graphの頂点は`EffectOccurrence` identityを持ち、同値Effectが二回あれば二つのOccurrence、結果Event、監査記録を持つ。API requestの重送を抑えるkeyと、Recoveryで同一Occurrenceを照合・再dispatchするkeyは別である。順序はOccurrence IDや生成順ではなく、意味を持つdependency edgeとguardだけで決まる。resource claimはschedulerが同時dispatch可否を判断するための競合宣言であり、意味順序を表さない。
 
 ### 「右を向いて、何が見える？」
 
@@ -102,21 +110,21 @@ MoveCamera(right)
 
 ### LLM／Provider routeも候補として解く
 
-推論能力は、具体モデル名を直接Domainへ持ち込まず、速度重視、Vision、高性能推論などの論理profileとして扱います。SBERTは入力からroute候補を返し、Decision Policyが利用可能性、privacy、利用者同意、能力広告を踏まえて解決します。
+推論能力は、具体モデル名を直接Domainへ持ち込まず、速度重視、Vision、高性能推論などの論理profileとして扱います。初期Agent adapterはCodexだけで、Provider choiceはCodex default経由のOpenAI、Hoshikage、Ollama APIである。SBERTは入力からroute候補を返し、Decision Policyが利用可能性、privacy、configured authorization、能力広告を踏まえて解決します。
 
-preferred route（希望経路）とeffective route（実効経路）を分けます。希望した外部Vision profileが使えない場合、拒否、利用者確認、許可済み縮退のどれを選ぶかはPolicyです。外部Providerやworkerはroute方針、会話状態、WorldStateを所有しません。
+preferred route（希望経路）とeffective route（実効経路）を分けます。effective route/provider/profile/versionはdispatch前に固定し、設定変更は次Interactionからだけ反映する。利用不能ならtyped terminal Failure/Recoveryを返し、Provider間/local-remote間/同一Provider内の自動fallbackやactive turn rebindを行わない。外部Providerやworkerはroute方針、会話状態、WorldStateを所有しません。
 
 ### Behavior routeと推論routeを分ける
 
 HomeでYatagarasuを起点とする通常構成は、独立制御語の後に、SBERT候補とDecision Policyから使用するBehaviorを解決します。ただしCapability Policyがrule-only、LLM-proposal-only等を宣言した機能へSBERTを強制しません。BehaviorがLLMを必要とする場合だけ、別のDecisionとして論理LLM／Provider profileを解決します。
 
-宣言されたContributorの評価後に有効なBehavior候補がなければ`FallbackToConversation`を明示的に返せます。安全、権限、能力方針で拒否された候補は、会話へfallbackして迂回しません。Starting、Active、Terminating、Recoveringでは、別Qualiaの開始要求をBusyとして拒否します。
+宣言されたContributorの評価後に有効なBehavior候補がなければ`FallbackToConversation`を明示的に返せます。安全、権限、能力方針で拒否された候補は、会話へfallbackして迂回しません。Qualia/Interactionのread-only viewを読む純粋admission Ruleが開始を判断し、Starting、Active、Terminating、Recoveringでは別Qualiaの開始要求を`Busy`として拒否する。暗黙queueは作らない。現在Qualiaの通常入力はversion付きBehavior Policyが決めるが、Home/Cancelは常にそれより優先する。
 
-## Skill、Proposal、Effectを分ける
+## Codex Skill、Y2 Behavior、Proposal、Effectを分ける
 
-Skillは、人間が使うアプリ、データ、外部能力をAIへ公開する接続面です。Skillを追加することで、Coreへ製品固有の分岐を足さずに、AIが新しい世界へ触れられるようにします。
+Codex Skillは、人間が使うアプリ、データ、外部能力をCodexへ公開する接続面です。Y2 Behaviorはdomain/application/ports/adaptersへ寄与するversion付きrobot機能である。Skillを追加しても、Coreへ製品固有の分岐を足さずに、AIが新しい世界へ触れられるようにします。
 
-Skillの読出しが観測を返す場合も、AIが書込みを提案する場合も、決定論的な能力を公開する場合もあります。したがってSkillは、Contributor、Proposal、Effect、Adapterのどれか一つと同義ではありません。
+初期Codex capabilityはSkillCreator、Search、Fetchである。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成でき、Y2は追加の承認/制限を加えない。ただし外部資産は正式Y2 Behavior updateなしにY2のBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillの読出しが観測を返す場合も、AIが書込みを提案する場合も、決定論的な能力を公開する場合もあります。したがってCodex Skillは、Contributor、Proposal、Effect、Adapterのどれか一つと同義ではありません。
 
 ```text
 Skillを介した観測
@@ -136,7 +144,17 @@ LLM、Codex、Skill内の外部主体が返すProposalは、命令ではあり�
 
 機能、機種、推論routeごとのprofileは、外側の中立なschemaから選びます。Effectをdispatchする時点で、実効profileと版を不変値としてEffectと永続待機記録へ固定します。後から設定が変わっても、すでに送った仕事の意味を変えません。
 
+profileがsettle（安定待ち）を宣言する場合も、値と版をOccurrenceへ固定する。`EffectExecutionStarted`受理後の単調時間だけがAssumed進行条件になり得て、物理完了をObservedに変えない。
+
+## 記憶と提示は、外部アプリの所有権を奪わない
+
+Conversation ContextはYatagarasuのturn履歴を、Memory ContextはYatagarasuの長期記憶を所有する。外部Codex Skill app data、Provider thread、search/fetch本文は外部のまま型付き参照またはArtifactRefで扱う。local auto-saveは既定ONでConversationの原発話と最終応答の組に限り、reflex commandはMemoryへ保存せずoperations logだけへ残す。MemoryはOwner deleteまで無期限で、README/setup/configのstanding disclosureとenabled configをauthorizationとする。明示`Memorize`は別目的である。Y1 import/migrationはしないが、同じ互換storeの旧recordはprovenance付きで示せる。既定のversion付きRecall Policyはrecent 3件とsemantic 3件を別に返し、重複はrecentを優先する。enabledな初期Conversation profileはconversational LLM request前に選択済み参照/provenanceだけを渡し、retrieval Failure/disabledを型付きPolicy結果にする。memoryが関係しないBehaviorは`NotApplicable`を明示できる。
+
+利用者へ渡す内容は`Presentation`と`OutputPurpose`で表す。`View`はSceneStatus、FaceExpression、Object、DocumentRead、Summarize、Translate、Transcribe、SummarizeTranslate、TranscribeTranslateを、`Recall`はSummarize、ExistenceConfirm、TopicSearch、Compare、Contextualizeを閉じた目的値として持つ。目的ごとに必要入力、許可surface、evidence/provenance、禁止presentationを宣言し、空RecallとFailureを混同しない。翻訳系は提示変換であり、英語または原文を追加で音声再生しない。
+
 `CancelRequested`は共通Inbound境界へ入るCommandです。Interaction Contextが受理した結果は`CancellationAccepted` Eventとして記録します。さらに、待機中仕事の永続取消、実行中仕事の取消結果、物理結果を別々のEventとStateで表します。取消後に遅れて届いたProposalは適用しません。止められない物理動作を、止めたことにはしません。
+
+Interaction Contextは、API mutationごとの耐久request-idempotency ledgerを唯一所有する。recordはclient key、payload fingerprint、replay可能な型付きresult、status、Interaction lifecycleを持つ。Rejected、AcceptedNoEffect、Pending、Completedはrestart後も区別して再生する。これはExecution Contextのdurable pending `EffectOccurrence` recordと、RecoveryのOccurrence照合keyとは別State・別keyである。voice入力はclient keyを要求せず、Adapter/Interaction Contextがserver-assigned input identityを記録する。
 
 通知する操作、計画、チャネル、言い回し、無通知はNotification Policy Contextが所有します。Projectionへの表示は、外部へ通知が届いた証拠ではありません。
 

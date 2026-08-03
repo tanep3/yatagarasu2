@@ -46,8 +46,8 @@ Yatagarasu 2はPCとスマートフォンへ対応した標準Web画面を提供
 
 ## 一Server、一Workspace、一Owner
 
-初期製品は、一つのServer、一つのWorkspace、一人のOwnerを運用単位にします。管理者と一般利用者を分けません。複数browser、取消可能なaccess token、複数cameraは、同じOwnerとWorkspaceへ属します。
+初期製品は、一つのServer、一つのWorkspace、一人のOwnerを運用単位にします。管理者と一般利用者を分けません。複数browser、revocable/reissuableなOwner Web API token、複数cameraは、同じOwnerとWorkspaceへ属します。
 
-Owner sessionとaccess tokenはYatagarasu APIの認証です。LANやTailscaleは到達範囲を制御します。この二つを同一視しません。初期状態で認証なしにInternetへ直接公開しません。
+Owner sessionとread/operateだけを持つ一種のWeb API tokenはYatagarasu APIの認証です。tokenはWebで発行時一回だけplaintextを示し、以後maskedにする。認可済みLinux server administrator CLIは保護された回復可能secret storageから再表示でき、auditはtoken IDだけを残す。tokenはpassword reset、token管理/reveal、secret、capability install、Skill enablement、security変更を許可しない。password resetはlocal Linux CLIだけから行い、成功前にsession/tokenをdurably revokeする。LANやTailscaleは到達範囲を制御します。この二つを同一視しません。reverse proxyはtrusted proxy/header sanitation/TLSを構成した場合だけ許可し、direct router port forwardingはunsupportedとしてdoctorがfail closedにします。
 
 規範的な条件は[API・Web要件](../requirements/api-and-web-requirements.md)にあります。

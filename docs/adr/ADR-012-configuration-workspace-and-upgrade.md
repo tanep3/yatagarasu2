@@ -17,7 +17,7 @@ Capability配置は`local-managed`、`remote`、`disabled`とし、Bootstrap bin
 
 ## Non-decision / open
 
-Windows／macOS配置、具体schema／atomic write library、secret store、local supervisor、installer、migration engine、remote fallbackとprivacy同意は未決である。
+Windows／macOS配置、具体schema／atomic write library、secret store、local supervisor、installer、migration engineは未決である。remote fallbackと利用ごとのprivacy同意画面は初期契約で採用しない。
 
 ## Consequences
 

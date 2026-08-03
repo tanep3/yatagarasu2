@@ -14,7 +14,9 @@ soukobanの閉じた世界では、Transitionを適用すれば次の世界が�
 
 Dispatcherは、この永続pending recordだけを読みます。これにより、commit後・dispatch前に停止しても仕事を失いません。一方で、journalからEffectを作り直して二重実行することも防ぎます。
 
-transaction、outbox、idempotency、reconciliation、databaseの具体方式は未決です。どの方式を選んでも、この不変条件を満たす必要があります。
+transaction、outbox、databaseの具体方式は未決です。Interaction Contextの耐久request-idempotency ledger（client key、payload fingerprint、replay可能な型付きresult、status、lifecycle）と、Recoveryで同一`EffectOccurrence`を照合・再dispatchする冪等性は別State・別key・別Policyにする。前者はRejected、AcceptedNoEffect、Pending、Completedをrestart後も再生でき、後者はExecution Contextのdurable pending recordを扱う。どの方式を選んでも、この不変条件を満たす必要があります。
+
+Codex外部turnはAgent Session Contextのdurable `AgentTurnBinding`として別に相関する。BindingはInteraction ID、exact Thread ID、external turn/operation IDまたはabsence、Y2-issued immutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolを持つ。crashがexternal ID返却前に起きてもこの相関を失わない。同じThread上の後続turnの開始は旧Bindingをcurrentへ戻さず、late/duplicate resultやstale interruptは旧BindingのRecovery/auditだけを更新する。
 
 ## 取消も永続化する
 
@@ -53,8 +55,10 @@ OutcomeUnknownの資源を再利用できるかは、物理結果の確かさと
 
 ## Artifactと通知も推測しない
 
-Artifact Contextは、画像、音声、その他ArtifactRefの作成、利用可能性、参照中、削除、孤立成果物の回収を所有します。撮影失敗や無効なArtifactRefは、LLM Effectを実行可能にしません。cleanupは明示Effectと結果Eventで監査します。
+Artifact Contextは、画像、音声、その他ArtifactRefの作成、利用可能性、参照中、認可、lifetime、削除、孤立成果物の回収を所有します。外部へ渡すのは論理Artifact IDと認可済み参照であり、filesystem path/storage locatorではありません。撮影失敗や無効なArtifactRefは、LLM Effectを実行可能にしません。TTS WAVはplayback terminalまたはdurable Recovery後かつ未解決dependentなしでのみ、temp captureはInteraction terminal後かつ未解決dependentなしでのみ削除する。saved ArtifactはOwner deleteまで保持する。cleanupはDecision→Effect→result Eventで監査し、restart、参照、OutcomeUnknownもlogical ID/lifetime/dependent/recoveryで再判定する。
+
+`Image`、`Audio`、`Transcript`、`Conversation`、`Memory`、`Artifact`などのcontent classごとに、`Local`/`Remote`の処理場所と`LocalToRemote`/`RemoteToLocal`の移送方向を別Policyで扱う。README/setup/configのstanding disclosureとenabled configがauthorizationであり、利用ごとのprompt UIは置かない。disable/revocationは次のsave/transferより前に効き、自動fallbackしない。取得または保存の許可は、LLM/Providerへの転送許可を含意しない。削除済みArtifact/Memoryを再公開しない。
 
 通知も同じです。通知を試みた、外部へ届いた、届いたか分からないを分けます。Projectionに「通知済み」と表示したことは、利用者の端末へ届いた証拠ではありません。
 
-ストリーミングTTSを採用する場合も、journalへ無制限の生chunkを保存せず、有界な監査参照と結果だけを残します。結果不明の音声やArtifactを自動再送しません。
+operations logは既定30日、audit logは90日、debug logは7日のrolling retentionであり、journal/pending/recovery/stateは対象外です。通常logはraw audio/image、secret、full Conversation、SemanticMemoryを既定で含めません。初期scope外のstreaming TTSを将来採用する場合も、journalへ無制限の生chunkを保存せず、有界な監査参照と結果だけを残します。結果不明の音声やArtifactを自動再送しません。

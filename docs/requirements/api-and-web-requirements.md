@@ -13,6 +13,7 @@ Webを管理画面の付属物ではなくYatagarasuの身体面として扱う�
 - AC-API-001: 標準Web画面から行う代表操作が、公開APIのtransport値から、音声等の別Inbound Adapterと同じ型付きCommand境界へ変換される。
 - AC-API-002: API適合試験が、内部Effectの直接dispatch、Adapter直接呼出し、WorldStateの直接変更を拒否し、安全・権限・Capability Policyを通過した操作だけを受理する。
 - AC-API-003: architecture testが、API request／response schemaを変更または別transportへ交換してもdomain型とRuleの変更を要求せず、domainがWeb frameworkまたはtransport schemaへ依存しないことを示す。
+- AC-API-015: 二つの認証済みbrowser/API mutationとvoiceが同時に入力するfixtureが、browser/API mutationのclient idempotency keyを必須にする。同一key/同一payloadはInteraction Contextの耐久request-idempotency ledgerから同じ型付きresultをreplayしてEffectを重複せず、同一key/異payloadはConflictを返す。restart fixtureはRejected、AcceptedNoEffect、Pending、Completedをledgerから復元し、Execution pending EffectOccurrence recordとRecovery keyと混同しない。voiceはAPI keyを要求されずserver-assigned input identityを受ける。Home/Cancelは競合中も優先する。
 
 ### REQ-API-002 — Webへ現在状態と更新を継続同期する
 
@@ -35,9 +36,11 @@ Webを管理画面の付属物ではなくYatagarasuの身体面として扱う�
 - AC-API-009: 利用者fixtureが独自HTML／CSSから承認済みWeb部品の配置と外観を変更できる一方、新しいCommand種別、API権限、実行コード、振る舞いを導入できない。
 - AC-API-010: 不正または非互換な利用者画面を読み込めない場合も、標準Web画面と常設Home操作を利用できる。
 
-### REQ-API-004 — 一つのOwnerを認証し、接続単位のtokenを管理する
+### REQ-API-004 — 一つのOwnerを認証し、一種のWeb API tokenを管理する
 
-初期製品は、一つのYatagarasu Server、一つのWorkspace、一人のOwnerを運用単位とする。管理者と一般利用者を分ける複数利用者RBACは提供しない。Ownerは保存時に平文としない資格情報でWeb sessionを確立でき、外部クライアントには取消可能なaccess tokenを発行できる。tokenは別利用者を表さず、Ownerが許可した接続を表す。LAN内運用を既定とし、外部からの利用はTailscale等の私設network併用を想定する。認証を理由に秘密情報をWeb frontendへ渡してはならない。
+初期製品は、一つのYatagarasu Server、一つのWorkspace、一人のOwnerを運用単位とする。管理者と一般利用者を分ける複数利用者RBACは提供しない。Ownerは保存時に平文としない資格情報でWeb sessionを確立でき、外部クライアントにはreadとoperateだけを持つ一種のOwner Web API tokenを発行できる。tokenは無期限だがrevocable/reissuableであり、別利用者を表さない。Webはplaintextを発行時に一度だけ示し、その後はmasked表示にする。認可済みLinux server administrator CLIはexact tokenを再表示できる。token secretは暗号化して回復可能なsecret storageへ置き、Linux permissionで保護する。hash-only storageにしてはならない。auditはtoken IDだけを記録する。
+
+tokenはpassword reset、token管理/reveal、secret参照、capability install、Skill有効化、security変更を許可しない。password resetはlocal Linux CLIだけで行い、新hashを保存する前にsession/tokenをdurably revokeして新requestとの競合を防ぐ。LAN/Tailscaleを既定の到達範囲とし、reverse proxyはconfigured trusted proxy、header sanitation、TLSがそろう場合だけ使う。direct router port forwardingはunsupportedでありdoctorがfail-closed warning/rejectionを返す。
 
 受入条件:
 
@@ -45,7 +48,11 @@ Webを管理画面の付属物ではなくYatagarasuの身体面として扱う�
 - AC-API-012: token取消fixtureが新規requestを拒否し、既存のQualia、Workspace、Owner identityを削除または変更しない。
 - AC-API-013: setup fixtureが一つのWorkspaceと一人のOwnerを作成し、複数利用者、role、organizationを要求しない。複数browser／token／deviceは同じOwnerとWorkspaceに属する。
 - AC-API-014: deployment fixtureが認証なしの直接Internet公開を既定にせず、LANまたは私設networkの到達範囲とYatagarasu認証を別々に診断表示する。
+- AC-API-016: token fixtureがread/operateだけを許可し、password reset、token管理/reveal、secret参照、capability install、Skill enablement、security変更をすべて拒否する。auditにはtoken IDだけが残る。
+- AC-API-017: token issuance fixtureがWebでplaintextを一回だけ表示して以後maskedにし、認可済みLinux server administrator CLIだけがencrypted recoverable secret storageからexact tokenを再表示できること、hash-only storageでないこと、secretがEvent/Projection/journal/logへ出ないことを示す。
+- AC-API-018: password reset fixtureがlocal Linux CLIからのみ可能であり、成功を返す前に既存session/tokenをdurably revokeする。並行new request fixtureはrevocation後に旧credentialを受理しない。
+- AC-API-019: reverse proxy fixtureがconfigured trusted proxy、header sanitation、TLSのいずれかを欠くと外部公開を拒否する。direct router port forwarding fixtureはdoctorがunsupportedとしてfail-closed warning/rejectionを返す。
 
 ## 技術検証後に決めること
 
-WebSocket、Server-Sent Events、polling、media transport、API versioning方式、revision配信の数値遅延、再接続時間、同時browser数、password session方式、token scopeの細分化、Tailscale identity連携は未決である。
+WebSocket、Server-Sent Events、polling、media transport、API versioning方式、revision配信の数値遅延、再接続時間、同時browser数、password session方式、Tailscale identity連携は未決である。初期token scopeはread/operateに固定し、admin/security scopeへ細分化しない。

@@ -114,7 +114,7 @@ Yatagarasu 2の振る舞い追加は正式なversion updateとして行い、実
 
 ### REQ-PER-001 — Graphから導く順序
 
-Effectの順序は命令的な主手順ではなく、Effect Graphの依存関係とresource claimで表す。
+Effectの意味順序は命令的な主手順ではなく、Effect Graphのdependency edgeとguardで表す。resource claimはscheduler admissionと同時実行競合だけを表し、順序を定義してはならない。
 
 受入条件:
 

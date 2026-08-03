@@ -11,6 +11,7 @@ Yatagarasu 2のアーキテクチャは、既存の設計用語をロボット�
 5. [ランタイム境界](runtime-boundaries.md) — 外界とどう接続し、設計上の境界と配置をどう分けるか
 6. [永続化と不確実性](persistence-and-uncertainty.md) — 再起動、遅延、取消、結果不明をどう誠実に扱うか
 7. [設定とCapability運用](configuration-and-capabilities.md) — 設定、Workspace、Upgrade、能力配置をどう守るか
-8. [用語集](glossary.md) — 英語由来の用語と、日本語での意味を統一する
+8. [承認済み境界契約](../requirements/approved-bounded-contract.md) — 初期に固定した音声、記憶、Effect、導入、品質、データ、networkの観測条件
+9. [用語集](glossary.md) — 英語由来の用語と、日本語での意味を統一する
 
 [要件](../requirements/README.md)は観測可能な義務を定め、[ADR](../adr/README.md)は矛盾を解いた承認済み判断を記録します。この説明文書だけで、新しい要件や決定を作ることはしません。

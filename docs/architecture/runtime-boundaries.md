@@ -54,25 +54,31 @@ Webへの状態同期は、現在Projectionとrevision、その後の更新で�
 
 Python推論workerや外部能力は、Portを通じて型付き要求を受け、型付き観測、Proposal、Failureを返します。WorldState、Effect Graph、Provider状態、会話状態を所有しません。
 
-Hoshikageからは、稼働確認と受付可能性の分離、能力広告、待ち行列受付失敗と推論失敗の分離、stream終端と切断の分離、secretの伏せ字、世代・貸出し管理といったProvider境界の候補を学びます。ただし、具体Providerの内部契約やルーティング、同意、privacy、transportはまだY2の決定ではありません。
+Hoshikageからは、稼働確認と受付可能性の分離、能力広告、待ち行列受付失敗と推論失敗の分離、stream終端と切断の分離、secretの伏せ字、世代・貸出し管理といったProvider境界の候補を学びます。初期Agent adapterはCodexだけで、Provider choiceはCodex default経由のOpenAI、Hoshikage、Ollama APIだけです。
 
-Yatagarasu 2は、SBERTとDecision Policyにより論理LLM／Provider profileを動的選択します。これは必須の製品能力です。一方、同一Provider内のmodel指定、Provider process再構成、active turnの扱い、会話の再bindingはAdapter／運用契約であり未決です。preferred routeとeffective route、能力広告、選択根拠は型付き値として観測可能にします。
+Yatagarasu 2は、SBERTとDecision Policyにより論理LLM／Provider profileを動的選択します。これは必須の製品能力です。configured choiceからeffective routeをdispatch前に固定し、設定変更は次Interactionからだけ適用します。active turnのrebindと、Provider間/local-remote間/同一Provider内の自動fallbackはしません。利用不能はtyped terminal FailureまたはRecoveryです。preferred routeとeffective route、能力広告、選択根拠は型付き値として観測可能にします。
 
-## Skillと人間のアプリ
+## Codex Agent Session
 
-Skillは、AIが人間のアプリ、データ、機能へ触れるための接続面です。外部能力を何でもSkillと呼ぶわけでも、Skillを一つのprocessやtransportへ固定するわけでもありません。
+通常のCodex経路はruntime bootstrapがsuperviseするlong-lived `codex app-server`である。turnごとの`codex exec`は使わない。connectionごとにinitialize handshakeを一回行い、production transportはspike後にstdioまたはUnix socketを選ぶ。WebSocketはexperimentalでproduction非対応である。
+
+Agent Session ContextはCodex Thread ID、connection/status、correlation、rebind/recoveryとexternal turnごとのdurable AgentTurnBindingを唯一所有する。BindingはY2 Interaction ID、exact Thread ID、external turn/operation IDまたはabsence、dispatch前に発行するimmutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolを持つ。Provider内部stateとconversation textを持たない。`thread/start`、`thread/resume`、`turn/start`、`turn/interrupt`を区別し、Home/Qualia終了はThread終了にしない。`turn/interrupt`はexact current Binding/generationだけをtargetとし、dispatch直前にstaleならrejected/no-effectにする。A/Bが同じThreadを再利用するとき、Aのlate/duplicate result/cancelはAのBinding/Recovery/auditだけを更新しBのState/Presentation/cancel/terminalを変えない。restart/reconnectは記録済みのexact Thread IDにresumeし、`--last`または暗黙new Threadを使わない。Adapterはtyped progress/result Eventだけを返し、raw deltaを無制限journalへ残さず、WorldStateを変更しない。
+
+## Codex SkillとY2 Behavior
+
+Codex Skillは、Codexが人間のアプリ、データ、機能へ触れ、作業できるようにする接続面です。Y2 Behaviorはdomain/application/ports/adaptersへ寄与するversion付きrobot機能です。二つは同義ではありません。外部能力を何でもCodex Skillと呼ぶわけでも、Skillを一つのprocessやtransportへ固定するわけでもありません。
 
 人がWeb UIから操作するアプリと、AIがSkillから利用する能力は、同じアプリ所有の世界へ異なる入口から関われます。Yatagarasu Coreはそのアプリの内部状態を奪いません。必要な観測、Proposal、Effect、結果Eventを境界越しに交換します。
 
-Skillを追加してもKernelへ製品固有の分岐を追加しません。Skillが返したAI由来の行動提案は、必ずPolicy検証を通ります。具体的なSkill形式、transport、認証・認可、Skill作成時の検証、配備、rollback、安全方針は今後の契約です。
+初期Codex capabilityはSkillCreator、Search、Fetchを含む。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成でき、Y2はその作成に追加承認/制限を加えない。その外部資産は正式Y2 Behavior updateなしにY2 Behavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillが返したAI由来の行動提案は、必ずPolicy検証を通る。Search/FetchはREQ-NET-001のallowlist、provenance、configured transfer authorizationを守る。
 
 ## 音声出力と取消
 
-ストリーミングTTSの採用と優先度はOPENです。採用する場合は、文区切り、並列音声生成、順序付き再生、上限付きqueue、逆圧、取消後chunk、成果物削除を、Effect Graphと結果Eventで扱います。
+初期TTSはnon-streamingであり、Effect Graphへaudio chunk、stream queue、backpressureを入れない。streaming TTSは次revisionの明示scopeであり、採用時には文区切り、並列音声生成、順序付き再生、上限付きqueue、逆圧、取消後chunk、成果物削除をEffect Graphと結果Eventで扱う。
 
 `PlaybackCompletionAssumed`（再生完了の仮定）は、再生Adapterの開始EventをCoreが受理した後、音声時間と余裕時間から導きます。音が実際に聞こえたという観測ではありません。go2rtc sessionの維持方法、数値、停止能力は未決です。
 
-Webを含むすべての入力Adapterは、共通の`CancelRequested` Commandとして取消要求を入れられます。取消を受理した事実は`CancellationAccepted` Eventとして別に返します。物理移動は送信後に止められないことがあります。その場合は後続仕事を取り消し、遅い結果を記録します。voice stopは、LLM、待機TTS、再生queue、現在chunkのうちAdapterが対応する対象だけへ要求し、未対応の停止を成功扱いしません。
+Webを含むすべての入力Adapterは、共通の`CancelRequested` Commandとして取消要求を入れられます。取消を受理した事実は`CancellationAccepted` Eventとして別に返します。物理移動は送信後に止められないことがあります。その場合は後続仕事を取り消し、遅い結果を記録します。voice stopは、LLM、待機TTS、開始済みnon-streaming playbackのうちAdapterが対応する対象だけへ要求し、未対応の停止を成功扱いしません。
 
 ## 将来の自律入力
 

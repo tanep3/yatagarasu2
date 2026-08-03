@@ -4,3 +4,4 @@
 
 - [第三者component](third-party-components.md)
 - [privacyとデータ境界](privacy-and-data-boundaries.md)
+- [承認済みdata/network契約](../requirements/approved-bounded-contract.md) — 法的保証ではなく、実装が守るべき移送・削除・出所の境界

@@ -2,7 +2,7 @@
 
 ## クオリアは一つ
 
-Qualia（クオリア）は、Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表します。会話、文字起こし、同時通訳、見守りはそれぞれ異なるクオリアです。現在の非Home qualia sessionは全体で0または1です。ここでいう「一つ」はLifecycleのActive phaseだけでなく、Starting、Active、Terminating、Recoveringにある現在session全体を指します。
+Qualia（クオリア）は、Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表します。会話、文字起こし、同時通訳、見守りは将来を含む異なるクオリアの例です。初期scopeは有限Conversationだけであり、long-duration transcription、simultaneous interpretation、surveillance、continuous conversationは延期する。現在の非Home qualia sessionは全体で0または1です。ここでいう「一つ」はLifecycleのActive phaseだけでなく、Starting、Active、Terminating、Recoveringにある現在session全体を指します。
 
 ```text
 Home
@@ -44,9 +44,13 @@ QualiaState
 └─ behavior-specific state reference
 ```
 
-機能固有Stateへの参照は、所有Context名とsession／correlation identityだけから成る不変・不透明な値です。State値、可変参照、reducer、dispatch handleではありません。文字起こし本文、会話履歴、監視対象、device内部状態、Effect Graph、画像・音声本体は所有しません。例えばQualia Contextは「文字起こし中」を所有し、Transcription Contextが文章と認識進行を所有します。
+機能固有Stateへの参照は、所有Context名とsession／correlation identityだけから成る不変・不透明な値です。State値、可変参照、reducer、dispatch handleではありません。文字起こし本文、会話履歴、監視対象、device内部状態、Effect Graph、画像・音声本体、AgentTurnBindingは所有しません。例えばQualia Contextは「文字起こし中」を所有し、Transcription Contextが文章と認識進行を所有します。
 
-Interactionは一つの入力から生じる有限の因果単位です。一つの長時間Qualiaは複数Interactionまたは外部Eventを受け取れます。Qualia、Interaction、Conversationを同義にしません。
+Interactionは一つの入力から生じる有限の因果単位です。将来の長時間Qualiaは複数Interactionまたは外部Eventを受け取れますが、初期scopeへ暗黙に持ち込まない。Qualia、Interaction、Conversationを同義にしません。
+
+Qualia Contextだけが非Home sessionの開始とHome復帰を所有する。Interaction Contextだけが入力受理、request idempotency、取消を所有する。両者のread-only viewを読むadmission Ruleは純粋であり、直接Stateを変えない。非Homeで別Qualiaを求めたときは`Busy`であり、待機列を暗黙に作らない。通常入力を現在Qualiaのcontrolとして扱うかはBehavior Policyが決める。ただしHomeとCancelは常に優先する共通制御である。
+
+初期のFallback Conversationは一入力・一最終応答の有限Behaviorで、terminal結果またはRecovery handoff後にHomeへ戻る。Home後もConversation履歴は残るが、継続会話のsessionを暗黙に保持しない。
 
 ## Home復帰
 
@@ -88,4 +92,4 @@ Home要求の受理は終了完了ではなく、終了完了は物理作用の�
 
 Yatagarasu 2では、この追加を正式なversion updateとして行います。利用者のHTML／CSSは画面を変えますが、振る舞い、Rule、Effect、Portを追加しません。実行時pluginやエンドユーザーによる機能追加は、必要ならYatagarasu 3で検討します。
 
-規範的な条件は[プロダクト要件](../requirements/product-requirements.md)、[アーキテクチャ要件](../requirements/architecture-requirements.md)、[運用要件](../requirements/operational-requirements.md)にあります。
+規範的な条件は[プロダクト要件](../requirements/product-requirements.md)、[アーキテクチャ要件](../requirements/architecture-requirements.md)、[運用要件](../requirements/operational-requirements.md)、[承認済み境界契約](../requirements/approved-bounded-contract.md)にあります。

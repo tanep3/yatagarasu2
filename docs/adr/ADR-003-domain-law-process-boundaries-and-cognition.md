@@ -9,7 +9,7 @@ Yatagarasu 1が発見した機能世界を継承しながら、知識を中央�
 
 ## Decision
 
-Domain境界は設計判断であり、process境界はdeployment判断です。Stateの所有者はちょうど一つです。RuleとTransitionは純粋で、Transitionは内部で確定できる世界変換だけを扱います。外界への仕事は不変のEffectとし、Adapterは結果Eventを返しWorldStateを変更しません。Kernelは汎用のまま保ちます。Effectの順序はGraph依存関係とresource claimで表します。LLM/CodexのProposalは信頼せず、Policy検証を要します。Python inferenceと外部capabilityはWorldState、plan、Provider state、conversation stateを所有しません。
+Domain境界は設計判断であり、process境界はdeployment判断です。Stateの所有者はちょうど一つです。RuleとTransitionは純粋で、Transitionは内部で確定できる世界変換だけを扱います。外界への仕事は不変のEffectとし、Adapterは結果Eventを返しWorldStateを変更しません。Kernelは汎用のまま保ちます。Effectの意味順序はGraph dependency edgeとguardで表し、resource claimはschedulerの同時実行競合だけを表します。LLM/CodexのProposalは信頼せず、Policy検証を要します。Python inferenceと外部capabilityはWorldState、plan、Provider state、conversation stateを所有しません。
 
 ## Non-decision / open
 

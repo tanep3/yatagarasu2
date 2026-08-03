@@ -5,9 +5,9 @@
 | 要件 | 受入条件 | 判断・説明 |
 | --- | --- | --- |
 | REQ-PRD-001 | AC-PRD-001, AC-PRD-002 | ADR-002; Product experience |
-| REQ-PRD-002 | AC-PRD-003, AC-PRD-004 | ADR-007; Skill boundary; Y1 capability baseline |
+| REQ-PRD-002 | AC-PRD-003, AC-PRD-004, AC-PRD-016 | ADR-007; ADR-015; Codex Skill/Y2 Behavior boundary; Y1 capability baseline |
 | REQ-PRD-003 | AC-PRD-005, AC-PRD-006, AC-PRD-007, AC-PRD-008 | Product experience; ADR-005; ADR-009 |
-| REQ-PRD-004 | AC-PRD-009, AC-PRD-010, AC-PRD-011 | ADR-011; Domain model; Runtime boundaries |
+| REQ-PRD-004 | AC-PRD-009, AC-PRD-010, AC-PRD-011, AC-PRD-017 | ADR-011; ADR-022; Domain model; Runtime boundaries |
 | REQ-PRD-005 | AC-PRD-012, AC-PRD-013 | ADR-013; ADR-015; Qualia and behavior |
 | REQ-PRD-006 | AC-PRD-014, AC-PRD-015 | ADR-014; Web body and public API |
 | REQ-FR-001 | AC-FR-001, AC-FR-002 | ADR-003; Domain model |
@@ -43,15 +43,28 @@
 | REQ-OPS-007 | AC-OPS-015, AC-OPS-016 | ADR-009; Domain model |
 | REQ-OPS-008 | AC-OPS-017, AC-OPS-018, AC-OPS-020, AC-OPS-021, AC-OPS-022, AC-OPS-023 | ADR-005; ADR-010; Runtime boundaries |
 | REQ-OPS-009 | AC-OPS-024, AC-OPS-025, AC-OPS-026, AC-OPS-027 | ADR-013; Persistence and uncertainty |
-| REQ-API-001 | AC-API-001, AC-API-002, AC-API-003 | ADR-014; Web body and public API |
+| REQ-API-001 | AC-API-001, AC-API-002, AC-API-003, AC-API-015 | ADR-014; ADR-019; Web body and public API |
 | REQ-API-002 | AC-API-004, AC-API-005, AC-API-006, AC-API-007 | ADR-014; Web body and public API |
 | REQ-API-003 | AC-API-008, AC-API-009, AC-API-010 | ADR-014; ADR-015 |
-| REQ-API-004 | AC-API-011, AC-API-012, AC-API-013, AC-API-014 | ADR-014; Configuration architecture |
+| REQ-API-004 | AC-API-011, AC-API-012, AC-API-013, AC-API-014, AC-API-016, AC-API-017, AC-API-018, AC-API-019 | ADR-014; ADR-021; Configuration architecture |
 | REQ-CFG-001 | AC-CFG-001, AC-CFG-002, AC-CFG-003 | ADR-012; Configuration architecture |
 | REQ-CFG-002 | AC-CFG-004, AC-CFG-005, AC-CFG-006 | ADR-012; Configuration architecture |
 | REQ-CFG-003 | AC-CFG-007, AC-CFG-008 | ADR-012; Configuration architecture |
-| REQ-CFG-004 | AC-CFG-009, AC-CFG-010, AC-CFG-011 | ADR-012; Runtime boundaries |
+| REQ-CFG-004 | AC-CFG-009, AC-CFG-010, AC-CFG-011, AC-CFG-012, AC-CFG-013, AC-CFG-014 | ADR-012; ADR-020; ADR-022; Runtime boundaries |
 | REQ-FUT-001 | AC-FUT-001 | ADR-007 |
+| REQ-ACOU-001 | AC-ACOU-001, AC-ACOU-002, AC-ACOU-003, AC-ACOU-004, AC-ACOU-005, AC-ACOU-006 | ADR-016; ADR-006; Y1 listen_state/listend evidence |
+| REQ-MEM-001 | AC-MEM-001, AC-MEM-002, AC-MEM-003, AC-MEM-004, AC-MEM-005 | ADR-017; Y1 SemanticMemory/recall evidence |
+| REQ-OUT-001 | AC-OUT-001, AC-OUT-002, AC-OUT-003, AC-OUT-004 | ADR-017; Presentation contract |
+| REQ-EFX-001 | AC-EFX-001, AC-EFX-002, AC-EFX-003, AC-EFX-004, AC-EFX-005 | ADR-018; ADR-004; ADR-005 |
+| REQ-CNV-001 | AC-CNV-001, AC-CNV-002, AC-CNV-003, AC-CNV-004 | ADR-019; ADR-013 |
+| REQ-QLI-001 | AC-QLI-001, AC-QLI-002, AC-QLI-003, AC-QLI-004 | ADR-019; ADR-010; ADR-013; ADR-014 |
+| REQ-SET-001 | AC-SET-001, AC-SET-002, AC-SET-003, AC-SET-004 | ADR-020; ADR-022; ADR-014; Y1 setup/doctor evidence |
+| REQ-QPR-001 | AC-QPR-001, AC-QPR-002, AC-QPR-003, AC-QPR-004 | ADR-020; ADR-022; Y1 wake measurements |
+| REQ-DAT-001 | AC-DAT-001, AC-DAT-002, AC-DAT-003, AC-DAT-004, AC-DAT-005 | ADR-021; ADR-009; ADR-012 |
+| REQ-NET-001 | AC-NET-001, AC-NET-002, AC-NET-003, AC-NET-004 | ADR-021; ADR-007 |
+| REQ-AGT-001 | AC-AGT-001, AC-AGT-002, AC-AGT-003, AC-AGT-004, AC-AGT-005, AC-AGT-006 | ADR-022; Codex app-server boundary |
+| REQ-SCP-001 | AC-SCP-001, AC-SCP-002, AC-SCP-003 | ADR-023; initial release scope |
+| REQ-LOG-001 | AC-LOG-001, AC-LOG-002, AC-LOG-003 | ADR-021; retention and cleanup boundary |
 
 ## 矛盾索引
 
@@ -62,7 +75,10 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | 凍結04 §8.1、§13 Phase 3、§15、§16: `listend` がAgent/Webをsuperviseする | 凍結05 §3.1および凍結06 §8が`listend`をsupervisorから外す | 旧supervisor契約は採用しない。process managementは未決であり、domain所有権にならない。ADR-002/003。 |
 | 凍結04 §9および§10.4: 固定Unix socket UTF-8 JSONL IPC | 凍結05 §3.3がUnix socket/JSONLを候補にとどめる | IPCは延期する。transport schemaはdomain型ではない。ADR-003。 |
 | 凍結06 §6.1: Mimyがgo2rtcへ直接接続する | 新しいaudio topology判断 | Mimyは汎用でsource-agnosticとし、go2rtcはsource adapterの一例にする。ADR-006。 |
-| 凍結02 §2.1: Voice GatewayがVAD/STTを所有する。凍結06 §6.1: Mimyがsource/ring bufferを常時維持し、wakeでsessionを作成・releaseする | 新しいwake/session所有判断 | Yata WakeとMimyは接続/buffer状態をそれぞれ独立して所有する。Acoustic Contextがwake acceptance/promptを所有し、Mimy sessionのcreate/releaseをcommandする。ADR-006。 |
+| 凍結02 §2.1: Voice GatewayがVAD/STTを所有する。凍結06 §6.1: Mimyがsource/ring bufferを常時維持し、wakeでsessionを作成・releaseする | 新しいwake/session所有判断 | Yata WakeとMimyは接続/raw audio bytes/ring bufferをそれぞれ独立して所有する。Acoustic Contextはpre-roll選択window/cursorと保持/discardを含むwake acceptance/promptを所有し、Mimy sessionのcreate/releaseをcommandする。ADR-006/016。 |
+| Y1 `listen_state.py`/`listend.py`: prompt後のRTSP consumer resetで自己音声を除去する | 一wake一命令とsource非依存のAcoustic所有 | Acoustic Contextがpre-roll選択、discard、guard、空命令を唯一所有する。RTSP resetは許されるAdapter実装候補であって、Y2の必須機構ではない。TTS中もHome/Stop control検知は生存する。ADR-016、REQ-ACOU-001。 |
+| 凍結01 §12および凍結05 §7: Conversation/Memoryの細部を未決にする | 初期の記憶・提示・有限fallbackの承認 | Yatagarasu所有と外部Codex Skill/Provider非所有、standing authorization、Owner delete、既定recall、Presentation、初期一入力一応答は決定した。schema、保存engine、継続会話は未決。Provider external bindingはADR-022に従う。 |
+| 凍結02 §5: 一般的なidempotency | Interaction request-idempotency ledgerとEffectOccurrence recoveryの分離 | Interaction Contextはclient key、payload fingerprint、replay可能なtyped result/status/lifecycleを持つ耐久ledgerを所有する。Execution Contextのpending EffectOccurrence recordとRecovery keyは別である。具体storage/key形式は未決。ADR-018/019、REQ-EFX-001、REQ-QLI-001。 |
 | 凍結04 §5、§8.3、§8.6: Agentがmodel/provider/thread/turn制御を所有する | 凍結05 §3.2/§9および新しいdomain判断 | Kernelと名前を持つContextがdomain stateを所有する。Python/外部capabilityはWorldState、plan、provider state、conversation stateを所有しない。ADR-003。 |
 | 凍結04 §9: IPC例を要件として扱う | 新しい要件規律 | 明示的制約でない限り、具体vendor/transport機構は要件にしない。ADR-001。 |
 | 凍結01 §14および凍結04の逐次実行例: move後にcapture/LLMを無条件実行する | ADR-009のGraph guardと物理不確実性 | move Failure/OutcomeUnknown、capture Failure、無効ArtifactRefは下流をblockする。Assumed継続には明示Policyが必要。 |
@@ -100,19 +116,25 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | latency budget | 区間別計測は必須。wake ACK、routing、TTFT、実機E2Eの数値budgetと対象profileはspike後に決定 |
 | 永続化 | snapshot保存機構、schema migration、Recovery機構 |
 | カメラ | 校正、照合、retry、完了の証拠 |
-| 音声 | 安全margin、cancel、Interaction完了Policy |
-| streaming TTS | 採用・優先度、数値上限、cancel timeout、Adapter別current chunk停止能力 |
-| model/provider routing | 必須の動的選択を実現する具体profile、閾値、Provider再構成、active turn、Conversation再binding、fallback、Recovery、利用者同意、privacy／cost Policy |
+| 音声 | 安全margin、具体playback観測、cancel timeout、Adapter別停止能力。初期Conversationのterminal/Home契約は決定済み |
+| streaming TTS | 次revisionの採用・数値上限、cancel timeout、Adapter別chunk停止能力（初期scope外） |
+| model/provider routing | 必須の動的選択を実現する具体profile、閾値、Providerごとの認証、cost Policy、transport。active turn rebind、自動fallback、利用ごとの同意UIは採用しない |
 | Provider境界 | Hoshikage由来候補（liveness/readiness、能力広告、admission/inference Failure、terminal/disconnect、generation/lease）をY2 Portへどう正規化するか |
 | Web/API transport | HTTP resource形状、OpenAPI、WebSocket／SSE／polling、media transport、API versioning、更新遅延、再接続時間、同時browser数 |
-| Web security詳細 | session方式、token scope、password recovery、TLS/reverse proxy、Tailscale identity連携。Owner認証と取消可能token、認証なしInternet非公開は確定済み |
-| Qualia詳細 | Lifecycle Eventの最終型名、Home別名、制御語検知方式、終了timeout、会話Qualiaの一回／継続境界 |
+| Web security詳細 | session/hash/暗号化storageの具体実装、trusted proxy設定方式、Tailscale identity連携。read/operateだけの無期限revocable token、local password reset時の全session/token revoke、direct port-forward非対応は確定済み |
+| Qualia詳細 | Lifecycle Eventの最終型名、Home別名、制御語検知方式、終了timeout、continuous conversation契約。初期Fallback Conversationの一入力・一応答・Home復帰は決定済み |
 | Behavior extension詳細 | descriptor schema、code配置、compile-time登録、将来の宣言macro／外部automation。Y2のruntime pluginと利用者機能追加は範囲外 |
 | process management | supervisor配置とlocal workerのlifecycle |
 | configuration mechanisms | Windows/macOS root、schema／atomic write library、secret store、installer、migration engine |
-| privacyとmemory | 保持、利用者制御、remote transfer、削除規則 |
-| external network capability | search/fetchの許可、取得先制約、citation、Failure、利用者同意 |
-| Skill運用契約 | Skill形式、transport、認証・認可、Skill作成の検証、配備、rollback、安全方針 |
+| acoustic実装 | RTSP/Mimyのbuffer/reconnect、pre-roll/guardの具体機構と数値 |
+| memory実装 | schema、保存engine、削除の内部実装。retentionはOwner deleteまで、同意画面は採用しない |
+| Presentation実装 | 翻訳器、表示/再生形式、読み上げvoiceの具体選択 |
+| EffectOccurrence実装 | durable keyの保存機構、API/recovery keyの具体format、settle数値 |
+| 初期Conversation以後 | 連続会話、複数入力session、長時間会話Behaviorの契約 |
+| Linux運用 | package/installer、secret store、doctor実装、サービス配置 |
+| Quality Profile | 対象hardware、閾値、測定時間、release判定の数値 |
+| data/network Policy | allowlist内容、citation形式、Providerごとのmodel/credential。standing authorizationと無期限Memory retentionは決定済み |
+| Codex Skill互換性 | Codex所有のSkill形式、実行権限、配布、rollbackはY2 Behavior/plugin設計の対象外。Y2は追加承認・制限を加えない。Y2側の互換性はpinしたCodex/app-server versionによる新規Skillのdiscover/reloadとavailability報告のみ |
 | legal inventory | component version、license、notice、distribution obligation |
 
 ## 実装開始後の追跡形式

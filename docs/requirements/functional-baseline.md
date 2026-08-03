@@ -9,7 +9,7 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | 分類 | 意味 |
 | --- | --- |
 | 必須基準 | Y2が体験または構造として継承する。具体実装は交換可能。 |
-| 契約未決の継承基準 | 能力の価値は継承するが、privacy、権限、Provider、保存などの契約が未決。 |
+| 契約未決の継承基準 | 能力の価値は継承するが、具体実装・長期Lifecycleなどが未決。既に承認済みのprivacy、保存、Provider境界を巻き戻さない。 |
 | 延期 | 将来価値を認めるが、初期の必須実装にはしない。 |
 | 実装方式は非採用 | Y1の機能は受け継ぐが、直接呼出しや中央手順などの実装形は移植しない。 |
 
@@ -19,14 +19,16 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | --- | --- | --- |
 | テキストInteraction | CLI等からAIへ依頼できる | REQ-PRD-001, REQ-FR-001 |
 | 常時音声、WakeWord、VAD、STT、stop word | 耳は一回限りの録音ではなく生存期間を持つ | REQ-PRD-001, ADR-006 |
+| 一wake一命令と自己音声防止 | wake後の「はい」prompt回り込み、最初の発話の欠落、実TTS・遅延音声の再入力を実機で経験した | REQ-ACOU-001, ADR-016 |
 | SBERT意味ルーティング | 意味の反射がLLM待ちを避け、実機体験を大きく改善する | REQ-ARC-005, REQ-ARC-008, ADR-008 |
 | 相対カメラ操作と校正 | 身体操作はLLMなしでも決定でき、姿勢の事実とは分ける必要がある | REQ-PHY-003, ADR-009 |
 | 撮影と画像解釈 | 撮影成果物が有効な場合だけAIへ渡す | REQ-PER-001, ADR-009 |
 | 複合要求 | 移動、撮影、解釈は一つの関数ではなく依存する仕事群である | REQ-PER-001 |
 | 実機End-to-End | Fake境界だけでなく、本物の目・耳・口を一つの因果列として動かす必要がある | REQ-PRD-003 |
+| wake→有限会話→Home E2E | 起床から最初の発話、応答、Home復帰までの因果を実機で確認する必要がある | REQ-SET-001, REQ-CNV-001 |
 | 区間別遅延計測 | 反射速度を守るには、総時間だけでなくwake、STT、routing、dispatch等を分けて測る必要がある | REQ-NFR-001 |
 | 音声promptと応答再生 | 口には再生時間、取消、成果物の生存期間がある | REQ-OPS-004, REQ-OPS-006 |
-| Skillによる能力拡張 | AIがロボット外のアプリ、データ、能力へ接続できる | REQ-PRD-002, REQ-ARC-007 |
+| Codex Skillによる能力拡張 | SkillCreator、Search、Fetchを通じ、AIがロボット外のアプリ、データ、能力へ接続できる。SkillはY2 Behaviorではない | REQ-PRD-002, REQ-SCP-001, REQ-ARC-007 |
 | 動的LLM／Provider選択 | SBERTの反射で用途に合うlocal／external推論能力を選び分ける | REQ-PRD-004, ADR-011 |
 | 設定と能力診断 | 設定、Workspace、状態、cacheを分け、採用元と能力を診断する | REQ-CFG-001, REQ-CFG-004 |
 | 安全な設定変更とUpgrade | 型検証、原子的保存、反映範囲、利用者資産保護が必要である | REQ-CFG-002, REQ-CFG-003 |
@@ -36,25 +38,27 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | Home復帰 | 音声制御語とWeb常設操作から現在Qualiaへ終了を要求する | REQ-FR-006, ADR-013 |
 | SBERTによるBehavior選択 | 既知機能を反射的に選び、候補なしだけを会話へfallbackする | REQ-FR-007, ADR-008 |
 | 一Server・一Workspace・一Owner | 一人のOwnerが複数browser、token、deviceを利用する | REQ-API-004, ADR-014 |
+| Linux setup、Capability診断、secret境界 | 設定とCapabilityが使えるかを安全に運用確認する必要がある | REQ-SET-001, ADR-020 |
+| Wake/SBERT品質測定 | Wake positive/near-negative/silence/self-audio、SBERT single/composite/negative/unrelated、warm/cold、CPU/RAM、連続稼働、再接続を測らなければ改善・配備判断できない | REQ-QPR-001, ADR-020 |
+| Yatagarasu所有の会話・記憶 | 自動保存、明示memorize、recent 3 + semantic 3、5目的のrecallとprovenanceの価値がある | REQ-MEM-001, ADR-017 |
+| View/Recall提示 | 9 View目的、5 Recall目的、根拠/禁止提示、空結果、翻訳のみの再生を区別する必要がある | REQ-OUT-001, ADR-017 |
+| search/fetch | 現在情報の検索・取得は独立の必須能力で、引用、no-results/Failure、内容分類別のconfigured transfer authorizationを必要とする | REQ-NET-001, ADR-021 |
 
 ## 契約未決の継承基準
 
 | 能力 | 継承する価値 | 未決の契約 |
 | --- | --- | --- |
-| recall | 過去の記憶を現在の判断へ使う | memory保持、privacy、検索結果の意味 |
-| memorize | 利用者の明示依頼で記憶を保存する | 同意、削除、保存期間、migration |
-| search / fetch | 現在の外部情報を取得して考える | network許可、取得先、citation、Failure、同意 |
-| Skill作成 | 新しいAI接続面を増やす | 作成権限、検証、配備、rollback、安全方針 |
-| 長期会話文脈 | 「もう少し」など前の行動を踏まえる | Conversation保持、privacy、Provider越境 |
-
-これらを未決とするのは、機能を捨てるためではありません。価値を継承したまま、危険な前提を実装前に確定しないためです。
+| 連続会話 | 複数入力を一つの会話sessionとして継続する | 初期は一入力・一応答であり、継続sessionのLifecycle/取消/Recovery |
+| 長期会話文脈 | 「もう少し」など前の行動を踏まえる | 連続sessionのLifecycle/取消/Recovery。初期は有限一往復 |
+これらを未決とするのは、機能を捨てるためではありません。価値を継承したまま、危険な前提を実装前に確定しないためです。保存・削除・standing authorization・network取得の**境界**は承認済みですが、具体engine・数値・transportは未決です。
 
 ## 延期
 
 | 能力 | 扱い |
 | --- | --- |
 | cron等による定時自律 | 将来、共通Inbound Adapterとして導入する。第二の制御中枢にしない。 |
-| ストリーミングTTS | 応答速度への価値は高いが、採否と優先度はOPEN。採用時の条件だけ要件化済み。 |
+| ストリーミングTTS | 応答速度への価値は高いが、初期scope外。次revisionで明示採用する。 |
+| 長時間文字起こし、同時通訳、見守り、連続会話 | 初期scope外。正式Behavior version updateで再評価する。 |
 
 ## 実装方式は非採用
 

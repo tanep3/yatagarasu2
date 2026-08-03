@@ -13,7 +13,7 @@
 
 ## Non-decision / open
 
-database、transaction/outbox機構、migration、idempotency、reconciliation機構は未決です。
+database、transaction/outbox機構、migration、reconciliation機構は未決です。Interaction request-idempotency ledgerとEffectOccurrence recovery照合の責務分離はADR-018/019で決定済みであり、具体storage/key形式は未決です。
 
 ## Consequences
 

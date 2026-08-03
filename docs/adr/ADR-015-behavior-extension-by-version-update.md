@@ -9,7 +9,7 @@ Yatagarasu 2は会話BOTに閉じず、文字起こし、同時通訳、見守�
 
 ## Decision
 
-Yatagarasu 2の振る舞い追加は、Rust／Python／Web資産を含み得る正式なversion updateとして行う。実行時pluginとエンドユーザーによる振る舞い追加は範囲外とし、必要ならYatagarasu 3で検討する。
+Yatagarasu 2のBehavior追加は、Rust／Python／Web資産を含み得る正式なversion updateとして行う。Y2 Behaviorはdomain/application/ports/adaptersへ寄与するrobot機能である。実行時pluginとエンドユーザーによるY2 Behavior追加は範囲外とし、必要ならYatagarasu 3で検討する。
 
 振る舞いは一つの万能objectではなく、必要なLayerへの明示的な寄与として追加する。寄与候補はidentity／version、必要Capability、入力・出力面、SBERT Candidateとgate、Command／Event／State／Rule／Transition／Policy／Effect、Application contributor、Projection、Port、Adapter、Bootstrap binding、設定schema、Web部品、migration、test、traceabilityである。
 
@@ -17,7 +17,7 @@ Yatagarasu 2の振る舞い追加は、Rust／Python／Web資産を含み得る�
 
 ## Consequences
 
-機能追加は通常の製品設計、review、test、Upgradeとして扱われる。エンドユーザーのHTML／CSSはWeb表示だけを変更し、Behavior catalog、ownership registry、Rule、Effect、Portを変更しない。公開APIを使う外部clientは作成できるが、Yatagarasu内部へ新しい信頼済み振る舞いを注入しない。
+機能追加は通常の製品設計、review、test、Upgradeとして扱われる。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、Y2 Behaviorとは別である。Codexが自身の権限で`SKILL.md`、Python、Web、scriptを作ることにY2は追加の承認・制限層を加えない。ただし、その外部資産は正式version updateなしにBehavior catalog、ownership registry、Rule、Policy、Effect、Portを変更しない。公開APIを使う外部clientは作成できるが、Yatagarasu内部へ新しい信頼済み振る舞いを注入しない。
 
 ## Non-decision / open
 

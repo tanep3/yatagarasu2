@@ -27,6 +27,7 @@ Yatagarasu 1は、実機で検証された機能要件の基準です。凍結�
 | 何を作り、利用者に何がうれしいか | [プロダクト](product/README.md) | 体験と使命を伝える |
 | なぜこの構造でなければならないか | [アーキテクチャ](architecture/README.md) | 思想から構造を導く |
 | 何を満たせば実現したと言えるか | [要件](requirements/README.md) | 要求と観測可能な受入条件を定める |
+| 初期に承認された追加境界は何か | [承認済み境界契約](requirements/approved-bounded-contract.md) | REQ/ACで音声・記憶・出力・運用・データを固定する |
 | どの矛盾を、なぜ解いたか | [ADR](adr/README.md) | 承認済み判断の範囲を記録する |
 | 原典の何を採用・保留・不採用にしたか | [根拠監査台帳](requirements/source-audit.md) | 要件漏れと黙った変更を防ぐ |
 | 何がまだ決まっていないか | [トレーサビリティと未決事項](requirements/traceability.md) | 要件・受入条件・論点を結ぶ |

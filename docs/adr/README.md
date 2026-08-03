@@ -21,3 +21,11 @@ Yatagarasu 1の実機機能要件と、凍結済みYatagarasu 2構造要件は�
 | [ADR-013](ADR-013-single-active-qualia-and-home.md) | Active Qualiaを一つにし、Home・終了・Recoveryと自律神経を分ける |
 | [ADR-014](ADR-014-api-first-web-body-and-owner-model.md) | WebをAPI優先の身体面とし、一Server・一Workspace・一Ownerで運用する |
 | [ADR-015](ADR-015-behavior-extension-by-version-update.md) | 振る舞いを実行時pluginではなく正式version updateで各Layerへ追加する |
+| [ADR-016](ADR-016-acoustic-context-one-wake-one-command.md) | wake受理、audio session、pre-roll、自己音声除去をAcoustic Contextへ集約する |
+| [ADR-017](ADR-017-owned-memory-and-typed-presentation.md) | Yatagarasu記憶と外部Skillデータ、View/Recall提示を混同しない |
+| [ADR-018](ADR-018-effect-occurrence-and-semantic-order.md) | 同値Effectの出現、意味順序、settle、二種類の冪等性を分離する |
+| [ADR-019](ADR-019-finite-conversation-and-admission.md) | 初期会話を有限にし、Qualia/Interactionのadmission責務を分離する |
+| [ADR-020](ADR-020-linux-setup-and-quality-profiles.md) | 初期Linux導入、doctor、実機E2E、実測品質をrelease契約にする |
+| [ADR-021](ADR-021-data-classes-artifacts-and-network-capabilities.md) | 内容分類、処理場所・移送方向、Artifact境界、search/fetch、LLM転送authorizationを別Policyにする |
+| [ADR-022](ADR-022-codex-app-server-agent-session.md) | Codex app-server、Thread再開、Agent Session Context、typed recoveryをY2会話から分離する |
+| [ADR-023](ADR-023-initial-release-scope-and-non-streaming-tts.md) | 初期scope、non-streaming TTS、延期機能を明示し、暗黙のstreaming/長時間処理を防ぐ |

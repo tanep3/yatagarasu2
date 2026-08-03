@@ -6,11 +6,11 @@ Yatagarasu 2を利用者には一つの製品として見せながら、設定�
 
 ### REQ-CFG-001 — 設定の役割、Layer、出所を分離する
 
-永続設定、秘密情報、ユーザー資産、実行状態、cache、一時runtimeデータは、役割ごとに異なる保存rootへ分離する。LinuxではXDG Base Directoryに従う。主設定はschemaで型検証する`config.toml`とし、環境変数はservice、CI、診断、一時上書きの入力に限定する。組込みDefault、system設定、user設定、active Profile、environment override、CLI overrideの解決順を明示し、各実効値の採用元を診断できなければならない。
+永続設定、ユーザー資産、実行状態、cache、一時runtimeデータは、役割ごとに五つのXDG rootへ分離する。LinuxではXDG Base Directoryに従う。secretは第六のXDG rootにせず、`config.toml`から参照する別のsecret storage boundary（外部Secret Storeまたは保護されたconfig-scoped実装）に置く。主設定はschemaで型検証する`config.toml`とし、secret本文を含めない。環境変数はservice、CI、診断、一時上書きの入力に限定する。組込みDefault、system設定、user設定、active Profile、environment override、CLI overrideの解決順を明示し、各実効値の採用元を診断できなければならない。
 
 受入条件:
 
-- AC-CFG-001: Linux適合試験が、config、data／Workspace、state、cache、runtimeの各データを対応するXDG rootへ分離し、同じ書込先へ混在させないことを示す。
+- AC-CFG-001: Linux適合試験が、config、data／Workspace、state、cache、runtimeの各データを対応する五つのXDG rootへ分離し、同じ書込先へ混在させないことを示す。secretはXDG rootとして数えず、configから参照するdistinct secret storage boundaryに置き、平文値が`config.toml`、Event、Projection、journal、通常logにないことを示す。
 - AC-CFG-002: schema fixtureが、型、既定値、validation、secret、read-only、apply modeを持つ設定定義により、正しい`config.toml`を受理し、不正な型または未知の必須値を拒否する。
 - AC-CFG-003: Layer競合fixtureが定義済み優先順位で一つの実効値を選び、値、採用Layer、元ファイルまたはoverride種別をsecretなしで診断表示する。
 
@@ -35,14 +35,27 @@ Webその他の入力境界は設定ファイルを直接編集せず、型付�
 
 ### REQ-CFG-004 — Capability配置を論理モードとして選択する
 
-Capabilityの配置は`local-managed`、`remote`、`disabled`の論理モードとして設定し、Coreの分岐にしない。Bootstrapが実装、配置、endpoint、認証をPortへbindingする。remote接続時はhealth、能力広告、互換versionを照合し、不一致を明示Failureまたは縮退判断へ変換する。Dockerを一般利用者の必須条件または標準管理単位にしない。
+Capabilityの配置は`local-managed`、`remote`、`disabled`の論理モードとして独立に設定し、Coreの分岐にしない。Bootstrapが実装、配置、endpoint、認証をPortへbindingする。service/capabilityはinstallation serverごとに個別選択し、全Y2 serverを自動installしない。Codexは公式installerを使いbundleしない。remote接続時はhealth、能力広告、互換versionを照合し、不一致を型付きFailureへ変換する。設定変更はnext_interactionでのみProvider routeへ適用し、自動fallbackをしない。Dockerを一般利用者の必須条件または標準管理単位にしない。
+
+初期deployment matrixは次のとおりである。全行でendpoint/binding、health、互換version、必要credentialのreadinessを検証し、unsupported combinationまたはreadyでない依存Capabilityはtyped Failureにする。`disabled`は依存Behaviorをreadyに見せず拒否する。どの行も全serviceの自動installを意味しない。
+
+| capability / adapter | 初期配置 | 境界 |
+| --- | --- | --- |
+| Codex app-server | **Y2 Agent hostと同一hostで必須**。公式Codex installer、long-lived。stdioまたはUnix socketはspike候補 | remote/WSは初期unsupported。Agent Session Contextだけがexternal turn bindingを所有する |
+| OpenAI | Codexを通るremote upstream。provider routeとしてselectedまたはdisabled | Codex自体をremote Agent serviceにしない |
+| Hoshikage / Ollama API | 明示選択installation hostの`local-managed`、またはLAN/Tailscale endpointの`remote`、または`disabled` | route/endpoint/version/credentialをbindし、自動fallbackしない |
+| Source/go2rtc、Wake、Mimy、TTS/VOICEVOX、SemanticMemory、device adapter | adapterが対応する場合、個別に`local-managed`または`remote`、または`disabled` | disabledまたは未readyなら依存Behaviorはtyped readiness Failureで拒否する |
+| SkillCreator / Search / Fetch | 必須Codex workspace capability | installable Y2 Behavior/plugin serviceではない。Search/FetchはREQ-NET-001を守る |
 
 受入条件:
 
 - AC-CFG-009: 同じCapability契約をlocal-managed、remote、disabledへ切り替えるfixtureが、domain Rule／Transitionを変更せず異なるBootstrap bindingを作る。
-- AC-CFG-010: remote能力照合fixtureが、期待するAPI versionまたは能力を欠くendpointを型付き不一致として拒否またはPolicyへ縮退提案し、暗黙に互換扱いしない。
+- AC-CFG-010: remote能力照合fixtureが、期待するAPI versionまたは能力を欠くendpointを型付きmismatch/rejection/Failureとして返し、暗黙に互換扱いまたは別mode/Providerへの自動fallbackをしない。
 - AC-CFG-011: local-managedの配備fixtureが、対応version、license情報、取得物checksum、health結果を提示し、UninstallまたはUpgradeでユーザーデータを既定削除しない。container runtimeがなくても適合可能である。
+- AC-CFG-012: installation fixtureがserverごとにservice/capabilityを個別選択し、全Y2 serverを自動installせず、Codexを公式installerから扱いbundleしないことを示す。
+- AC-CFG-013: `local-managed`、`remote`、`disabled`とProvider routeの変更fixtureがactive Interactionをrebindせず次Interactionからだけ反映し、利用不能時に別mode/Providerへの自動fallbackをしないことを示す。
+- AC-CFG-014: deployment matrix fixtureが、Codex app-serverをY2 Agent host上の公式installer由来long-lived capabilityとして検証し、stdio/Unix socket候補以外の初期remote/WSをtyped unsupported Failureにする。OpenAIはCodex経由remote route、Hoshikage/Ollamaは選択host local-managed/LAN-Tailscale remote/disabled、その他各adapterは対応範囲のlocal-managed/remote/disabledとして個別bindingする。全行のendpoint/binding/health/version/credential readinessと、disabled/unsupported/未ready依存Behaviorのtyped Failure、全service非自動install、SkillCreator/Search/FetchがY2 installable Behavior/pluginでないことを示す。
 
 ## 未決の詳細
 
-Windows/macOSの保存root、具体schema library、secret store、atomic write機構、local worker supervisor、installer／package形式、remoteからlocalへの自動fallbackとprivacy同意は未決である。
+Windows/macOSの保存root、具体schema library、secret store、atomic write機構、local worker supervisor、installer／package形式は未決である。remoteからlocalへの自動fallbackと利用ごとのprivacy同意画面は初期契約で採用しない。
