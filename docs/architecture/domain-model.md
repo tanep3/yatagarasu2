@@ -39,14 +39,17 @@ WorldStateは外部データを何でも詰め込む巨大な袋ではありま�
 | 入力受理、request idempotency ledger、Interactionの生存期間と取消 | Interaction Context | Web、音声、CLI、LLM、Execution Context |
 | 会話turn履歴 | Conversation Context | Provider thread、Codex Skill app data、LLM |
 | 長期記憶、standing authorization、delete状態 | Memory Context | SemanticMemory等のAdapter、Codex Skill app data、Provider |
-| Codex external binding、connection/status、correlation、rebind/recovery、durable AgentTurnBinding | Agent Session Context | Codex、Provider、Conversation Context、LLM |
+| 外部推論binding、Codex connection/Thread、correlation、rebind/recovery、durable AgentTurnBinding | Agent Session Context | Codex、Provider、Conversation Context、LLM |
 | 意味解決方針の版 | Decision Policy Context | SBERT、LLM、profile |
-| Effect Graph、永続待機、取消済み仕事 | Execution Context | dispatcher、Adapter、journal再生 |
+| OwnerのSkillCreator包括委任、SkillExecutionGrant、status/revocation | Authorization Policy Context | SkillCreator、Skill、LLM、Adapter |
+| 内容分類schema/導出Policy版、分類済みauthorization view | Data Classification Policy Context | Provider、Skill、Fetcher、Artifact store |
+| Effect Graph、永続待機、取消済み仕事、playback occurrenceと回答全文/Stop Policy版のbinding | Execution Context | dispatcher、TTS/音声Adapter、journal再生 |
+| 登録Stop語とStopSuppressionPolicy版 | Acoustic Context | STT、TTS、音声Adapter |
 | 物理観測と姿勢 | Physical Observation Context | カメラAdapter、校正能力 |
 | 成果物の生存期間 | Artifact Context | TTS、撮影、Provider、filesystem Adapter |
 | 通知の方針 | Notification Policy Context | 通知チャネル、Projection |
 
-Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、Codex Skill、profile、ProjectionはWorldState、plan、provider state、Conversation、Memoryを所有しません。Agent Session ContextもProvider内部stateとconversation textを所有しません。AgentTurnBindingはY2 Interaction ID、exact Thread ID、external turn/operation IDまたはabsence、Y2-issued immutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolだけを持つ耐久外部相関である。
+Contextは、自分が所有する状態だけを変更します。他のContextへ可変参照を渡さず、事実をEventとして交換します。Adapter、Python worker、外部Provider、Codex Skill、profile、ProjectionはWorldState、plan、provider state、Conversation、Memoryを所有しません。Agent Session ContextもProvider内部stateとconversation textを所有しません。AgentTurnBindingはY2 Interaction ID、exact Thread IDまたはabsence、external turn/operation IDまたはabsence、Y2-issued immutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocol/ContextContinuityだけを持つ耐久外部相関である。TTS/音声Adapterはwaveform、候補、結果Eventを返すだけで、回答全文照合またはStop抑止を決めません。
 
 ## クオリア、振る舞い、Interactionを分ける
 
@@ -118,13 +121,13 @@ preferred route（希望経路）とeffective route（実効経路）を分け�
 
 HomeでYatagarasuを起点とする通常構成は、独立制御語の後に、SBERT候補とDecision Policyから使用するBehaviorを解決します。ただしCapability Policyがrule-only、LLM-proposal-only等を宣言した機能へSBERTを強制しません。BehaviorがLLMを必要とする場合だけ、別のDecisionとして論理LLM／Provider profileを解決します。
 
-宣言されたContributorの評価後に有効なBehavior候補がなければ`FallbackToConversation`を明示的に返せます。安全、権限、能力方針で拒否された候補は、会話へfallbackして迂回しません。Qualia/Interactionのread-only viewを読む純粋admission Ruleが開始を判断し、Starting、Active、Terminating、Recoveringでは別Qualiaの開始要求を`Busy`として拒否する。暗黙queueは作らない。現在Qualiaの通常入力はversion付きBehavior Policyが決めるが、Home/Cancelは常にそれより優先する。
+宣言されたContributorの評価後に有効なBehavior候補がなければ`FallbackToConversation`を明示的に返せます。安全、権限、能力方針で拒否された候補は、会話へfallbackして迂回しません。Qualia/Interactionのread-only viewを読む純粋admission Ruleが開始を判断し、Starting、Active、Terminating、Recoveringでは別Qualiaの開始要求を`Busy`として拒否する。暗黙queueは作らない。現在Qualiaの通常入力はversion付きBehavior Policyが決める。HomeとWeb Cancelは常にそれより優先するが、TTS再生中の音声Stop候補は`StopSuppressionPolicy`で抑止され得る。
 
 ## Codex Skill、Y2 Behavior、Proposal、Effectを分ける
 
 Codex Skillは、人間が使うアプリ、データ、外部能力をCodexへ公開する接続面です。Y2 Behaviorはdomain/application/ports/adaptersへ寄与するversion付きrobot機能である。Skillを追加しても、Coreへ製品固有の分岐を足さずに、AIが新しい世界へ触れられるようにします。
 
-初期Codex capabilityはSkillCreator、Search、Fetchである。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成でき、Y2は追加の承認/制限を加えない。ただし外部資産は正式Y2 Behavior updateなしにY2のBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillの読出しが観測を返す場合も、AIが書込みを提案する場合も、決定論的な能力を公開する場合もあります。したがってCodex Skillは、Contributor、Proposal、Effect、Adapterのどれか一つと同義ではありません。
+初期Codex capabilityはSkillCreator、Search、Fetchである。OwnerはAuthorization Policy Contextが所有するstanding delegationにより、SkillCreatorへSkill資産と初期SkillExecutionGrantの構成を包括委任する。assetはinactive staging、grant commit、activation Eventを経て実行可能になり、作成ごとの承認UIは置かない。Skillはgrant範囲でWorkspace外read/write、network、secret、外部副作用を行えるが、自身または別Skillのgrantを拡大しない。ただし外部資産は正式Y2 Behavior updateなしにY2のBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillの読出しが観測を返す場合も、AIが書込みを提案する場合も、決定論的な能力を公開する場合もあります。したがってCodex Skillは、Contributor、Proposal、Effect、Adapterのどれか一つと同義ではありません。
 
 ```text
 Skillを介した観測
@@ -148,7 +151,7 @@ profileがsettle（安定待ち）を宣言する場合も、値と版をOccurre
 
 ## 記憶と提示は、外部アプリの所有権を奪わない
 
-Conversation ContextはYatagarasuのturn履歴を、Memory ContextはYatagarasuの長期記憶を所有する。外部Codex Skill app data、Provider thread、search/fetch本文は外部のまま型付き参照またはArtifactRefで扱う。local auto-saveは既定ONでConversationの原発話と最終応答の組に限り、reflex commandはMemoryへ保存せずoperations logだけへ残す。MemoryはOwner deleteまで無期限で、README/setup/configのstanding disclosureとenabled configをauthorizationとする。明示`Memorize`は別目的である。Y1 import/migrationはしないが、同じ互換storeの旧recordはprovenance付きで示せる。既定のversion付きRecall Policyはrecent 3件とsemantic 3件を別に返し、重複はrecentを優先する。enabledな初期Conversation profileはconversational LLM request前に選択済み参照/provenanceだけを渡し、retrieval Failure/disabledを型付きPolicy結果にする。memoryが関係しないBehaviorは`NotApplicable`を明示できる。
+Conversation ContextはYatagarasuの原発話/最終応答の正本履歴を、Memory ContextはYatagarasuの長期記憶を所有する。Codex ThreadはHomeと有限Interactionを越えて推論へ影響する外部継続文脈であり、Agent Session Contextは本文でなくopaque bindingだけを所有する。外部Codex Skill app data、Provider thread、search/fetch本文は外部のまま型付き参照またはArtifactRefで扱う。local auto-saveは既定ONでConversationの原発話と最終応答の組に限り、reflex commandはMemoryへ保存せずoperations logだけへ残す。MemoryはOwner deleteまで無期限で、README/setup/configのstanding disclosureとenabled configをauthorizationとする。明示`Memorize`は別目的である。Y1 import/migrationはしないが、同じ互換storeの旧recordはprovenance付きで示せる。通常Conversationのversion付きRecall Policyは既定`recent=0`、`semantic=3`を返し、件数は設定可能である。`CodexThread` routeでは選択済み参照/provenanceを継続Threadへ追加し、`NoExternalContinuity` routeでは現在入力と選択参照だけを`RequestInference`へ渡す。SemanticMemory delete/resetは既注入Threadを遡及消去せず、完全に外部文脈を切るOwner Thread resetはdurable barrier後に新Threadを開始する別Commandである。memoryが関係しないBehaviorは`NotApplicable`を明示できる。
 
 利用者へ渡す内容は`Presentation`と`OutputPurpose`で表す。`View`はSceneStatus、FaceExpression、Object、DocumentRead、Summarize、Translate、Transcribe、SummarizeTranslate、TranscribeTranslateを、`Recall`はSummarize、ExistenceConfirm、TopicSearch、Compare、Contextualizeを閉じた目的値として持つ。目的ごとに必要入力、許可surface、evidence/provenance、禁止presentationを宣言し、空RecallとFailureを混同しない。翻訳系は提示変換であり、英語または原文を追加で音声再生しない。
 
@@ -157,6 +160,8 @@ Conversation ContextはYatagarasuのturn履歴を、Memory ContextはYatagarasu�
 Interaction Contextは、API mutationごとの耐久request-idempotency ledgerを唯一所有する。recordはclient key、payload fingerprint、replay可能な型付きresult、status、Interaction lifecycleを持つ。Rejected、AcceptedNoEffect、Pending、Completedはrestart後も区別して再生する。これはExecution Contextのdurable pending `EffectOccurrence` recordと、RecoveryのOccurrence照合keyとは別State・別keyである。voice入力はclient keyを要求せず、Adapter/Interaction Contextがserver-assigned input identityを記録する。
 
 通知する操作、計画、チャネル、言い回し、無通知はNotification Policy Contextが所有します。Projectionへの表示は、外部へ通知が届いた証拠ではありません。
+
+Y1から継承するThinkingNotice（「考えるね」）は、設定で文言と有効/無効を選べるvoice-only通知です。Memory retrievalとroute確定後、LLM dispatch直前だけに置き、SBERT反射、Web、Homeでは生成しません。通知FailureはLLMを止めず、Homeへ「待機します」を暗黙に結び付けません。
 
 ## 時刻と物理的事実
 

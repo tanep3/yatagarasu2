@@ -62,7 +62,7 @@ Yatagarasu 2は、SBERTとDecision Policyにより論理LLM／Provider profile�
 
 通常のCodex経路はruntime bootstrapがsuperviseするlong-lived `codex app-server`である。turnごとの`codex exec`は使わない。connectionごとにinitialize handshakeを一回行い、production transportはspike後にstdioまたはUnix socketを選ぶ。WebSocketはexperimentalでproduction非対応である。
 
-Agent Session ContextはCodex Thread ID、connection/status、correlation、rebind/recoveryとexternal turnごとのdurable AgentTurnBindingを唯一所有する。BindingはY2 Interaction ID、exact Thread ID、external turn/operation IDまたはabsence、dispatch前に発行するimmutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolを持つ。Provider内部stateとconversation textを持たない。`thread/start`、`thread/resume`、`turn/start`、`turn/interrupt`を区別し、Home/Qualia終了はThread終了にしない。`turn/interrupt`はexact current Binding/generationだけをtargetとし、dispatch直前にstaleならrejected/no-effectにする。A/Bが同じThreadを再利用するとき、Aのlate/duplicate result/cancelはAのBinding/Recovery/auditだけを更新しBのState/Presentation/cancel/terminalを変えない。restart/reconnectは記録済みのexact Thread IDにresumeし、`--last`または暗黙new Threadを使わない。Adapterはtyped progress/result Eventだけを返し、raw deltaを無制限journalへ残さず、WorldStateを変更しない。
+Agent Session ContextはCodex Thread ID、connection/status、correlation、rebind/recoveryとexternal turnごとのdurable AgentTurnBindingを唯一所有する。BindingはY2 Interaction ID、exact Thread IDまたはabsence、external turn/operation IDまたはabsence、dispatch前に発行するimmutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocol/ContextContinuityを持つ。Provider内部stateとconversation textを持たない。`CodexThread` routeの同じThreadは後続推論へ影響する外部継続文脈だがY2正本ではない。`NoExternalContinuity` routeはThread ID absenceで、現在入力と選択済みSemanticMemoryを`RequestInference` EffectからProvider Inference Portへ渡す。取消は同じBinding/generationへの`CancelInference`とし、Unsupported/OutcomeUnknownなら下流をrevokedにして停止を捏造しない。遅延結果は元Bindingへ隔離する。`thread/start`、`thread/resume`、`thread/compact/start`、`turn/start`、`turn/interrupt`を区別し、Home/Qualia終了はThread終了にしない。Owner Thread resetはdurable barrier後に新Threadを開始する。取消はexact current Binding/generationだけをtargetとし、dispatch直前にstaleならrejected/no-effectにする。A/Bが同じThreadを再利用するとき、Aのlate/duplicate result/cancelはAのBinding/Recovery/auditだけを更新しBのState/Presentation/cancel/terminalを変えない。restart/reconnectは記録済みのexact Thread IDにresumeし、`--last`または暗黙new Threadを使わない。Adapterはtyped progress/result Eventだけを返し、raw deltaを無制限journalへ残さず、WorldStateを変更しない。
 
 ## Codex SkillとY2 Behavior
 
@@ -70,7 +70,7 @@ Codex Skillは、Codexが人間のアプリ、データ、機能へ触れ、作�
 
 人がWeb UIから操作するアプリと、AIがSkillから利用する能力は、同じアプリ所有の世界へ異なる入口から関われます。Yatagarasu Coreはそのアプリの内部状態を奪いません。必要な観測、Proposal、Effect、結果Eventを境界越しに交換します。
 
-初期Codex capabilityはSkillCreator、Search、Fetchを含む。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成でき、Y2はその作成に追加承認/制限を加えない。その外部資産は正式Y2 Behavior updateなしにY2 Behavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillが返したAI由来の行動提案は、必ずPolicy検証を通る。Search/FetchはREQ-NET-001のallowlist、provenance、configured transfer authorizationを守る。
+初期Codex capabilityはSkillCreator、Search、Fetchを含む。Owner standing delegationに基づくSkillCreatorは、inactive assetと初期SkillExecutionGrantを構成し、grant commit後のactivationまでSkillを実行させない。Skillはpinしたgrant範囲でWorkspace外read/write、network、secret、外部副作用を使えるが、grantを自己拡大しない。その外部資産は正式Y2 Behavior updateなしにY2 Behavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skillが返したAI由来の行動提案は、必ずPolicy検証を通る。初期catalogのmanaged Search/Fetch実通信はREQ-NET-001の型付きY2 Portへ限定し、Skillの直接通信をprovenance付きSearch/Fetch成功へ昇格させない。一般Skillのgrant内network能力は維持する。
 
 ## 音声出力と取消
 

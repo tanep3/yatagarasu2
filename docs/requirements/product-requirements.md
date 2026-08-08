@@ -15,17 +15,18 @@
 
 ### REQ-PRD-002 — Codex SkillとY2 Behaviorを分けて人とAIがアプリの世界を共有する
 
-製品は、Codex Skillを通して人が使うアプリ、データ、能力をAIへ接続できなければならない。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、version付きrobot機能であるY2 Behaviorとは別である。初期Codex capabilityにはSkillCreator、Search、Fetchを含める。Codexは自身の権限で`SKILL.md`、Python、Web、scriptを作成してよく、Y2はその作成に承認/制限層を追加しない。ただし外部資産は正式Y2 Behavior updateなしに信頼済みBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skill追加のためにKernelへ製品固有の主手順を追加してはならない。
+製品は、Codex Skillを通して人が使うアプリ、データ、能力をAIへ接続できなければならない。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、version付きrobot機能であるY2 Behaviorとは別である。初期Codex capabilityにはSkillCreator、Search、Fetchを含める。OwnerはSkillCreatorへSkill作成と初期実行権限構成を包括委任し、作成ごとの承認操作なしで`SKILL.md`、Python、Web、scriptとSkill単位grantを有効化できる。作成済みSkillはgrantの範囲でWorkspace外の外部アプリ、ファイル、network、secret、副作用へ接続できるが、自身のgrantを拡大しない。ただし外部資産は正式Y2 Behavior updateなしに信頼済みBehavior、Rule、Policy、Port、Effect、ownership/catalogを変更しない。Skill追加のためにKernelへ製品固有の主手順を追加してはならない。
 
 受入条件:
 
 - AC-PRD-003: 試験用アプリの同じデータを、人向け入口とSkill入口から参照でき、データの所有者がYatagarasu Coreへ移らないことを示す。
 - AC-PRD-004: 試験用Skillを一つ追加しても、Kernelにそのアプリ名または製品固有の条件分岐を追加せず、能力一覧と境界契約から利用可能にできる。
 - AC-PRD-016: SkillCreator、Search、Fetchが初期Codex capabilityとして存在し、Codex Skillが作る外部ファイルをY2の信頼済みBehavior/Rule/Policy/Port/Effectまたは状態所有へ自動昇格させないことを示す。Search/FetchはREQ-NET-001のallowlist、provenance、transfer authorizationを通る。
+- AC-PRD-018: Ownerの包括委任から作成された試験Skillが、作成ごとの承認UIなしで初期grantの範囲にあるWorkspace外アプリデータを読み書きできる一方、自身のgrantまたはY2 Behaviorを拡大できないことを示す。
 
 ### REQ-PRD-003 — 実機による代表Interaction
 
-対応実機構成において、Yatagarasu 2は、相対身体操作、撮影と画像解釈、それらを結ぶ複合要求、音声入力から音声応答までを、実際の外部I/Oを含む一つの因果列として実行できなければならない。Fake Adapterだけの試験はこの要件の受入証拠にならない。
+初期対象機種はTapo TC70とTapo C210とする。第一基準かつ初期releaseの必須実機はY1で実績のあるTC70、第二基準はC210であり、同時対応を目指す。C210対応が困難な場合は、初期TC70契約を弱めず追加の機種profileとして後続対応できる。製品名はAdapter/bootstrap/profileに閉じ、Coreの型・Rule・Policyへ持ち込まない。対応実機構成において、Yatagarasu 2は、相対身体操作、撮影と画像解釈、それらを結ぶ複合要求、音声入力から音声応答までを、実際の外部I/Oを含む一つの因果列として実行できなければならない。Fake Adapterだけの試験はこの要件の受入証拠にならない。
 
 受入条件:
 
@@ -33,10 +34,11 @@
 - AC-PRD-006: 対応実機から画像を取得し、有効なArtifactRefとしてAgentへ渡し、画像に基づく回答を得られる。撮影Failureまたは無効ArtifactRefではAgentへ画像解釈を要求しない。
 - AC-PRD-007: 「右を向いて何が見える？」が、移動、想定動作時間、撮影、画像解釈、応答の因果列を生成する。移動のDefinitelyNotApplied、Failure、OutcomeUnknownは下流を止め、Assumedから進む場合は明示Policyを要求する。
 - AC-PRD-008: 実音声入力がWakeWord、VAD/STT、Interaction受理を経て応答を生成し、対応TTS／再生Adapterから少なくとも再生開始の結果Eventが返る。
+- AC-PRD-019: TC70を第一基準としてAC-PRD-005–008を実機で満たし、対象hardware/firmware、device profile、Adapter versionを記録する。C210は第二基準として同じ証拠を目指し、未達ならtyped unsupported/deferredと後続profile計画を示す。どちらもCoreへ製品名分岐を追加しない。
 
 ### REQ-PRD-004 — SBERTで推論能力を動的に選択する
 
-製品は、少なくともローカル推論能力と外部推論能力をlogical profile（論理プロファイル）として構成し、SBERTの意味候補と決定方針により、LLMへ選択判断を求めずにLLM modelおよびProvider routeを選択できなければならない。初期Agent adapterはCodexのみであり、Provider choiceはCodex default経由のOpenAI、Hoshikage、Ollama APIだけとする。local/remoteおよびSBERT-policyの選択は明示configured choiceであり、effective routeをdispatch前にbindする。設定変更は次Interactionからのみ適用し、active turnをrebindせず、Provider間/local-remote間/同一Provider内の自動fallbackをしない。失敗はtyped terminal FailureまたはRecoveryとする。
+製品は、少なくともローカル推論能力と外部推論能力をlogical profile（論理プロファイル）として構成し、SBERTの意味候補と決定方針により、LLMへ選択判断を求めずにLLM modelおよびProvider routeを選択できなければならない。初期Agent adapterはCodexのみであり、Provider choiceはCodex default経由のOpenAI、Hoshikage、Ollama APIだけとする。各routeは`CodexThread`または`NoExternalContinuity`の文脈継続能力を広告し、effective routeとともにdispatch前へ固定する。Codex Threadを継続できるrouteだけがexact Threadをresumeし、非対応routeへThread継続を要求または偽装しない。local/remoteおよびSBERT-policyの選択は明示configured choiceであり、設定変更は次Interactionからのみ適用し、active turnをrebindせず、Provider間/local-remote間/同一Provider内の自動fallbackをしない。失敗はtyped terminal FailureまたはRecoveryとする。
 
 受入条件:
 
@@ -44,6 +46,7 @@
 - AC-PRD-010: 速度重視、Vision、高性能推論の代表入力が、SBERT候補とversion付きPolicyにより異なる論理プロファイルへ解決され、route選択のためのLLM requestを生成しない。
 - AC-PRD-011: 選択したpreferred route（希望経路）と、configured authorization・可用性・Policy適用後のeffective route（実効経路）が別々に参照でき、selection、rejection、Failureの理由を型付き結果として示す。自動縮退/fallbackを示してはならない。
 - AC-PRD-017: 初期Provider choice以外を要求する、またはeffective route bind後に設定変更/利用不能を注入するfixtureが、active turnをrebindせず自動fallbackもせず、次Interactionへ新設定を適用し、現在turnにはtyped terminal Failure/Recoveryを返す。
+- AC-PRD-020: OpenAI/Codex routeとHoshikage/Ollamaの対応profileが文脈継続能力を広告し、`CodexThread` routeだけがexact Thread resumeを要求する。`NoExternalContinuity` routeは現在入力と選択済みSemanticMemoryだけで開始し、route切替後も存在しない外部履歴を継承したと表示しない。
 
 ### REQ-PRD-005 — 会話に閉じない振る舞いを提供する
 

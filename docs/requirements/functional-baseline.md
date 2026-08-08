@@ -28,7 +28,7 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | wake→有限会話→Home E2E | 起床から最初の発話、応答、Home復帰までの因果を実機で確認する必要がある | REQ-SET-001, REQ-CNV-001 |
 | 区間別遅延計測 | 反射速度を守るには、総時間だけでなくwake、STT、routing、dispatch等を分けて測る必要がある | REQ-NFR-001 |
 | 音声promptと応答再生 | 口には再生時間、取消、成果物の生存期間がある | REQ-OPS-004, REQ-OPS-006 |
-| Codex Skillによる能力拡張 | SkillCreator、Search、Fetchを通じ、AIがロボット外のアプリ、データ、能力へ接続できる。SkillはY2 Behaviorではない | REQ-PRD-002, REQ-SCP-001, REQ-ARC-007 |
+| Codex Skillによる能力拡張 | SkillCreator、Search、Fetchを通じ、AIがロボット外のアプリ、データ、能力へ接続できる。Ownerは作成と初期grantを包括委任し、Skillはgrant範囲で外部副作用を行えるが自己拡大しない。SkillはY2 Behaviorではない | REQ-PRD-002, REQ-SKL-001, REQ-SCP-001, REQ-ARC-007 |
 | 動的LLM／Provider選択 | SBERTの反射で用途に合うlocal／external推論能力を選び分ける | REQ-PRD-004, ADR-011 |
 | 設定と能力診断 | 設定、Workspace、状態、cacheを分け、採用元と能力を診断する | REQ-CFG-001, REQ-CFG-004 |
 | 安全な設定変更とUpgrade | 型検証、原子的保存、反映範囲、利用者資産保護が必要である | REQ-CFG-002, REQ-CFG-003 |
@@ -40,7 +40,7 @@ Yatagarasu 1は、Yatagarasu 2へ移植するコードの一覧ではありま�
 | 一Server・一Workspace・一Owner | 一人のOwnerが複数browser、token、deviceを利用する | REQ-API-004, ADR-014 |
 | Linux setup、Capability診断、secret境界 | 設定とCapabilityが使えるかを安全に運用確認する必要がある | REQ-SET-001, ADR-020 |
 | Wake/SBERT品質測定 | Wake positive/near-negative/silence/self-audio、SBERT single/composite/negative/unrelated、warm/cold、CPU/RAM、連続稼働、再接続を測らなければ改善・配備判断できない | REQ-QPR-001, ADR-020 |
-| Yatagarasu所有の会話・記憶 | 自動保存、明示memorize、recent 3 + semantic 3、5目的のrecallとprovenanceの価値がある | REQ-MEM-001, ADR-017 |
+| Provider別継続文脈とYatagarasu記憶 | `CodexThread` routeはexact Threadが会話連続性を担い、非対応routeは外部継続を主張しない。Yatagarasuは原発話/最終応答を正本保存する。SemanticMemory自動保存、通常既定recent 0 + semantic 3、5目的のrecallとprovenanceを持つ | REQ-MEM-001, REQ-AGT-001, ADR-011, ADR-017, ADR-022 |
 | View/Recall提示 | 9 View目的、5 Recall目的、根拠/禁止提示、空結果、翻訳のみの再生を区別する必要がある | REQ-OUT-001, ADR-017 |
 | search/fetch | 現在情報の検索・取得は独立の必須能力で、引用、no-results/Failure、内容分類別のconfigured transfer authorizationを必要とする | REQ-NET-001, ADR-021 |
 

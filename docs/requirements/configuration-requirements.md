@@ -45,7 +45,7 @@ Capabilityの配置は`local-managed`、`remote`、`disabled`の論理モード�
 | OpenAI | Codexを通るremote upstream。provider routeとしてselectedまたはdisabled | Codex自体をremote Agent serviceにしない |
 | Hoshikage / Ollama API | 明示選択installation hostの`local-managed`、またはLAN/Tailscale endpointの`remote`、または`disabled` | route/endpoint/version/credentialをbindし、自動fallbackしない |
 | Source/go2rtc、Wake、Mimy、TTS/VOICEVOX、SemanticMemory、device adapter | adapterが対応する場合、個別に`local-managed`または`remote`、または`disabled` | disabledまたは未readyなら依存Behaviorはtyped readiness Failureで拒否する |
-| SkillCreator / Search / Fetch | 必須Codex workspace capability | installable Y2 Behavior/plugin serviceではない。Search/FetchはREQ-NET-001を守る |
+| SkillCreator / Search / Fetch | 必須Codex workspace capability。Owner standing delegationとSkill単位grantを構成 | installable Y2 Behavior/plugin serviceではない。assetとgrantが有効化されるまでSkillは実行不能。Search/FetchはREQ-NET-001を守る |
 
 受入条件:
 
@@ -55,6 +55,7 @@ Capabilityの配置は`local-managed`、`remote`、`disabled`の論理モード�
 - AC-CFG-012: installation fixtureがserverごとにservice/capabilityを個別選択し、全Y2 serverを自動installせず、Codexを公式installerから扱いbundleしないことを示す。
 - AC-CFG-013: `local-managed`、`remote`、`disabled`とProvider routeの変更fixtureがactive Interactionをrebindせず次Interactionからだけ反映し、利用不能時に別mode/Providerへの自動fallbackをしないことを示す。
 - AC-CFG-014: deployment matrix fixtureが、Codex app-serverをY2 Agent host上の公式installer由来long-lived capabilityとして検証し、stdio/Unix socket候補以外の初期remote/WSをtyped unsupported Failureにする。OpenAIはCodex経由remote route、Hoshikage/Ollamaは選択host local-managed/LAN-Tailscale remote/disabled、その他各adapterは対応範囲のlocal-managed/remote/disabledとして個別bindingする。全行のendpoint/binding/health/version/credential readinessと、disabled/unsupported/未ready依存Behaviorのtyped Failure、全service非自動install、SkillCreator/Search/FetchがY2 installable Behavior/pluginでないことを示す。
+- AC-CFG-015: config fixtureがSemanticMemory通常取得の`recent=0`/`semantic=3`、Provider routeのContextContinuity能力、ThinkingNoticeの文言/有効無効、Owner standing delegation、Skill単位grant、TC70/C210 device profileを型検証し、変更を次Interactionまたは宣言apply modeから適用する。active Effect/Skill executionへ新versionを遡及適用せず、secret本文を表示しない。
 
 ## 未決の詳細
 

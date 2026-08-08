@@ -13,7 +13,9 @@ Y1はLinux、Owner相当の運用設定、複数Capability、doctor、WakeのCPU
 
 Codex app-serverはY2 Agent hostと同一hostの必須long-lived capabilityであり、公式installerから導入する。OpenAIはCodex経由のremote upstream、Hoshikage/Ollamaは選択host local-managedまたはLAN/Tailscale remoteまたはdisabledとする。その他adapterは対応するlocal-managed/remote/disabledを個別選択する。endpoint/binding、health、version、credentialのreadinessを満たさない行、または初期unsupported remote/WS Codexは型付きFailureである。SkillCreator/Search/Fetchは必須Codex workspace capabilityであってY2 plugin serviceではない。
 
-Quality Profileはversion付きでWake positive/near-negative/silence/self-audio、SBERT single/composite/negative/unrelated、warm/cold、CPU、RAM、endurance、reconnectの測定条件・結果・Failureを記録する。365日objectiveは計画、hardware/profile、途中evidence、spike後soak thresholdが揃うときだけ主張できる。pre-roll/guard/settleは環境別の実測defaultをversion/configへ固定し、必要測定または閾値が未設定ならrelease-readyではない。具体的な数値・測定時間はspike後に決める。
+第一基準かつ初期release必須実機はTapo TC70、第二基準はTapo C210とする。両方を対象に同時対応を目指すが、C210が未達ならTC70契約を弱めず後続device profileとして扱える。製品名はAdapter/bootstrap/profileに閉じ、Coreへ持ち込まない。TC70試験はY1環境へY2を混在させず、Y1 handle/session解放、実機排他、期限付きtest window、abort cleanup、Y1復帰確認を証明してから行う。
+
+Quality Profileはversion付きでWake positive/near-negative/silence/self-audio、TTS全文Stop語あり/なしの利用者Stop・自己音声・同時発話・近似語・遅延buffer、SBERT single/composite/negative/unrelated、warm/cold、CPU、RAM、endurance、reconnectの測定条件・結果・Failureを機種別に記録する。365日objectiveは計画、hardware/profile、途中evidence、spike後soak thresholdが揃うときだけ主張できる。pre-roll/guard/settleは環境別の実測defaultをversion/configへ固定し、必要測定または閾値が未設定ならrelease-readyではない。具体的な数値・測定時間はspike後に決める。TC70の音声Stop採否はTC70 spike後にOwnerが明示し初期release gateとする。C210は対応を主張するprofileだけが同じgateを独立に満たし、未達でもTC70 releaseをblockしない。
 
 ## Consequences
 

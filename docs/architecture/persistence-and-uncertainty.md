@@ -18,6 +18,8 @@ transaction、outbox、databaseの具体方式は未決です。Interaction Cont
 
 Codex外部turnはAgent Session Contextのdurable `AgentTurnBinding`として別に相関する。BindingはInteraction ID、exact Thread ID、external turn/operation IDまたはabsence、Y2-issued immutable attempt/generation/correlation、lifecycle、pinしたprovider/profile/protocolを持つ。crashがexternal ID返却前に起きてもこの相関を失わない。同じThread上の後続turnの開始は旧Bindingをcurrentへ戻さず、late/duplicate resultやstale interruptは旧BindingのRecovery/auditだけを更新する。
 
+Codex Threadは複数Interaction/Homeを越える外部継続文脈であり、Yatagarasuの正本Conversation/Memoryとは別である。通常SemanticMemory取得の既定`recent=0`はThread履歴を除外しない。SemanticMemoryの削除は将来の保存・注入へ効くが、すでに外部Threadへ渡した内容を遡及消去したとは主張しない。完全に外部文脈を切るOwner Thread resetは別Commandとし、durable reset barrier後に新Threadへ切り替え、旧late resultを隔離する。
+
 ## 取消も永続化する
 
 待機中の仕事が取り消された場合、Execution Contextはrevocation（取消済み状態）を同じ復旧境界で永続化します。再起動後もDispatcherはそれを送信しません。
@@ -57,7 +59,7 @@ OutcomeUnknownの資源を再利用できるかは、物理結果の確かさと
 
 Artifact Contextは、画像、音声、その他ArtifactRefの作成、利用可能性、参照中、認可、lifetime、削除、孤立成果物の回収を所有します。外部へ渡すのは論理Artifact IDと認可済み参照であり、filesystem path/storage locatorではありません。撮影失敗や無効なArtifactRefは、LLM Effectを実行可能にしません。TTS WAVはplayback terminalまたはdurable Recovery後かつ未解決dependentなしでのみ、temp captureはInteraction terminal後かつ未解決dependentなしでのみ削除する。saved ArtifactはOwner deleteまで保持する。cleanupはDecision→Effect→result Eventで監査し、restart、参照、OutcomeUnknownもlogical ID/lifetime/dependent/recoveryで再判定する。
 
-`Image`、`Audio`、`Transcript`、`Conversation`、`Memory`、`Artifact`などのcontent classごとに、`Local`/`Remote`の処理場所と`LocalToRemote`/`RemoteToLocal`の移送方向を別Policyで扱う。README/setup/configのstanding disclosureとenabled configがauthorizationであり、利用ごとのprompt UIは置かない。disable/revocationは次のsave/transferより前に効き、自動fallbackしない。取得または保存の許可は、LLM/Providerへの転送許可を含意しない。削除済みArtifact/Memoryを再公開しない。
+`Image`、`Audio`、`Transcript`、`Conversation`、`Memory`、`Artifact`などは、排他的な一分類ではなく非空の`ContentClassSet`として同時に付く。Data Classification Policyが入力、派生、結合、検索取得、prompt組立で分類をunionし、Unknown、未分類、空集合、矛盾を拒否する。`Local`/`Remote`の処理場所と`LocalToRemote`/`RemoteToLocal`の移送方向を別Policyで扱い、目的・方向・宛先について集合内の全分類が許可された場合だけEffectを作る。README/setup/configのstanding disclosureとenabled configがauthorizationであり、利用ごとのprompt UIは置かない。disable/revocationは次のsave/transferより前に効き、自動fallbackしない。取得または保存の許可は、LLM/Providerへの転送許可を含意しない。削除済みArtifact/Memoryを再公開しない。
 
 通知も同じです。通知を試みた、外部へ届いた、届いたか分からないを分けます。Projectionに「通知済み」と表示したことは、利用者の端末へ届いた証拠ではありません。
 

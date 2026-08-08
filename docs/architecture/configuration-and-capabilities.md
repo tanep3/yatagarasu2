@@ -70,12 +70,12 @@ remote接続はhealth、能力広告、API versionを照合します。local-man
 | OpenAI | Codex経由のremote upstreamとしてselectedまたはdisabled。 |
 | Hoshikage / Ollama API | 明示選択hostのlocal-managed、LAN/Tailscale remote、またはdisabled。 |
 | Source/go2rtc、Wake、Mimy、TTS/VOICEVOX、SemanticMemory、device adapter | adapter対応範囲で個別local-managed/remote/disabled。未ready依存Behaviorはtyped readiness Failure。 |
-| SkillCreator / Search / Fetch | 必須Codex workspace capability。Y2 installable Behavior/plugin serviceではない。 |
+| SkillCreator / Search / Fetch | 必須Codex workspace capability。Owner standing delegationとSkill単位grantを持ち、asset/grant activation完了まで実行不能。Y2 installable Behavior/plugin serviceではない。 |
 
 ## Linux導入、doctor、Quality Profile
 
 初期baselineはUbuntu 24.04 LTS、x86_64、Intel第8世代Core i5以上、RAM 8GB以上であり、外部serverは自身の要件を所有する。setupは一Server、一Workspace、一Ownerを作る。Capability選択、credential registration、logical modeとconfigから参照するsecret boundaryを明示し、secret本文をconfig、Event、Projection、journal、通常log、Artifact名へ出さない。`doctor`はSource、Wake、STT、SBERT、camera、TTS、Provider、Memory、Codex version/schemaごとの未設定、認証失敗、非互換、利用不能、ready、remedyを別の型付き診断として返し、configured authorizationなしのexternal transferを試行しない。
 
-Quality Profileはversion付きでWake positive/near-negative/silence/self-audio、SBERT single/composite/negative/unrelated、warm/cold、CPU、RAM、endurance、reconnectの測定条件、結果、Failureを記録する。365日objectiveは計画、hardware/profile、途中evidence、spike後soak thresholdが揃う場合だけ主張できる。pre-roll/guard/settleは環境別の実測defaultをversion/configへ固定し、未計測ならrelease-readyではない。必要な測定または数値閾値が未設定でもrelease-readyではない。
+Quality Profileは第一基準TC70、第二基準C210を明示し、Wake positive/near-negative/silence/self-audio、TTS回答全文のStop語あり/なしにおける自己音声・利用者Stop・同時発話・近似語・遅延buffer、SBERT single/composite/negative/unrelated、warm/cold、CPU、RAM、endurance、reconnectの測定条件、結果、Failureを記録する。TC70は実測とOwner採否が初期release gateである。C210は同時対応を目指すが、未達ならC210 profileだけを非readyとして後続対応にでき、TC70 releaseを止めない。365日objectiveは計画、hardware/profile、途中evidence、spike後soak thresholdが揃う場合だけ主張できる。pre-roll/guard/settleは環境別の実測defaultをversion/configへ固定し、未計測ならrelease-readyではない。必要な測定または数値閾値が未設定でもrelease-readyではない。
 
 規範的な受入条件は[設定・Workspace要件](../requirements/configuration-requirements.md)にあります。

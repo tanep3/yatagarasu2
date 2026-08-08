@@ -70,6 +70,7 @@ LLM、Codex、Skillを介した外部主体、その他外部能力のProposal�
 - AC-ARC-011: LLM Proposalを拒否するfixtureが、State変更、Effect確定、Graph変更、dispatchのいずれも生まないことを示す。
 - AC-ARC-019: 承認済み決定論Contributorと信頼できない外部主体へ同等のGraph断片を提案させるfixtureが、前者だけを宣言権限の範囲で受理し、後者にはPolicy検証を要求する。
 - AC-ARC-020: Skillの読取観測、決定論的能力、AI由来Proposalの三経路が、それぞれObservation、許可済みGraph断片、未承認Proposalとして区別される。
+- AC-ARC-028: Owner standing delegation、inactive Skill asset、version付きSkillExecutionGrant、activation、runtime Effectのfixtureが、Authorization Policy Contextだけをgrant所有者として示し、SkillCreator/Skill/LLMがgrantまたはY2 Behavior catalogを直接変更しない。
 
 ### REQ-ARC-006 — 実効profileをdispatch時に固定する
 

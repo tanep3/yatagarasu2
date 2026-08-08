@@ -13,7 +13,7 @@ Webを管理画面の付属物ではなくYatagarasuの身体面として扱う�
 - AC-API-001: 標準Web画面から行う代表操作が、公開APIのtransport値から、音声等の別Inbound Adapterと同じ型付きCommand境界へ変換される。
 - AC-API-002: API適合試験が、内部Effectの直接dispatch、Adapter直接呼出し、WorldStateの直接変更を拒否し、安全・権限・Capability Policyを通過した操作だけを受理する。
 - AC-API-003: architecture testが、API request／response schemaを変更または別transportへ交換してもdomain型とRuleの変更を要求せず、domainがWeb frameworkまたはtransport schemaへ依存しないことを示す。
-- AC-API-015: 二つの認証済みbrowser/API mutationとvoiceが同時に入力するfixtureが、browser/API mutationのclient idempotency keyを必須にする。同一key/同一payloadはInteraction Contextの耐久request-idempotency ledgerから同じ型付きresultをreplayしてEffectを重複せず、同一key/異payloadはConflictを返す。restart fixtureはRejected、AcceptedNoEffect、Pending、Completedをledgerから復元し、Execution pending EffectOccurrence recordとRecovery keyと混同しない。voiceはAPI keyを要求されずserver-assigned input identityを受ける。Home/Cancelは競合中も優先する。
+- AC-API-015: 二つの認証済みbrowser/API mutationとvoiceが同時に入力するfixtureが、browser/API mutationのclient idempotency keyを必須にする。同一key/同一payloadはInteraction Contextの耐久request-idempotency ledgerから同じ型付きresultをreplayしてEffectを重複せず、同一key/異payloadはConflictを返す。restart fixtureはRejected、AcceptedNoEffect、Pending、Completedをledgerから復元し、Execution pending EffectOccurrence recordとRecovery keyと混同しない。voiceはAPI keyを要求されずserver-assigned input identityを受ける。HomeとWeb Cancelは競合中も優先する。TTS再生中の音声Stop候補だけはREQ-ACOU-001の抑止判定を先に通る。
 
 ### REQ-API-002 — Webへ現在状態と更新を継続同期する
 

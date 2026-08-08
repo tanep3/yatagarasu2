@@ -5,9 +5,9 @@
 | 要件 | 受入条件 | 判断・説明 |
 | --- | --- | --- |
 | REQ-PRD-001 | AC-PRD-001, AC-PRD-002 | ADR-002; Product experience |
-| REQ-PRD-002 | AC-PRD-003, AC-PRD-004, AC-PRD-016 | ADR-007; ADR-015; Codex Skill/Y2 Behavior boundary; Y1 capability baseline |
-| REQ-PRD-003 | AC-PRD-005, AC-PRD-006, AC-PRD-007, AC-PRD-008 | Product experience; ADR-005; ADR-009 |
-| REQ-PRD-004 | AC-PRD-009, AC-PRD-010, AC-PRD-011, AC-PRD-017 | ADR-011; ADR-022; Domain model; Runtime boundaries |
+| REQ-PRD-002 | AC-PRD-003, AC-PRD-004, AC-PRD-016, AC-PRD-018 | ADR-007; ADR-015; Codex Skill/Y2 Behavior boundary; Y1 capability baseline |
+| REQ-PRD-003 | AC-PRD-005, AC-PRD-006, AC-PRD-007, AC-PRD-008, AC-PRD-019 | Product experience; ADR-005; ADR-009; ADR-020 |
+| REQ-PRD-004 | AC-PRD-009, AC-PRD-010, AC-PRD-011, AC-PRD-017, AC-PRD-020 | ADR-011; ADR-022; Domain model; Runtime boundaries |
 | REQ-PRD-005 | AC-PRD-012, AC-PRD-013 | ADR-013; ADR-015; Qualia and behavior |
 | REQ-PRD-006 | AC-PRD-014, AC-PRD-015 | ADR-014; Web body and public API |
 | REQ-FR-001 | AC-FR-001, AC-FR-002 | ADR-003; Domain model |
@@ -26,21 +26,21 @@
 | REQ-ARC-006 | AC-ARC-012 | ADR-008; ADR-009; Domain model |
 | REQ-ARC-007 | AC-ARC-014, AC-ARC-015, AC-ARC-016 | ADR-007; Domain model; Runtime boundaries |
 | REQ-ARC-008 | AC-ARC-013, AC-ARC-018 | ADR-008; Architecture requirements |
-| REQ-ARC-009 | AC-ARC-011, AC-ARC-019, AC-ARC-020 | ADR-008; Architecture requirements |
+| REQ-ARC-009 | AC-ARC-011, AC-ARC-019, AC-ARC-020, AC-ARC-028 | ADR-007; ADR-008; Architecture requirements |
 | REQ-ARC-010 | AC-ARC-021, AC-ARC-022, AC-ARC-023 | ADR-013; Domain model |
 | REQ-ARC-011 | AC-ARC-024, AC-ARC-025, AC-ARC-026, AC-ARC-027 | ADR-015; Qualia and behavior |
 | REQ-PER-001 | AC-PER-001, AC-PER-002 | ADR-003 |
 | REQ-PHY-001 | AC-PHY-001, AC-PHY-002 | ADR-005 |
 | REQ-PHY-002 | AC-PHY-003, AC-PHY-004, AC-PHY-005, AC-PHY-006 | ADR-005 |
 | REQ-PHY-003 | AC-PHY-007, AC-PHY-008, AC-PHY-009 | ADR-009; Persistence and uncertainty |
-| REQ-OPS-001 | AC-OPS-001 | ADR-002 |
+| REQ-OPS-001 | AC-OPS-001, AC-OPS-028 | ADR-002; ADR-020 |
 | REQ-OPS-002 | AC-OPS-002, AC-OPS-003 | ADR-004 |
 | REQ-OPS-003 | AC-OPS-004, AC-OPS-005, AC-OPS-006 | ADR-004 |
 | REQ-OPS-004 | AC-OPS-007, AC-OPS-008, AC-OPS-010, AC-OPS-011 | ADR-005 |
 | REQ-SEC-001 | AC-SEC-001 | 運用要件; ADR-007 |
 | REQ-OPS-005 | AC-OPS-009 | ADR-006; ADR-007 |
 | REQ-OPS-006 | AC-OPS-012, AC-OPS-013, AC-OPS-014, AC-OPS-019 | ADR-010; Persistence and uncertainty |
-| REQ-OPS-007 | AC-OPS-015, AC-OPS-016 | ADR-009; Domain model |
+| REQ-OPS-007 | AC-OPS-015, AC-OPS-016, AC-OPS-029, AC-OPS-030 | ADR-009; Domain model; Y1 listend feedback |
 | REQ-OPS-008 | AC-OPS-017, AC-OPS-018, AC-OPS-020, AC-OPS-021, AC-OPS-022, AC-OPS-023 | ADR-005; ADR-010; Runtime boundaries |
 | REQ-OPS-009 | AC-OPS-024, AC-OPS-025, AC-OPS-026, AC-OPS-027 | ADR-013; Persistence and uncertainty |
 | REQ-API-001 | AC-API-001, AC-API-002, AC-API-003, AC-API-015 | ADR-014; ADR-019; Web body and public API |
@@ -50,19 +50,20 @@
 | REQ-CFG-001 | AC-CFG-001, AC-CFG-002, AC-CFG-003 | ADR-012; Configuration architecture |
 | REQ-CFG-002 | AC-CFG-004, AC-CFG-005, AC-CFG-006 | ADR-012; Configuration architecture |
 | REQ-CFG-003 | AC-CFG-007, AC-CFG-008 | ADR-012; Configuration architecture |
-| REQ-CFG-004 | AC-CFG-009, AC-CFG-010, AC-CFG-011, AC-CFG-012, AC-CFG-013, AC-CFG-014 | ADR-012; ADR-020; ADR-022; Runtime boundaries |
+| REQ-CFG-004 | AC-CFG-009, AC-CFG-010, AC-CFG-011, AC-CFG-012, AC-CFG-013, AC-CFG-014, AC-CFG-015 | ADR-007; ADR-012; ADR-020; ADR-022; Runtime boundaries |
 | REQ-FUT-001 | AC-FUT-001 | ADR-007 |
-| REQ-ACOU-001 | AC-ACOU-001, AC-ACOU-002, AC-ACOU-003, AC-ACOU-004, AC-ACOU-005, AC-ACOU-006 | ADR-016; ADR-006; Y1 listen_state/listend evidence |
-| REQ-MEM-001 | AC-MEM-001, AC-MEM-002, AC-MEM-003, AC-MEM-004, AC-MEM-005 | ADR-017; Y1 SemanticMemory/recall evidence |
+| REQ-ACOU-001 | AC-ACOU-001, AC-ACOU-002, AC-ACOU-003, AC-ACOU-004, AC-ACOU-005, AC-ACOU-006, AC-ACOU-007 | ADR-016; ADR-006; Y1 listen_state/listend evidence |
+| REQ-MEM-001 | AC-MEM-001, AC-MEM-002, AC-MEM-003, AC-MEM-004, AC-MEM-005, AC-MEM-006 | ADR-017; ADR-022; Y1 SemanticMemory/recall evidence |
 | REQ-OUT-001 | AC-OUT-001, AC-OUT-002, AC-OUT-003, AC-OUT-004 | ADR-017; Presentation contract |
 | REQ-EFX-001 | AC-EFX-001, AC-EFX-002, AC-EFX-003, AC-EFX-004, AC-EFX-005 | ADR-018; ADR-004; ADR-005 |
 | REQ-CNV-001 | AC-CNV-001, AC-CNV-002, AC-CNV-003, AC-CNV-004 | ADR-019; ADR-013 |
 | REQ-QLI-001 | AC-QLI-001, AC-QLI-002, AC-QLI-003, AC-QLI-004 | ADR-019; ADR-010; ADR-013; ADR-014 |
 | REQ-SET-001 | AC-SET-001, AC-SET-002, AC-SET-003, AC-SET-004 | ADR-020; ADR-022; ADR-014; Y1 setup/doctor evidence |
 | REQ-QPR-001 | AC-QPR-001, AC-QPR-002, AC-QPR-003, AC-QPR-004 | ADR-020; ADR-022; Y1 wake measurements |
-| REQ-DAT-001 | AC-DAT-001, AC-DAT-002, AC-DAT-003, AC-DAT-004, AC-DAT-005 | ADR-021; ADR-009; ADR-012 |
-| REQ-NET-001 | AC-NET-001, AC-NET-002, AC-NET-003, AC-NET-004 | ADR-021; ADR-007 |
-| REQ-AGT-001 | AC-AGT-001, AC-AGT-002, AC-AGT-003, AC-AGT-004, AC-AGT-005, AC-AGT-006 | ADR-022; Codex app-server boundary |
+| REQ-DAT-001 | AC-DAT-001, AC-DAT-002, AC-DAT-003, AC-DAT-004, AC-DAT-005, AC-DAT-006, AC-DAT-007 | ADR-021; ADR-009; ADR-012 |
+| REQ-NET-001 | AC-NET-001, AC-NET-002, AC-NET-003, AC-NET-004, AC-NET-005 | ADR-021; ADR-007 |
+| REQ-AGT-001 | AC-AGT-001, AC-AGT-002, AC-AGT-003, AC-AGT-004, AC-AGT-005, AC-AGT-006, AC-AGT-007, AC-AGT-008, AC-AGT-009 | ADR-011; ADR-017; ADR-022; Codex app-server and Provider Inference Port boundary |
+| REQ-SKL-001 | AC-SKL-001, AC-SKL-002, AC-SKL-003, AC-SKL-004 | ADR-007; Skill creation/execution authority boundary |
 | REQ-SCP-001 | AC-SCP-001, AC-SCP-002, AC-SCP-003 | ADR-023; initial release scope |
 | REQ-LOG-001 | AC-LOG-001, AC-LOG-002, AC-LOG-003 | ADR-021; retention and cleanup boundary |
 
@@ -76,7 +77,7 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | 凍結04 §9および§10.4: 固定Unix socket UTF-8 JSONL IPC | 凍結05 §3.3がUnix socket/JSONLを候補にとどめる | IPCは延期する。transport schemaはdomain型ではない。ADR-003。 |
 | 凍結06 §6.1: Mimyがgo2rtcへ直接接続する | 新しいaudio topology判断 | Mimyは汎用でsource-agnosticとし、go2rtcはsource adapterの一例にする。ADR-006。 |
 | 凍結02 §2.1: Voice GatewayがVAD/STTを所有する。凍結06 §6.1: Mimyがsource/ring bufferを常時維持し、wakeでsessionを作成・releaseする | 新しいwake/session所有判断 | Yata WakeとMimyは接続/raw audio bytes/ring bufferをそれぞれ独立して所有する。Acoustic Contextはpre-roll選択window/cursorと保持/discardを含むwake acceptance/promptを所有し、Mimy sessionのcreate/releaseをcommandする。ADR-006/016。 |
-| Y1 `listen_state.py`/`listend.py`: prompt後のRTSP consumer resetで自己音声を除去する | 一wake一命令とsource非依存のAcoustic所有 | Acoustic Contextがpre-roll選択、discard、guard、空命令を唯一所有する。RTSP resetは許されるAdapter実装候補であって、Y2の必須機構ではない。TTS中もHome/Stop control検知は生存する。ADR-016、REQ-ACOU-001。 |
+| Y1 `listen_state.py`/`listend.py`: prompt後のRTSP consumer resetで自己音声を除去する | 一wake一命令とsource非依存のAcoustic所有 | Acoustic Contextがpre-roll選択、discard、guard、空命令を唯一所有する。RTSP resetは許されるAdapter実装候補であって、Y2の必須機構ではない。TTS中もHome/Stop候補の検知経路は生存するが、回答全文に登録Stop語がある間の音声Stopだけは意図的に抑止する。Web Home/Cancelと音声Homeは生存する。ADR-016、REQ-ACOU-001。 |
 | 凍結01 §12および凍結05 §7: Conversation/Memoryの細部を未決にする | 初期の記憶・提示・有限fallbackの承認 | Yatagarasu所有と外部Codex Skill/Provider非所有、standing authorization、Owner delete、既定recall、Presentation、初期一入力一応答は決定した。schema、保存engine、継続会話は未決。Provider external bindingはADR-022に従う。 |
 | 凍結02 §5: 一般的なidempotency | Interaction request-idempotency ledgerとEffectOccurrence recoveryの分離 | Interaction Contextはclient key、payload fingerprint、replay可能なtyped result/status/lifecycleを持つ耐久ledgerを所有する。Execution Contextのpending EffectOccurrence recordとRecovery keyは別である。具体storage/key形式は未決。ADR-018/019、REQ-EFX-001、REQ-QLI-001。 |
 | 凍結04 §5、§8.3、§8.6: Agentがmodel/provider/thread/turn制御を所有する | 凍結05 §3.2/§9および新しいdomain判断 | Kernelと名前を持つContextがdomain stateを所有する。Python/外部capabilityはWorldState、plan、provider state、conversation stateを所有しない。ADR-003。 |
@@ -127,14 +128,14 @@ Yatagarasu 1の実機で検証済み機能要件と、凍結済みYatagarasu 2�
 | process management | supervisor配置とlocal workerのlifecycle |
 | configuration mechanisms | Windows/macOS root、schema／atomic write library、secret store、installer、migration engine |
 | acoustic実装 | RTSP/Mimyのbuffer/reconnect、pre-roll/guardの具体機構と数値 |
-| memory実装 | schema、保存engine、削除の内部実装。retentionはOwner deleteまで、同意画面は採用しない |
+| memory実装 | schema、保存engine、削除の内部実装、Codex Thread reset barrierとcompactionの具体機構。retentionはOwner deleteまで、通常取得`recent=0`/`semantic=3`、ThreadとSemanticMemoryの独立resetは決定済み。利用ごとの同意画面は採用しない |
 | Presentation実装 | 翻訳器、表示/再生形式、読み上げvoiceの具体選択 |
 | EffectOccurrence実装 | durable keyの保存機構、API/recovery keyの具体format、settle数値 |
 | 初期Conversation以後 | 連続会話、複数入力session、長時間会話Behaviorの契約 |
 | Linux運用 | package/installer、secret store、doctor実装、サービス配置 |
-| Quality Profile | 対象hardware、閾値、測定時間、release判定の数値 |
+| Quality Profile | TC70を第一基準・初期release gate、C210を第二基準・独立profile gateとする。Wake/SBERT/TTS中Stop等の閾値、測定時間、release判定の数値はspike後に決める |
 | data/network Policy | allowlist内容、citation形式、Providerごとのmodel/credential。standing authorizationと無期限Memory retentionは決定済み |
-| Codex Skill互換性 | Codex所有のSkill形式、実行権限、配布、rollbackはY2 Behavior/plugin設計の対象外。Y2は追加承認・制限を加えない。Y2側の互換性はpinしたCodex/app-server versionによる新規Skillのdiscover/reloadとavailability報告のみ |
+| Codex Skill実行権限の強制方式 | Owner standing delegation、Skill単位grant、作成時activation、自己拡大禁止は決定済み。Codex turn permission profile、型付きTool、隔離workerのどれで強制するかはspikeで決める |
 | legal inventory | component version、license、notice、distribution obligation |
 
 ## 実装開始後の追跡形式

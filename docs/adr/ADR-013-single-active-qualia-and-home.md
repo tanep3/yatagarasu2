@@ -11,7 +11,7 @@
 
 Yatagarasu全体で現在の非Home qualia sessionは0または1とする。これはLifecycleのActive phaseだけでなく、Starting、Active、Terminating、Recoveringにある現在session全体を指す。Qualiaは、Yatagarasuが現在どの振る舞いとして世界を知覚し活動しているかを表す。Homeは現在sessionがない基本待受状態であり、Home以外では別Qualia開始要求をBusyとして拒否する。
 
-Qualia Contextは活動identityとLifecycleだけを所有し、Behavior固有Stateを集約しない。Home／Stop検知、永続化、Recovery、診断、認証、Web同期は自律神経として並行稼働するが、第二のQualiaまたは製品固有司令塔にならない。
+Qualia Contextは活動identityとLifecycleだけを所有し、Behavior固有Stateを集約しない。Home／Stop検知、永続化、Recovery、診断、認証、Web同期は自律神経として並行稼働するが、第二のQualiaまたは製品固有司令塔にならない。TTS再生中の音声Stop候補はADR-016の自己音声抑止を先に通るという明示的な例外を持つ。抑止中も音声／Web HomeとWeb Cancelは利用できる。
 
 設定可能な音声制御語とWebの常設Home操作は共通の`ReturnToHomeRequested` Commandを生む。既定音声は「ヤタガラス、ホーム」とする。Home要求の受理、Qualia終了、外部作用の取消、物理結果を分ける。
 

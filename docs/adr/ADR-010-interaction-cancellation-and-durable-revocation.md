@@ -9,7 +9,7 @@
 
 ## Decision
 
-`CancelRequested`は共通Inbound境界のCommandであり、Webのcancelは直ちにここへ投入する。Interaction Contextは取消受理を所有し、受理した事実を`CancellationAccepted` Eventとして記録する。Execution Contextはpending Graph workをdurable revokedにし、dispatcherはrestart後もrevoked recordをdispatchしない。cancelled Interactionは遅延Proposalを拒否する。
+`CancelRequested`は共通Inbound境界のCommandであり、Webのcancelは直ちにここへ投入する。音声Stop候補は、TTS再生中に限りADR-016の`StopSuppressionPolicy`を先に通る。抑止された候補から`CancelRequested`を作らないが、Web Cancelと音声／Web Homeは常に利用できる。Interaction Contextは取消受理を所有し、受理した事実を`CancellationAccepted` Eventとして記録する。Execution Contextはpending Graph workをdurable revokedにし、dispatcherはrestart後もrevoked recordをdispatchしない。cancelled Interactionは遅延Proposalを拒否する。
 
 `ReturnToHomeRequested`はQualia終了を求める別Commandである。一つのQualiaに属する複数Interactionのadmission停止と終了処理を開始してよいが、Home要求の受理を各Interaction取消結果または物理停止結果と同一視しない。
 

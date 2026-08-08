@@ -17,7 +17,7 @@ Yatagarasu 2のBehavior追加は、Rust／Python／Web資産を含み得る正�
 
 ## Consequences
 
-機能追加は通常の製品設計、review、test、Upgradeとして扱われる。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、Y2 Behaviorとは別である。Codexが自身の権限で`SKILL.md`、Python、Web、scriptを作ることにY2は追加の承認・制限層を加えない。ただし、その外部資産は正式version updateなしにBehavior catalog、ownership registry、Rule、Policy、Effect、Portを変更しない。公開APIを使う外部clientは作成できるが、Yatagarasu内部へ新しい信頼済み振る舞いを注入しない。
+機能追加は通常の製品設計、review、test、Upgradeとして扱われる。Codex SkillはCodexの作業能力またはアプリ/AI接続面であり、Y2 Behaviorとは別である。OwnerはSkillCreatorへSkill資産と初期SkillExecutionGrantの構成をstanding delegationとして包括委任し、作成ごとの承認UIを置かない。作成済みSkillは有効なgrantの範囲で`SKILL.md`、Python、Web、scriptや外部資産を扱えるが、自身のgrantを拡大できない。また、その外部資産は正式version updateなしにBehavior catalog、ownership registry、Rule、Policy、Effect、Portを変更しない。公開APIを使う外部clientは作成できるが、Yatagarasu内部へ新しい信頼済み振る舞いを注入しない。
 
 ## Non-decision / open
 

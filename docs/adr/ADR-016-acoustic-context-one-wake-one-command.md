@@ -11,7 +11,9 @@ Y1はwake後のprompt回り込み、RTSP bufferの遅延、最初の発話の欠
 
 Acoustic Contextがwake acceptance、session identity、pre-rollの選択window/cursor、保持/discard判断、prompt中discard、prompt guard、empty commandを唯一所有する。初期既定は一wake一命令であり、受理した命令の後はsessionを閉じる。自己音声、遅延buffer、再接続は次のwake/session/Interactionを暗黙に作らない。
 
-Yata Wake、Mimy、RTSPその他のsource Adapterは、接続、raw audio bytes/ring buffer、推論、再接続、結果Eventを担当する。Acoustic Contextへ観測を返してよいが、wake受理、session、pre-roll選択、Interaction、Conversation、WorldStateを所有しない。prompt、pre-roll、guardの具体機構と数値は未決である。実profile fixtureはwake prompt「はい」をtranscriptへ入れず、最初の実発話を保ち、実TTSを新しい通常Wake/通常command/Interaction/LLMとして受理しないことを示さなければならない。独立したHome/Stop control検知はTTS中も生存する。
+Yata Wake、Mimy、RTSPその他のsource Adapterは、接続、raw audio bytes/ring buffer、推論、再接続、結果Eventを担当する。Acoustic Contextへ観測を返してよいが、wake受理、session、pre-roll選択、Interaction、Conversation、WorldStateを所有しない。prompt、pre-roll、guardの具体機構と数値は未決である。実profile fixtureはwake prompt「はい」をtranscriptへ入れず、最初の実発話を保ち、実TTSを新しい通常Wake/通常command/Interaction/LLMとして受理しないことを示さなければならない。独立したHome/Stop候補検知はTTS中も生存する。
+
+ただしTTS再生中の音声Stopは、exact playback occurrenceへbindした回答全文を使うversion付きStopSuppressionPolicyの対象とする。Acoustic Contextが登録Stop語とPolicy versionを、Execution Contextがplayback occurrenceとcanonical回答全文/Policy versionのbindingを所有し、純粋Ruleが両read viewを照合する。TTS/STT Adapterは候補/結果Eventだけを返して抑止を決めない。回答全文に登録Stop語があれば、利用者由来か自己音声かを識別せず、その再生中の音声Stop候補を抑止する。含まれなければCancellationへ渡す。これは実際の利用者Stopも見逃し得ることをOwnerが受け入れた明示的なHome/Cancel優先規則の例外である。Web Home/Cancelと音声Homeは抑止しない。TC70は実音響spikeとOwner採否を初期release gateとする。C210は対応を主張するprofileについて同じgateを満たし、未達ならTC70をblockせず後続profileにできる。
 
 ## Consequences
 

@@ -30,10 +30,17 @@
 | preferred / effective route（希望／実効経路） | 利用者・Policyが希望したrouteと、configured authorization・可用性を評価してdispatch前に固定されたroute。自動縮退/fallbackはしない。 |
 | revision（更新版） | Webが現在Projectionと後続更新の連続性を確認する単調増加値。domain Eventの通し番号と同一とは限らない。 |
 | Codex Skill（Codex作業能力／AI接続面） | Codexが人のアプリ、データ、能力を扱うための能力・接続面。`SKILL.md`、Python、Web、scriptを含み得るが、正式Y2 updateなしにY2 Behavior/Rule/Policy/Port/Effect/ownershipを変更しない。 |
-| SkillCreator | Codex Skillを作成・更新する初期必須Codex capability。Y2はCodex自身の権限に追加の承認・制限層を加えない。 |
+| SkillCreator | Codex Skillを作成・更新する初期必須Codex capability。Ownerのstanding delegationに基づき、inactive assetと初期SkillExecutionGrantを構成する。作成ごとの承認UIは置かないが、Skill自身によるgrant拡大は許さない。 |
+| SkillExecutionGrant（Skill実行権限） | Skill identity/versionへ結び付くversion付きstanding authorization。Workspace外read/write、network、secret、外部operation、副作用範囲、status/revocationを持ち、Authorization Policy Contextが所有する。 |
+| ContentClassSet（内容分類集合） | 一つのrequest、Artifact、派生データが同時に持つ非空の分類集合。保存画像なら`Image + Artifact`であり、全分類の許可を満たさない限り移送・処理しない。 |
+| ThinkingNotice（思考開始通知） | LLM dispatch直前だけに任意で発話する設定可能な通知。既定文言は「考えるね」。SBERT反射、Web、Homeには出さず、失敗しても推論を止めない。 |
+| ContextContinuity（文脈継続能力） | Provider routeが外部会話文脈を継続できるかを示す閉じた能力値。初期は`CodexThread`と`NoExternalContinuity`を区別し、後者へ存在しない履歴継続を要求しない。 |
+| Provider Inference Port（推論提供境界） | 外部継続文脈を持たないProviderへ`RequestInference`/`CancelInference` Effectを渡し、型付き開始・進行・結果・取消結果Eventを受ける抽象境界。 |
 | Agent Session Context | Codex Thread ID、connection/status、correlation、rebind/recovery、durable AgentTurnBindingを唯一所有するY2 Context。Provider内部stateとconversation textは所有しない。 |
 | AgentTurnBinding | 一external turnの耐久相関値。Y2 Interaction ID、exact Thread ID、external turn/operation IDまたはabsence、dispatch前にY2が発行するimmutable attempt/generation/correlation ID、`Planned`/`Requested`/`Started`/`Terminal`/`Interrupted`/`Recovery`、pinしたprovider/profile/protocolを持つ。別turnの結果・取消を更新しない。 |
 | `thread/start` / `thread/resume` | Codex外部Threadを開始／記録済みexact IDへ再開する閉じたoperation。`--last`やY2 Conversation IDを使わない。 |
+| Thread reset | Ownerが外部継続文脈を切る別Command。durable barrier後に新Threadを開始し、旧Threadのlate resultを隔離する。SemanticMemory delete/resetとは別である。 |
+| StopSuppressionPolicy（音声Stop抑止方針） | TTS回答全文に登録Stop語が含まれる間、exact playback occurrence中の音声Stop候補を抑止するversion付き方針。利用者Stopも意図的に見逃し得るが、Web Home/Cancelと音声Homeは抑止しない。 |
 | `turn/start` / `turn/interrupt` | Codex Threadへturnを開始／取消する閉じたoperation。`turn/interrupt`はexact current AgentTurnBinding/generationだけをtargetにし、staleならno-effect。adapterは対応するtyped result Eventを返す。 |
 | Port（抽象接続口） | Applicationが外部能力へ要求する、具体製品に依存しない契約。 |
 | Adapter（変換境界） | Portの値と具体製品・通信・入出力の表現を相互に翻訳するもの。 |

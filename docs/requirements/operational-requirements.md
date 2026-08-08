@@ -10,9 +10,12 @@
 
 Yatagarasu 2の開発中もYatagarasu 1は稼働を継続し、別系統として保つ。未完成のYatagarasu 2コードを本番ロボット環境へ混在させない。Yatagarasu 1は旧版ではなく、実機機能要件を検証し続ける基準系として扱う。
 
+第一基準TC70をY2で検証するときも、Y1のrepository、runtime、設定、dataへY2をinstallまたは混在させない。明示的な実機試験windowでは、Y1がTC70のconsumer/session/device handleを解放した事実、transportまたは物理的な排他、Y2アクセスの期限、abort cleanup、Y1復帰確認を一つの排他障壁として記録する。障壁が成立しない間はY2からTC70へdispatchしない。
+
 受入条件:
 
 - AC-OPS-001: リリースまたは配備チェックリストがYatagarasu 2の独立環境を示し、Yatagarasu 1本番環境を対象から除外する。
+- AC-OPS-028: TC70実機試験fixtureが、Y1 handle/session解放、排他確認、bounded test window、Y2 abort cleanup、Y1再接続/機能復帰を相関して記録し、排他障壁前または失敗後にY2 Effectをdispatchしない。Y1のrepository、runtime、設定、dataへY2資産を書き込まない。
 
 ### REQ-OPS-002 — 初期永続化のSource of Truth
 
@@ -49,6 +52,7 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 `CancelRequested` Command、Interactionが中止を受理した`CancellationAccepted` Event、pending workのdurable revocation（永続取消）、in-flight workの取消結果、
 物理結果を区別する。dispatch済みの物理移動はnon-cancellable（取消不可）であり、下流の仕事をrevokedにし、遅い結果は記録する。
 音声のstopは必要であり、LLM、保留TTS、開始済みnon-streaming playbackのうちAdapterが対応するものだけへ適用する。停止を捏造してはならない。
+TTS中の音声Stop候補はREQ-ACOU-001のStopSuppressionPolicyを先に通る。exact playback occurrenceの回答全文に登録Stop語があれば、Home/Cancel優先規則の明示的な音声Stop例外としてCancellationを作らない。Web Home/Cancelと音声Homeはこの例外に含めない。
 中止済みInteractionは遅いProposalを拒否し、revoked recordはrestart後も残りdispatcherはdispatchしない。OutcomeUnknownは自動retryしない。
 
 受入条件:
@@ -63,10 +67,14 @@ snapshotのcommitによりEffectがreadyになるなら、そのEffectのdispatc
 通知のoperation、plan、channel、wording、silentは名前を持つNotification Policy所有者の設定である。silentはnotification Effectだけを抑止し、
 内部事実またはProjectionを抑止しない。Projectionは外部配達の証拠ではない。通知の試行は型付き成功またはFailureの結果Eventを返す。
 
+Y1から継承する`ThinkingNotice`（既定文言「考えるね」）はvoice-onlyで、文言と有効/無効をprofile設定できる。Memory retrievalとroute確定後、LLM dispatch直前に一度だけ依存させ、SBERT反射、Web、通常または明示Homeでは生成しない。通知Failure、disabled、OutcomeUnknownは型付き結果を残すがLLM dispatchを止めない。Home復帰へ「待機します」を暗黙に結び付けない。
+
 受入条件:
 
 - AC-OPS-015: silent fixtureが内部の完了・Failure Projectionを残し、notification Effectだけを作らない。
 - AC-OPS-016: 通知Adapterの成功、Failure、未確認配達の各結果が型付きEventとして記録される。
+- AC-OPS-029: ThinkingNoticeのenabled/disabled/文言変更fixtureが、LLM dispatch直前のvoice Effectだけを生成または抑止し、SBERT反射、Web、Homeでは生成しない。通知Failure/OutcomeUnknownでもLLMを進め、自己音声guardと相関し、内部Projectionを失わない。
+- AC-OPS-030: 同一InteractionのThinkingNotice occurrenceとAgent-request occurrenceを相関するGraph fixtureが、通知をAgent requestより前にreadyにしても、通知terminal/successをAgent dispatchのdependencyまたはguardにしない。通知Failure、OutcomeUnknown、disabledでもAgent requestがreadyになり、Interaction自体のCancel/revocationだけは両方を止める。
 
 ### REQ-OPS-008 — 次revisionのストリーミングTTS（初期scope外）
 
