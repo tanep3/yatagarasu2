@@ -34,7 +34,7 @@ ACに含まれる独立した義務、否定条件、障害条件、実機条件
 - 一つの義務が複数Design IDを必要としてよい。一つのDesign IDが複数義務を支えてよい。
 - canonical contractとproof designがなければ`designed`にしない。
 - 全atomic obligationの所在が判明し、初期scope、正式な将来scope、spike待ち、Owner判断待ちのいずれかに分類された場合だけ、親ACを`accounted-for`と表示できる。
-- 初期scope内の全atomic obligationが`designed`でなければ、親ACを`covered`と表示しない。`blocked-by-spike`、`blocked-by-owner`、`deferred`は`covered`へ数えない。
+- 初期scope内の全atomic obligationが`designed`でなければ、親ACを`covered`と表示しない。Design軸の`blocked-by-spike`、`blocked-by-owner`、`deferred`は`covered`へ数えない。
 
 ## 状態の二軸
 
@@ -43,10 +43,35 @@ ACに含まれる独立した義務、否定条件、障害条件、実機条件
 | 軸 | 値 | 意味 |
 | --- | --- | --- |
 | Accounting | `unaccounted` / `accounted-for` | 義務の所在を把握したか |
-| Design | `undesign` / `designed` / `blocked-by-spike` / `blocked-by-owner` / `deferred` | canonical contractとproof designを確定できたか |
+| Design | `undesigned` / `designed` / `blocked-by-spike` / `blocked-by-owner` / `deferred` | canonical contractとproof designを確定できたか |
 | Proof | `unplanned` / `planned` / `implemented` / `passing` / `blocked-by-spike` / `blocked-by-owner` / `not-applicable` | 実装・試験・実機証拠がどこまで存在するか |
 
 canonical contractが確定し、実機証拠だけを待つ義務は、Design=`designed`、Proof=`blocked-by-spike`です。Design=`blocked-by-spike`は、実測結果がState所有やDomain法則を変え得るため設計自体を確定できない場合だけに使います。
+
+## 二つのGateで三軸をどう使うか
+
+Design Pilot Gateは、設計方法を全214 ACへ横展開してよいかを判定します。
+初期scopeの義務について、Accounting=`accounted-for`、Design=`designed`、
+Proofが`planned`、`implemented`、`passing`、`blocked-by-spike`のいずれかであれば通過対象です。
+Proof=`blocked-by-spike`は実証待ちを意味するため、設計横展開を止めません。
+
+Design=`undesigned`、`blocked-by-spike`、`blocked-by-owner`、またはProof=`unplanned`、
+`blocked-by-owner`はDesign Pilot Gateを止めます。実測結果によってState ownerやDomain法則が
+変わり得る場合はProof側ではなくDesign=`blocked-by-spike`です。
+
+Implementation / Evidence Gateは実装・release判定に使い、release対象義務の
+Proof=`passing`とrevision付きEvidence Refを要求します。`planned`、`implemented`、
+`blocked-by-spike`は、Design Pilot Gateを通過できてもrelease証拠にはなりません。
+
+ここでいうrelease対象は実装者が選ぶ集合ではありません。version付きの
+[Release Scope](release-scope.md)が、全atomic obligationを`required`または
+`excluded-by-owner`へ証拠取得前に分類して固定します。要件側に機械可読な将来版scope台帳がない
+現在は`deferred-by-requirement`を使用できません。未登録の義務、Owner記録のない除外が一件でもあれば
+Implementation / Evidence Gateは開始できません。
+
+Proof type、否定例、対象scope、blockerはproof plan（証明計画）の構成要素です。
+Proof=`passing`へ進める場合は、再現command、実行revision、試験結果または実機Artifactを
+Evidence Refとして保存します。
 
 ## Proof type
 
@@ -56,9 +81,12 @@ canonical contractが確定し、実機証拠だけを待つ義務は、Design=`
 | `architecture` | 依存方向、単一owner、到達不能性、製品名漏洩 |
 | `contract` | Port、Adapter、API schema、DTO変換 |
 | `integration` | 複数Contextと外部境界の因果関係 |
+| `concurrency` | 同時要求、競合winner、late result、取消とのrace |
 | `crash-recovery` | commit／dispatch境界、restart、late result、冪等性 |
+| `projection` | State/Eventから公開表現への変換、再同期、非漏洩 |
 | `real-device` | 実カメラ、実音声、実外部I/O |
 | `measurement` | latency、CPU、RAM、quality、soak |
+| `spike` | 未確定の技術方式がcanonical lawへ影響しないことを確かめる限定実験 |
 | `owner-gate` | 実測後のOwner採否 |
 
 ## 現在の状態

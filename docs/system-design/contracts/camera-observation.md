@@ -1,29 +1,15 @@
 # カメラ移動・撮影・画像解釈のcanonical contract
 
-この文書はPilot Aの唯一の正式定義です。TC70とC210はProfile／Adapter／Bootstrapの名前であり、Domain型には現れません。
+この文書はPilot AのBehavior固有契約です。[共通Execution契約](execution.md)へplanned/dispatch/result payloadを寄与します。TC70とC210はProfile／Adapter／Bootstrapの名前であり、Domain型には現れません。
 
-## 閉じた共通値
+## 閉じたCamera値
 
 ```text
-Correlation {
-  interaction_id, qualia_session_id, graph_id,
-  occurrence_id?, attempt_id?, generation
-}
-
-ResourceClaim { resource: ResourceKey, mode: Exclusive | Shared(capacity) }
-
-GuardExpr = All(NonEmptyList<GuardExpr>)
-          | Any(NonEmptyList<GuardExpr>)
-          | DependencyTerminal(OccurrenceId)
-          | DispatchIntentCommitted(OccurrenceId, DispatchAttemptId)
-          | ExecutionStarted(OccurrenceId, AttemptId)
-          | MotionProgressAllowed(OccurrenceId, PolicyBinding)
-          | ArtifactAvailable(ArtifactId, ArtifactRevision)
-          | DataTransferAuthorized(TransferAuthorizationBinding)
-          | InteractionNotCancelled(InteractionId)
-          | DeviceTestLeaseValid(DeviceAccessLeaseId)
-          | DeviceSendPermitValid(DeviceSendPermitId, Generation)
-          | ResultPurposeMatches(OutputPurpose)
+CameraGuardFactKind = DispatchIntentCommitted |
+  ExecutionStarted | MotionProgressAllowed |
+  ArtifactAvailable | DataTransferAuthorized |
+  DeviceTestLeaseValid | DeviceSendPermitValid |
+  ResultPurposeMatches
 
 RequestedSurface = WebProjection | Text | Voice
 OutputDelivery = Surface(RequestedSurface) |
@@ -63,10 +49,11 @@ ImageMediaObservation {
   content_length: NonZeroByteCount,
   integrity_digest: Sha256Digest
 }
-Presentation {
-  output_purpose, body: TextArtifact | StructuredObservation,
-  evidence_refs, allowed_surfaces
-}
+CameraPresentationPayload =
+  CameraInterpretation {
+    body: TextArtifact | StructuredObservation,
+    inference_basis
+  }
 InferenceBasis {
   artifact_ref, physical_evidence_refs,
   physical_assessment, assessment_policy_version,
@@ -93,8 +80,7 @@ DeviceExclusionFailure = LegacyReleaseFailed |
 DataPolicyFailure = UnknownClass | EmptyClassSet | ConflictingClass |
   MissingAuthorization | PartialAuthorization | RevokedAuthorization
 
-ExternalResultPayload =
-  ExecutionStartedReported(ExecutionStartedPayload) |
+CameraResultPayload =
   MotionPortResult(MotionResultPayload) |
   TimerPortResult(TimerResultPayload) |
   CapturePortResult(CaptureResultPayload) |
@@ -102,7 +88,6 @@ ExternalResultPayload =
   ArtifactDeletePortResult(ArtifactDeleteResultPayload) |
   DeviceExclusionPortResult(DeviceTestExclusionResult)
 
-ExecutionStartedPayload { adapter_started_ref }
 OutcomeBasis<F> = Failure(F) |
   Evidence(EvidenceRef) |
   FailureWithEvidence(F, EvidenceRef)
@@ -118,56 +103,22 @@ CaptureResultPayload = Materialized {
     provenance
   } | NotApplied(OutcomeBasis<CapturePortFailure>) |
   OutcomeUnknown(OutcomeBasis<CapturePortFailure>)
-InferenceResultPayload = Succeeded(Presentation, provider_provenance) |
+InferenceResultPayload = Succeeded(
+  Presentation<CameraPresentationPayload>, provider_provenance
+) |
   Failed(InferenceFailure) | Cancelled | CancelUnsupported |
-  OutcomeUnknown(EvidenceRef?)
+  OutcomeUnknown(OutcomeBasis<InferenceFailure>)
 ArtifactDeleteResultPayload = Deleted | DefinitelyNotApplied |
-  Failed(ArtifactStoreFailure) | OutcomeUnknown(EvidenceRef?)
+  Failed(ArtifactStoreFailure) |
+  OutcomeUnknown(OutcomeBasis<ArtifactStoreFailure>)
 ```
 
-IDはopaque valueです。解析、大小比較、生成順から業務判断をしません。`GuardExpr`は上記の閉じたデータであり、closure、callback、scriptを持ちません。`OutcomeBasis`は空variantを持たず、全Port結果を根拠付きDomain Eventへ全域変換できます。`Materialized`は`observed_media`が`requested_media`を満たし、digest検証済みの場合だけ生成できます。不一致または検証不能は`OutcomeUnknown`としてArtifact cleanup／Recoveryへ渡します。
+IDはopaque valueです。解析、大小比較、生成順から業務判断をしません。Camera Ruleが導いた事実は`CameraGuardFactKind`付きの共通`GuardFactRef`へ変換し、Executionへ登録します。`OutcomeBasis`は空variantを持たず、全Port結果を根拠付きDomain Eventへ全域変換できます。`Materialized`は`observed_media`が`requested_media`を満たし、digest検証済みの場合だけ生成できます。不一致または検証不能は`OutcomeUnknown`としてArtifact cleanup／Recoveryへ渡します。
 
 ## ContextとState
 
-### SD-CTX-EXE-001 — Execution Context
-
-Effect Graph、EffectOccurrence、dispatch attempt、resource lease、durable revocation、結果相関を唯一所有します。Scheduler、dispatcher、Adapter、journal replayは変更しません。
-
-### SD-STA-EXE-001 — ExecutionState
-
 ```text
-ExecutionState {
-  graphs: Map<GraphId, GraphRecord>,
-  occurrences: Map<EffectOccurrenceId, OccurrenceRecord>,
-  attempts: Map<DispatchAttemptId, DispatchAttempt>,
-  resource_leases: Map<ResourceLeaseId, ResourceLease>
-}
-
-OccurrenceRecord {
-  occurrence_id, graph_id, planned_effect_spec,
-  dependencies, guard, resource_claims,
-  configuration_snapshot_version,
-  candidate_profile_ref,
-  effective_profile_binding?, policy_bindings,
-  lifecycle, active_attempt_id?, result_event_ids,
-  revoked_reason?
-}
-
-OccurrenceLifecycle =
-  Planned | PendingDurable | DispatchClaimed |
-  DispatchIntentCommitted | Started | Terminal |
-  Revoked | Recovering
-
-DispatchAttempt {
-  attempt_id, occurrence_id, generation,
-  dispatcher_identity, result_correlation,
-  dispatch_intent_mark: MonotonicMark,
-  dispatch_effect,
-  lifecycle: Claimed | DispatchIntentCommitted |
-             Started | Terminal | OutcomeUnknown
-}
-
-PlannedEffectSpec =
+CameraPlannedPayload =
   PlannedRelativeMotion {
     device_id, resource_id, motion,
     candidate_profile_ref, correlation
@@ -205,32 +156,13 @@ PlannedDeviceExclusionCorrelation {
   y2_access_generation
 }
 
-DispatchEffect = RequestRelativeMotion |
+CameraDispatchPayload = RequestRelativeMotion |
   AwaitStartConfirmationDeadline | AwaitSettleWindow |
   CaptureImage | RequestImageInterpretation |
   DeleteArtifact | ManageDeviceTestExclusion
-
-ResourceLease {
-  lease_id, graph_id, owner_occurrence_id,
-  scope: Occurrence | Graph | VisualFrameInterval,
-  resource, mode,
-  release_guard: CaptureTerminal | BranchRecoveryHandoff |
-                 OccurrenceTerminal,
-  lifecycle: Pending | Active | Released,
-  recovery_policy_binding
-}
 ```
 
-不変条件:
-
-- 同値Effectの各出現は別`EffectOccurrenceId`を持つ。
-- 意味順序はdependencyと`GuardExpr`だけで決める。ID、配列順、生成順、resource claimを順序に使わない。
-- 一Occurrenceのactive attemptは最大一つ。
-- dispatcherへ渡せるのは`DispatchIntentCommitted`だけである。
-- Graph nodeは未確定入力を含む`PlannedEffectSpec`を保持し、dispatch claim時に必要な証拠、effective Profile、Policy、Data authorizationを束縛した不変の`DispatchEffect`へ変換する。
-- settleはStarted Eventの単調時刻を得た後、画像解釈はAvailable Artifactと転送許可を得た後でなければ`DispatchEffect`にできない。
-- claim時に固定した`DispatchEffect`をactive attemptへ遡及変更しない。
-- `Revoked`をrestart後にpendingへ戻さない。
+Camera Graphは`PlannedEffectSpec<CameraPlannedPayload>`を登録し、Cameraのpure dispatch Ruleが`DispatchEffect<CameraDispatchPayload>`を生成します。settleはStarted Event後、画像解釈はAvailable Artifactと転送許可後でなければdispatch payloadにできません。
 
 ### SD-CTX-PHY-001 — Physical Observation Context
 
@@ -418,45 +350,6 @@ OpenDeviceTestWindow {
 
 ## Event
 
-### SD-EVT-ING-001 — IngestedExternalEvent
-
-```text
-IngestedExternalEvent {
-  event_id, adapter_event_ref,
-  correlation,
-  ingest_mark: MonotonicMark,
-  payload: ExternalResultPayload
-}
-```
-
-settle根拠はAdapter時刻ではなくCoreがClockPortから付けた`ingest_mark`です。異なるclock epochのtickを比較しません。
-
-### SD-EVT-EXE-001 — EffectExecutionStartedAccepted
-
-```text
-EffectExecutionStartedAccepted {
-  occurrence_id, attempt_id,
-  adapter_event_ref,
-  ingest_mark
-}
-```
-
-外部作用を試みた、または開始した事実であり、適用・完了の証拠ではありません。
-
-### SD-EVT-EXE-002 — EffectExecutionFailed
-
-```text
-EffectExecutionFailed {
-  occurrence_id, attempt_id,
-  failure: TypedPortFailure,
-  physical_outcome: NotPhysical |
-    DefinitelyNotApplied | OutcomeUnknown,
-  diagnostic_ref?
-}
-```
-
-未解析vendor文字列を含みません。Adapterのretryable hintはPolicyの再試行許可ではありません。
-
 ### SD-EVT-PHY-001 — PhysicalActionResolved
 
 ```text
@@ -572,7 +465,7 @@ ArtifactDeleteResult {
 ImageInterpretationResolved {
   occurrence_id, attempt_id,
   result: Succeeded {
-    presentation: Presentation,
+    presentation: Presentation<CameraPresentationPayload>,
     artifact_ref, output_purpose,
     inference_route_binding,
     evidence_refs, provider_provenance,
@@ -635,42 +528,9 @@ CameraObservationPlan = Rejected(CameraObservationFailure) |
 
 `ArtifactId`は`interaction_id + graph_id + capture ordinal`から純粋なtyped constructorで導出し、同じPlanの再評価で変化させません。外部乱数やfilesystem pathをID生成に使いません。
 
-### SD-RUL-EXE-001 — DetermineReadyOccurrences
+### SD-RUL-CAM-002 — BuildCameraDispatchEffect
 
-dependency、閉じたguard、revocation、resource lease availability、Physical Observation Contextの`ImmediatelyReusable`、test leaseをpureに評価します。物理資源が他の再利用状態ならclaimを拒否します。製品名やBehavior固有順序を知りません。
-
-### SD-RUL-EXE-002 — DecideDispatchClaim
-
-applicationがClock Portから先に取得した`dispatch_intent_mark`を含む次の値を入力として、純粋な`DispatchClaimDecision`を返します。
-
-```text
-DispatchClaimInput {
-  expected_state_revision, ready_occurrence_id,
-  configuration_snapshot,
-  profile_view, policy_view, data_authorization_view,
-  device_test_lease_view,
-  next_generation,
-  dispatch_intent_mark: MonotonicMark
-}
-
-DispatchClaimDecision = Rejected(DispatchConflict) |
-  Claim {
-    expected_state_revision,
-    attempt_id: AttemptId(occurrence_id, generation),
-    lease_ids: Set<LeaseId(resource, graph, scope, generation)>,
-    effective_profile_binding,
-    policy_bindings,
-    transfer_authorization_binding?,
-    device_send_permit?,
-    dispatch_intent_mark: MonotonicMark,
-    dispatch_effect: DispatchEffect,
-    next_state
-  }
-```
-
-IDは入力から決定論的に構成し、Rule／Transition内で乱数、clock、I/Oを呼びません。`planned_effect_spec`、確定済みevidence、Artifact revision、Profile／Policy snapshot、authorizationを照合し、すべて揃った場合だけ完全な`DispatchEffect`を構築します。開始確認Effectには入力の`dispatch_intent_mark`を、DEX correlationにはclaimで構成した`attempt_id`を束縛します。未確定値を後からApplicationやAdapterが補うことを禁止します。
-
-`dispatch_intent_mark`はCAS commit直前に取得する保守的な期限起点であり、commit永続化時間もstart confirmation timeoutへ含めます。これは安全側に早くOutcomeUnknownへ倒す意図です。性能計測ではこのmarkとdurable commit完了markを別々に記録し、永続化遅延をdevice開始遅延へ混ぜません。
+`CameraPlannedPayload`、確定済みevidence、Artifact revision、Profile／Policy snapshot、Data authorization、DEX permit、Application取得のdispatch mark、共通attempt IDをpureに評価し、完全な`CameraDispatchPayload`または型付き拒否を返します。物理資源が`ImmediatelyReusable`でない場合も拒否します。開始確認Effectにはdispatch mark、DEX correlationにはattempt IDを束縛し、後付けを禁止します。
 
 ### SD-RUL-TIM-001 — ResolveStartConfirmationRace
 
@@ -700,18 +560,6 @@ OutcomeUnknownを自動retryしません。初期Pilotのphysical retryはNone�
 
 DEX Stateの`protected_devices`に未登録なら通常admissionへ進みます。登録済みdeviceはProfileの自己申告でbarrierを無効化できません。Open、device/profile/test run/generation一致、release/exclusive evidence、window内をすべて要求し、実送信直前用の単回`DeviceSendPermit` Decisionを返します。
 
-### SD-TRN-EXE-001 — RegisterGraphAndPending
-
-Execution ContextのStateだけへ、Graph、初期PendingDurable occurrence、pending resource leaseを適用します。Artifact Stateを変更しません。
-
-### SD-TRN-EXE-002 — ApplyDispatchClaim
-
-`DispatchClaimDecision::Claim`が持つ値をExecution Stateへ決定論的に適用します。I/O、CAS、ID発行を行いません。application側の`SD-MOD-EXE-001`がexpected revisionを使ってUnit of WorkをCAS commitし、競合時はStateを再読込してRuleを再評価します。
-
-### SD-TRN-EXE-003 — ApplyOccurrenceResult
-
-occurrence、attempt、generation一致の結果Eventだけを一度適用します。FailureをTerminal／Recoveringへ進め、未dispatch子孫をrevokeします。未知、重複、旧session結果はRecovery／auditへ隔離します。
-
 ### SD-TRN-PHY-001 — RecordPhysicalEvidence
 
 evidenceをappendし、version付きprecedence Ruleでassessmentを再計算します。後着evidenceで履歴を上書きしません。
@@ -732,19 +580,9 @@ Started captureを`Reserved -> Writing`、Started deleteを`DeletePending -> Del
 
 Data Classification Contextだけを変更し、決定EventをArtifact／Executionへ渡します。
 
-### SD-TRN-EXE-004 — RevokeInteractionDescendants
-
-Cancellation後、未dispatch子孫をdurable revokeします。dispatch済みmove停止を主張しません。
-
 ### SD-TRN-EXE-005 — ApplyStartConfirmationRace
 
 `SD-RUL-TIM-001`のDecisionだけを適用します。Started勝者ならdeadlineをrevokeし、deadline勝者ならmoveと未dispatch子孫をRecovering／Revokedへ進めます。後着Eventで勝敗を反転しません。
-
-### SD-TRN-EXE-006 — ReleaseResourceLease
-
-取消、Recovery handoff、capture terminal、Occurrence terminalのEventに対して、各leaseの閉じた`release_guard`を評価し、Execution Contextのleaseだけを`Released`へ進めます。Physical Observation Contextの資源再利用可否やDEX phaseは変更しません。
-
-OutcomeUnknownまたはRecovery handoffによる解放Decisionは、必ず`SD-TRN-PHY-002`が資源を`ReusableAfterCooldown`、`ReusableAfterReconciliation`、`OwnerConfirmationRequired`、`Unavailable`のいずれかへ進めるDecisionと対になります。`SD-PER-EXE-001`は両Contextの変更を同じUnit of Workでcommitし、一方だけを公開しません。通常のcapture terminalで`ImmediatelyReusable`を維持できる場合だけ、Execution lease単独の解放を許します。
 
 ### SD-TRN-DEX-001 — ApplyDeviceTestExclusionResult
 
@@ -843,17 +681,11 @@ terminal/handoff + no dependents/holds --> Delete temporary Artifact
 
 ## Port
 
-すべてのPort結果は次のenvelopeを必須とします。
-
-```text
-PortResultEnvelope {
-  event_id, occurrence_id, attempt_id, generation,
-  adapter_operation_id, payload: ExternalResultPayload,
-  diagnostic_ref?
-}
-```
-
-Port例外を直接applicationへ投げず、閉じたpayloadへ正規化します。結果は`SD-PER-EXE-002`へdurable保存されるまでAdapterへackしません。
+すべてのCamera Adapterは、共通実行契約の
+`PortResultEnvelope<CameraResultPayload>`で結果をEvent ingressへ戻します。
+Port例外を直接applicationへ投げず、Cameraの閉じたpayloadへ正規化します。
+共通envelope、安定したAdapter操作ID、ack条件は
+[execution.md](execution.md)だけが定義し、この契約では再定義しません。
 
 ### SD-PRT-PHY-001 — RelativeMotionPort
 
@@ -903,31 +735,6 @@ Reserved orphan、capture失敗、cancel、terminal後temporary artifactをclean
 ### SD-REC-DEX-001 — DeviceTestExclusionRecovery
 
 window expiry、abort、process crashで新規dispatchを止め、Y2 access解放、cleanup、legacy復帰、機能確認を継続します。復帰未確認ならresourceをquarantineします。
-
-### SD-PER-EXE-001 — DurableExecutionBoundary
-
-次を一つのUnit of Workでcommitします。
-
-- 所有Contextごとのrevision付きState change
-- Graph／Occurrence／dispatch attempt／resource lease
-- Artifact reservationまたはlifecycle change
-- Data classification decision reference
-- Domain EventとProjection再構築参照
-- OutcomeUnknown／Recovery handoff時のExecution lease解放と、Physical resourceを非再利用状態へ進める変更
-
-dispatcherはdurable intentだけを送ります。journal replayはEffect作成、ready化、dispatchを行いません。保存engine／outbox方式はこの原子性を満たす範囲でspike選択できます。
-
-### SD-PER-EXE-002 — DurableResultInbox
-
-```text
-ResultInboxKey {
-  adapter_identity, adapter_operation_id,
-  occurrence_id, attempt_id, generation,
-  result_phase: Started | Progress | Terminal
-}
-```
-
-Port結果はState適用前に上記の安定keyでdurable inboxへ保存し、その後にowner Transitionを適用します。`event_id`は監査metadataであり重複排除keyではありません。同一key／同一payloadは一度だけ適用し、同一key／異payloadはConflictとしてquarantineします。一attemptにつきTerminalは一つだけとし、複数Terminalを許すEffectは別契約で明示しない限り拒否します。Adapterへはinbox commit後だけackします。
 
 | Effect class | intent後・結果前crash | DefinitelyNotApplied | OutcomeUnknown |
 | --- | --- | --- | --- |
@@ -991,10 +798,6 @@ TC70は第一基準、C210は同じschemaの第二基準Profileです。数値�
 - Adapter: TC70/C210、Clock、store、Provider、legacy runtime連携。
 - Python worker: 画像推論結果だけを返し、State／Graph／route／Artifactを所有しない。
 - Bootstrap: concrete AdapterとProfile binding。動的test leaseを一回限りの起動条件へ隠さない。
-
-### SD-MOD-EXE-001 — DispatchClaimApplicationService
-
-Execution／Physical Observation／DEXのread viewを同じrevision setで取得し、`SD-RUL-EXE-001`を評価します。readyならApplicationがClock Portから`MonotonicMark`を一度取得して`DispatchClaimInput`へ入れ、`SD-RUL-EXE-002`と必要なら`SD-RUL-DEX-001`を評価し、`SD-TRN-EXE-002`の出力とsend permitをexpected revision付きUnit of WorkへCAS commitします。CAS失敗時は古いmarkを破棄し、State再読込、mark再取得、Rule再評価を行います。Transitionへrepository、clock、ID allocator、dispatcherを渡しません。commit後のdurable intentだけをdispatcherへ公開します。
 
 ### SD-MOD-DEX-001 — ProtectedDeviceSendCoordinator
 

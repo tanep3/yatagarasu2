@@ -16,12 +16,18 @@ Final snapshot / Projection IDs
 Failure / cancellation / recovery cases
 Proof design
 Change impact
+Accounting status
+Design status
+Proof status
+Evidence / blocker
 ```
 
 例示時系列を中央workflow、固定dispatcher順、runtime descriptorへ昇格させません。
 
-pilotとして次の三本を作成します。
+pilotとして次の三本を作成し、[Design Pilot Gate](../verification/pilot-gate.md)で
+設計横展開の可否を判定します。実装・release証拠は
+[Implementation / Evidence Gate](../verification/implementation-evidence-gate.md)で別に判定します。
 
 - [01-camera-observation.md](01-camera-observation.md)
-- `02-finite-conversation.md`
+- [02-finite-conversation.md](02-finite-conversation.md)
 - `03-configuration-capability.md`

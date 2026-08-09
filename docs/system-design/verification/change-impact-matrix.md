@@ -7,7 +7,9 @@
 | Change case | Predicted changed Design IDs / modules | Must not change | Planned proof | Status |
 | --- | --- | --- | --- | --- |
 | 新しいカメラ機種を追加する | device Profile、Adapter、Bootstrap binding、機種固有contract test | Kernel、相対移動Command、物理結果語彙、Graph ready Rule | 同一Port contractへ別Adapterをbindingするarchitecture/contract test | `predicted` |
-| Providerを切り替える | Provider Profile、Adapter binding、Capability advertisement | Conversation正本、AgentTurnBinding法則、no-auto-fallback Policy | `CodexThread`／`NoExternalContinuity`のtable-driven integration test | `predicted` |
+| Providerを切り替える | SD-PRT-AGT-001またはSD-PRT-AGT-002のAdapter、Provider Profile、Bootstrap binding | SD-STA-CNV-001、SD-STA-MEM-001、SD-STA-AGT-001のBinding法則、no-auto-fallback Policy | `CodexThread`／`NoExternalContinuity`のtable-driven integration test | `predicted` |
+| SemanticMemoryのserver・engine・配置を交換する | SD-PRT-MEM-001のAdapter、Bootstrap binding、接続profile | SD-STA-MEM-001のlogical record/generation、SD-RUL-MEM-001〜003、Conversation正本 | unavailable/empty/failure/reset-generationのcontract/crash test | `predicted` |
+| 外部Thread対応Agentを交換する | SD-PRT-AGT-001のAdapter、protocol/profile binding | SD-GPH-CNV-001、SD-STA-CNV-001、SD-STA-MEM-001、late result隔離 | exact binding、Home越え継続、reset barrier、crash-before-ID test | `predicted` |
 | 既存能力だけでBehaviorを追加する | routing contribution、Graph contribution、Projection/Web部品、適合表 | Kernel、新しいPort Trait、既存State owner | compile-time contributionとarchitecture diff test | `predicted` |
 | 新しい外部能力を使うBehaviorを追加する | 新Port、Adapter、Bootstrap binding、結果Event、contract test | Domainから具体製品への依存、Kernelの製品分岐 | dependency testとFake/real Adapter contract test | `predicted` |
 | Web更新transportを交換する | Web transport Adapter、gateway設定、再接続contract test | 公開Command/Query意味、Projection schema、Domain Event | SSE/WebSocket/polling候補を同一API contractへ適合させるtest | `planned-proof` |

@@ -5,8 +5,8 @@
 - Requirement: 62件
 - Acceptance Criteria: 214件
 - Source locator: `4df6fb1:<file>:<line>`
-- Accounting status: Pilot A対象49件は`accounted-for`、残り165件は`inventoried`
-- Coverage status: Pilot A対象49件は`partial`、残り165件は`unmapped`
+- Accounting status: Pilot A/B対象92件は`accounted-for`、残り122件は`inventoried`
+- Coverage status: Pilot A/B対象92件は`partial`、残り122件は`unmapped`
 
 `inventoried`は入口に存在することだけを意味し、`accounted-for`は少なくとも一つのAtomic Design Obligationへ接続されたことだけを意味します。`partial`は親ACに未設計の兄弟義務または未完了Pilotが残る状態であり、設計済み・実装済み・試験済みを意味しません。要件基準を変更した場合は、要件変更またはAccepted ADRとともにこの索引を再生成し、差分を確認します。
 
@@ -38,32 +38,32 @@
 | REQ-ACOU-001 | AC-ACOU-005 | `4df6fb1:approved-bounded-contract.md:21` | — | `inventoried` | `unmapped` |
 | REQ-ACOU-001 | AC-ACOU-006 | `4df6fb1:approved-bounded-contract.md:22` | — | `inventoried` | `unmapped` |
 | REQ-ACOU-001 | AC-ACOU-007 | `4df6fb1:approved-bounded-contract.md:23` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-001 | `4df6fb1:approved-bounded-contract.md:39` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-002 | `4df6fb1:approved-bounded-contract.md:40` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-003 | `4df6fb1:approved-bounded-contract.md:41` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-004 | `4df6fb1:approved-bounded-contract.md:42` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-005 | `4df6fb1:approved-bounded-contract.md:43` | — | `inventoried` | `unmapped` |
-| REQ-MEM-001 | AC-MEM-006 | `4df6fb1:approved-bounded-contract.md:44` | — | `inventoried` | `unmapped` |
+| REQ-MEM-001 | AC-MEM-001 | `4df6fb1:approved-bounded-contract.md:39` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-MEM-001 | AC-MEM-002 | `4df6fb1:approved-bounded-contract.md:40` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-MEM-001 | AC-MEM-003 | `4df6fb1:approved-bounded-contract.md:41` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-MEM-001 | AC-MEM-004 | `4df6fb1:approved-bounded-contract.md:42` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-MEM-001 | AC-MEM-005 | `4df6fb1:approved-bounded-contract.md:43` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-MEM-001 | AC-MEM-006 | `4df6fb1:approved-bounded-contract.md:44` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-OUT-001 | AC-OUT-001 | `4df6fb1:approved-bounded-contract.md:71` | — | `inventoried` | `unmapped` |
-| REQ-OUT-001 | AC-OUT-002 | `4df6fb1:approved-bounded-contract.md:72` | — | `inventoried` | `unmapped` |
+| REQ-OUT-001 | AC-OUT-002 | `4df6fb1:approved-bounded-contract.md:72` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-OUT-001 | AC-OUT-003 | `4df6fb1:approved-bounded-contract.md:73` | — | `inventoried` | `unmapped` |
-| REQ-OUT-001 | AC-OUT-004 | `4df6fb1:approved-bounded-contract.md:74` | JG-CAM-* | `accounted-for` | `partial` |
+| REQ-OUT-001 | AC-OUT-004 | `4df6fb1:approved-bounded-contract.md:74` | JG-CAM-*, JG-CNV-* | `accounted-for` | `partial` |
 | REQ-EFX-001 | AC-EFX-001 | `4df6fb1:approved-bounded-contract.md:84` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-EFX-001 | AC-EFX-002 | `4df6fb1:approved-bounded-contract.md:85` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-EFX-001 | AC-EFX-003 | `4df6fb1:approved-bounded-contract.md:86` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-EFX-001 | AC-EFX-004 | `4df6fb1:approved-bounded-contract.md:87` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-EFX-001 | AC-EFX-005 | `4df6fb1:approved-bounded-contract.md:88` | JG-CAM-* | `accounted-for` | `partial` |
-| REQ-CNV-001 | AC-CNV-001 | `4df6fb1:approved-bounded-contract.md:96` | — | `inventoried` | `unmapped` |
-| REQ-CNV-001 | AC-CNV-002 | `4df6fb1:approved-bounded-contract.md:97` | — | `inventoried` | `unmapped` |
-| REQ-CNV-001 | AC-CNV-003 | `4df6fb1:approved-bounded-contract.md:98` | — | `inventoried` | `unmapped` |
-| REQ-CNV-001 | AC-CNV-004 | `4df6fb1:approved-bounded-contract.md:99` | — | `inventoried` | `unmapped` |
-| REQ-QLI-001 | AC-QLI-001 | `4df6fb1:approved-bounded-contract.md:107` | — | `inventoried` | `unmapped` |
-| REQ-QLI-001 | AC-QLI-002 | `4df6fb1:approved-bounded-contract.md:108` | — | `inventoried` | `unmapped` |
-| REQ-QLI-001 | AC-QLI-003 | `4df6fb1:approved-bounded-contract.md:109` | — | `inventoried` | `unmapped` |
-| REQ-QLI-001 | AC-QLI-004 | `4df6fb1:approved-bounded-contract.md:110` | — | `inventoried` | `unmapped` |
+| REQ-CNV-001 | AC-CNV-001 | `4df6fb1:approved-bounded-contract.md:96` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-CNV-001 | AC-CNV-002 | `4df6fb1:approved-bounded-contract.md:97` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-CNV-001 | AC-CNV-003 | `4df6fb1:approved-bounded-contract.md:98` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-CNV-001 | AC-CNV-004 | `4df6fb1:approved-bounded-contract.md:99` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-QLI-001 | AC-QLI-001 | `4df6fb1:approved-bounded-contract.md:107` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-QLI-001 | AC-QLI-002 | `4df6fb1:approved-bounded-contract.md:108` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-QLI-001 | AC-QLI-003 | `4df6fb1:approved-bounded-contract.md:109` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-QLI-001 | AC-QLI-004 | `4df6fb1:approved-bounded-contract.md:110` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-SET-001 | AC-SET-001 | `4df6fb1:approved-bounded-contract.md:118` | — | `inventoried` | `unmapped` |
 | REQ-SET-001 | AC-SET-002 | `4df6fb1:approved-bounded-contract.md:119` | — | `inventoried` | `unmapped` |
-| REQ-SET-001 | AC-SET-003 | `4df6fb1:approved-bounded-contract.md:120` | — | `inventoried` | `unmapped` |
+| REQ-SET-001 | AC-SET-003 | `4df6fb1:approved-bounded-contract.md:120` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-SET-001 | AC-SET-004 | `4df6fb1:approved-bounded-contract.md:121` | — | `inventoried` | `unmapped` |
 | REQ-QPR-001 | AC-QPR-001 | `4df6fb1:approved-bounded-contract.md:129` | — | `inventoried` | `unmapped` |
 | REQ-QPR-001 | AC-QPR-002 | `4df6fb1:approved-bounded-contract.md:130` | — | `inventoried` | `unmapped` |
@@ -81,20 +81,20 @@
 | REQ-NET-001 | AC-NET-003 | `4df6fb1:approved-bounded-contract.md:160` | — | `inventoried` | `unmapped` |
 | REQ-NET-001 | AC-NET-004 | `4df6fb1:approved-bounded-contract.md:161` | — | `inventoried` | `unmapped` |
 | REQ-NET-001 | AC-NET-005 | `4df6fb1:approved-bounded-contract.md:162` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-001 | `4df6fb1:approved-bounded-contract.md:176` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-002 | `4df6fb1:approved-bounded-contract.md:177` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-003 | `4df6fb1:approved-bounded-contract.md:178` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-004 | `4df6fb1:approved-bounded-contract.md:179` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-005 | `4df6fb1:approved-bounded-contract.md:180` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-006 | `4df6fb1:approved-bounded-contract.md:181` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-007 | `4df6fb1:approved-bounded-contract.md:182` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-008 | `4df6fb1:approved-bounded-contract.md:183` | — | `inventoried` | `unmapped` |
-| REQ-AGT-001 | AC-AGT-009 | `4df6fb1:approved-bounded-contract.md:184` | — | `inventoried` | `unmapped` |
+| REQ-AGT-001 | AC-AGT-001 | `4df6fb1:approved-bounded-contract.md:176` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-002 | `4df6fb1:approved-bounded-contract.md:177` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-003 | `4df6fb1:approved-bounded-contract.md:178` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-004 | `4df6fb1:approved-bounded-contract.md:179` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-005 | `4df6fb1:approved-bounded-contract.md:180` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-006 | `4df6fb1:approved-bounded-contract.md:181` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-007 | `4df6fb1:approved-bounded-contract.md:182` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-008 | `4df6fb1:approved-bounded-contract.md:183` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-AGT-001 | AC-AGT-009 | `4df6fb1:approved-bounded-contract.md:184` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-SKL-001 | AC-SKL-001 | `4df6fb1:approved-bounded-contract.md:194` | — | `inventoried` | `unmapped` |
-| REQ-SKL-001 | AC-SKL-002 | `4df6fb1:approved-bounded-contract.md:195` | — | `inventoried` | `unmapped` |
+| REQ-SKL-001 | AC-SKL-002 | `4df6fb1:approved-bounded-contract.md:195` | JG-CNV-TOOL | `accounted-for` | `partial` |
 | REQ-SKL-001 | AC-SKL-003 | `4df6fb1:approved-bounded-contract.md:196` | — | `inventoried` | `unmapped` |
 | REQ-SKL-001 | AC-SKL-004 | `4df6fb1:approved-bounded-contract.md:197` | — | `inventoried` | `unmapped` |
-| REQ-SCP-001 | AC-SCP-001 | `4df6fb1:approved-bounded-contract.md:205` | — | `inventoried` | `unmapped` |
+| REQ-SCP-001 | AC-SCP-001 | `4df6fb1:approved-bounded-contract.md:205` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-SCP-001 | AC-SCP-002 | `4df6fb1:approved-bounded-contract.md:206` | — | `inventoried` | `unmapped` |
 | REQ-SCP-001 | AC-SCP-003 | `4df6fb1:approved-bounded-contract.md:207` | — | `inventoried` | `unmapped` |
 | REQ-LOG-001 | AC-LOG-001 | `4df6fb1:approved-bounded-contract.md:215` | — | `inventoried` | `unmapped` |
@@ -128,11 +128,11 @@
 | REQ-FR-003 | AC-FR-006 | `4df6fb1:product-requirements.md:94` | — | `inventoried` | `unmapped` |
 | REQ-FR-004 | AC-FR-007 | `4df6fb1:product-requirements.md:102` | — | `inventoried` | `unmapped` |
 | REQ-FR-004 | AC-FR-008 | `4df6fb1:product-requirements.md:103` | — | `inventoried` | `unmapped` |
-| REQ-FR-005 | AC-FR-009 | `4df6fb1:product-requirements.md:111` | — | `inventoried` | `unmapped` |
-| REQ-FR-005 | AC-FR-010 | `4df6fb1:product-requirements.md:112` | — | `inventoried` | `unmapped` |
+| REQ-FR-005 | AC-FR-009 | `4df6fb1:product-requirements.md:111` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-FR-005 | AC-FR-010 | `4df6fb1:product-requirements.md:112` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-FR-005 | AC-FR-011 | `4df6fb1:product-requirements.md:113` | — | `inventoried` | `unmapped` |
-| REQ-FR-006 | AC-FR-012 | `4df6fb1:product-requirements.md:121` | — | `inventoried` | `unmapped` |
-| REQ-FR-006 | AC-FR-013 | `4df6fb1:product-requirements.md:122` | — | `inventoried` | `unmapped` |
+| REQ-FR-006 | AC-FR-012 | `4df6fb1:product-requirements.md:121` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-FR-006 | AC-FR-013 | `4df6fb1:product-requirements.md:122` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-FR-006 | AC-FR-014 | `4df6fb1:product-requirements.md:123` | — | `inventoried` | `unmapped` |
 | REQ-FR-007 | AC-FR-015 | `4df6fb1:product-requirements.md:131` | — | `inventoried` | `unmapped` |
 | REQ-FR-007 | AC-FR-016 | `4df6fb1:product-requirements.md:132` | — | `inventoried` | `unmapped` |
@@ -170,16 +170,16 @@
 | REQ-ARC-008 | AC-ARC-013 | `4df6fb1:architecture-requirements.md:61` | — | `inventoried` | `unmapped` |
 | REQ-ARC-008 | AC-ARC-018 | `4df6fb1:architecture-requirements.md:62` | — | `inventoried` | `unmapped` |
 | REQ-ARC-009 | AC-ARC-011 | `4df6fb1:architecture-requirements.md:70` | — | `inventoried` | `unmapped` |
-| REQ-ARC-009 | AC-ARC-019 | `4df6fb1:architecture-requirements.md:71` | — | `inventoried` | `unmapped` |
-| REQ-ARC-009 | AC-ARC-020 | `4df6fb1:architecture-requirements.md:72` | — | `inventoried` | `unmapped` |
+| REQ-ARC-009 | AC-ARC-019 | `4df6fb1:architecture-requirements.md:71` | JG-CNV-PROPOSAL | `accounted-for` | `partial` |
+| REQ-ARC-009 | AC-ARC-020 | `4df6fb1:architecture-requirements.md:72` | JG-CNV-PROPOSAL | `accounted-for` | `partial` |
 | REQ-ARC-009 | AC-ARC-028 | `4df6fb1:architecture-requirements.md:73` | — | `inventoried` | `unmapped` |
 | REQ-ARC-006 | AC-ARC-012 | `4df6fb1:architecture-requirements.md:83` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-ARC-007 | AC-ARC-014 | `4df6fb1:architecture-requirements.md:91` | — | `inventoried` | `unmapped` |
 | REQ-ARC-007 | AC-ARC-015 | `4df6fb1:architecture-requirements.md:92` | — | `inventoried` | `unmapped` |
 | REQ-ARC-007 | AC-ARC-016 | `4df6fb1:architecture-requirements.md:93` | — | `inventoried` | `unmapped` |
-| REQ-ARC-010 | AC-ARC-021 | `4df6fb1:architecture-requirements.md:101` | — | `inventoried` | `unmapped` |
-| REQ-ARC-010 | AC-ARC-022 | `4df6fb1:architecture-requirements.md:102` | — | `inventoried` | `unmapped` |
-| REQ-ARC-010 | AC-ARC-023 | `4df6fb1:architecture-requirements.md:103` | — | `inventoried` | `unmapped` |
+| REQ-ARC-010 | AC-ARC-021 | `4df6fb1:architecture-requirements.md:101` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-ARC-010 | AC-ARC-022 | `4df6fb1:architecture-requirements.md:102` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-ARC-010 | AC-ARC-023 | `4df6fb1:architecture-requirements.md:103` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-ARC-011 | AC-ARC-024 | `4df6fb1:architecture-requirements.md:111` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-025 | `4df6fb1:architecture-requirements.md:112` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-026 | `4df6fb1:architecture-requirements.md:113` | — | `inventoried` | `unmapped` |
@@ -208,21 +208,21 @@
 | REQ-OPS-004 | AC-OPS-011 | `4df6fb1:operational-requirements.md:48` | — | `inventoried` | `unmapped` |
 | REQ-OPS-006 | AC-OPS-012 | `4df6fb1:operational-requirements.md:60` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-OPS-006 | AC-OPS-013 | `4df6fb1:operational-requirements.md:61` | JG-CAM-* | `accounted-for` | `partial` |
-| REQ-OPS-006 | AC-OPS-014 | `4df6fb1:operational-requirements.md:62` | — | `inventoried` | `unmapped` |
-| REQ-OPS-006 | AC-OPS-019 | `4df6fb1:operational-requirements.md:63` | — | `inventoried` | `unmapped` |
-| REQ-OPS-007 | AC-OPS-015 | `4df6fb1:operational-requirements.md:74` | — | `inventoried` | `unmapped` |
-| REQ-OPS-007 | AC-OPS-016 | `4df6fb1:operational-requirements.md:75` | — | `inventoried` | `unmapped` |
-| REQ-OPS-007 | AC-OPS-029 | `4df6fb1:operational-requirements.md:76` | — | `inventoried` | `unmapped` |
-| REQ-OPS-007 | AC-OPS-030 | `4df6fb1:operational-requirements.md:77` | — | `inventoried` | `unmapped` |
+| REQ-OPS-006 | AC-OPS-014 | `4df6fb1:operational-requirements.md:62` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-OPS-006 | AC-OPS-019 | `4df6fb1:operational-requirements.md:63` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-OPS-007 | AC-OPS-015 | `4df6fb1:operational-requirements.md:74` | JG-CNV-NOTICE | `accounted-for` | `partial` |
+| REQ-OPS-007 | AC-OPS-016 | `4df6fb1:operational-requirements.md:75` | JG-CNV-NOTICE | `accounted-for` | `partial` |
+| REQ-OPS-007 | AC-OPS-029 | `4df6fb1:operational-requirements.md:76` | JG-CNV-* | `accounted-for` | `partial` |
+| REQ-OPS-007 | AC-OPS-030 | `4df6fb1:operational-requirements.md:77` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-OPS-008 | AC-OPS-017 | `4df6fb1:operational-requirements.md:88` | — | `inventoried` | `unmapped` |
 | REQ-OPS-008 | AC-OPS-018 | `4df6fb1:operational-requirements.md:89` | — | `inventoried` | `unmapped` |
 | REQ-OPS-008 | AC-OPS-020 | `4df6fb1:operational-requirements.md:90` | — | `inventoried` | `unmapped` |
 | REQ-OPS-008 | AC-OPS-021 | `4df6fb1:operational-requirements.md:91` | — | `inventoried` | `unmapped` |
 | REQ-OPS-008 | AC-OPS-022 | `4df6fb1:operational-requirements.md:92` | — | `inventoried` | `unmapped` |
 | REQ-OPS-008 | AC-OPS-023 | `4df6fb1:operational-requirements.md:93` | — | `inventoried` | `unmapped` |
-| REQ-SEC-001 | AC-SEC-001 | `4df6fb1:operational-requirements.md:101` | — | `inventoried` | `unmapped` |
+| REQ-SEC-001 | AC-SEC-001 | `4df6fb1:operational-requirements.md:101` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-OPS-005 | AC-OPS-009 | `4df6fb1:operational-requirements.md:109` | — | `inventoried` | `unmapped` |
-| REQ-OPS-009 | AC-OPS-024 | `4df6fb1:operational-requirements.md:117` | JG-CAM-* | `accounted-for` | `partial` |
-| REQ-OPS-009 | AC-OPS-025 | `4df6fb1:operational-requirements.md:118` | JG-CAM-* | `accounted-for` | `partial` |
+| REQ-OPS-009 | AC-OPS-024 | `4df6fb1:operational-requirements.md:117` | JG-CAM-*, JG-CNV-* | `accounted-for` | `partial` |
+| REQ-OPS-009 | AC-OPS-025 | `4df6fb1:operational-requirements.md:118` | JG-CAM-*, JG-CNV-* | `accounted-for` | `partial` |
 | REQ-OPS-009 | AC-OPS-026 | `4df6fb1:operational-requirements.md:119` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-OPS-009 | AC-OPS-027 | `4df6fb1:operational-requirements.md:120` | — | `inventoried` | `unmapped` |

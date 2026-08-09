@@ -67,26 +67,53 @@ Final snapshot / Projection
 
 Behavior適合表もruntime descriptorではありません。各Layerへの寄与を確認する設計時の索引であり、canonical Design IDだけを参照します。型、State、owner、guardを定義せず、実行順、reducer参照、dispatch handleを持ちません。runtime descriptorへ変更する場合は別のADRとOwner判断が必要です。
 
-## 設計状態
+## 状態を三軸に分ける
 
-設計義務の状態は次に限定します。
+設計義務の所在、設計完成度、証拠進捗を一つの状態へ混ぜません。
 
-| 状態 | 意味 |
-| --- | --- |
-| `unmapped` | まだcanonical design contractへ割り当てていない |
-| `designed` | canonical contractとproof designが存在する |
-| `blocked-by-spike` | 技術検証結果がなければ設計を確定できない |
-| `blocked-by-owner` | Owner判断がなければ確定できない |
-| `deferred` | 正式に初期scope外である |
-| `implemented` | 対応sourceが存在するが、証拠は未確認 |
-| `passing` | revision付きの自動試験または実機証拠がある |
+| 軸 | 主な状態 | 問い |
+| --- | --- | --- |
+| Accounting | `unaccounted` / `accounted-for` | 義務の所在とscopeを把握したか |
+| Design | `undesigned` / `designed` / `blocked-by-spike` / `blocked-by-owner` / `deferred` | canonical contractとproof designを確定できたか |
+| Proof | `unplanned` / `planned` / `implemented` / `passing` / `blocked-by-spike` / `blocked-by-owner` / `not-applicable` | 実装・試験・実機証拠がどこまで存在するか |
 
-文書を埋めただけでは`implemented`または`passing`にしません。実機受入条件はFake Adapterだけで`passing`にしません。
+設計は確定済みで実機証拠だけを待つ場合は、Design=`designed`、Proof=`blocked-by-spike`です。
+実測結果によってState ownerやDomain法則自体が変わり得る場合だけDesign=`blocked-by-spike`です。
+文書を埋めただけではProof=`implemented`または`passing`にしません。実機受入条件は
+Fake Adapterだけで`passing`にしません。
+
+## 二つのGate
+
+- [Design Pilot Gate](verification/pilot-gate.md): 三本のpilotで設計方法を検証し、全214 ACへ横展開してよいかを判定する。
+- [Implementation / Evidence Gate](verification/implementation-evidence-gate.md): 実装とrevision付き証拠がrelease水準かを判定する。
+
+Design Pilot Gateはproduction codeや実機passingを要求しません。Implementation / Evidence Gateは
+Proof=`passing`を要求します。設計完成とrelease証拠を分離することで、実装しなければ設計を
+展開できない循環と、証拠がない実装を完成扱いする誤りの両方を防ぎます。
+
+横展開後のsystem design FIXは、Design Pilot Gateとは別の完成確認です。
+[system design FIX検査](verification/check-system-design-fix.sh)は、全214 ACが`covered`、
+全canonical contractが`accepted`、人間向け読み物版が存在してcanonical Design IDへ
+接続されていることを要求します。この検査を通らない限り「システム設計書FIX」と表示しません。
+
+## 人間向けの読み物版
+
+canonical system designは、AIエージェントと実装者が曖昧なく参照できる契約形式を維持します。
+全214 ACへの転写が完了しsystem designをFIXする際、非権威の派生成果物
+`docs/system-design/system-design-guide.md`を必ず作成します。
+
+読み物版は、Yatagarasu 2の世界モデル、Context／State owner地図、
+Command→Decision→Effect→result Event、Pilot A/B/Cの因果関係、Failure／Recovery、
+Rust／Python／Web／外部能力境界を、人間が順に理解できる文体と図で説明します。
+canonical Design IDへリンクし、新しいpayload、owner、guard、要件を独自に定義しません。
 
 ## 現在のGate
 
-現在は「system design pilot」段階です。三本の縦断設計がGateを通るまで、全214受入条件への構造横展開、crate/module固定、production code作成を開始しません。
+現在は「system design pilot」段階です。三本の縦断設計がDesign Pilot Gateを通るまで、
+全214受入条件への構造横展開とcrate/module固定を開始しません。Gate通過後に全system designを
+横展開・FIXし、その後にproduction implementationへ進みます。実装とrelease証拠の合否は
+Implementation / Evidence Gateで別に管理します。
 
-最初の成果物は[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)です。
+Pilot Aは[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)、Pilot Bは[有限Conversation・外部Thread・SemanticMemoryのcanonical contract](contracts/finite-conversation.md)と[Pilot B slice](slices/02-finite-conversation.md)で設計します。
 
 技術spike待ちのIPC、process数、storage engine、Web更新transport、Skill権限強制方式、実測数値は、仮の既定値として設計へ紛れ込ませません。
