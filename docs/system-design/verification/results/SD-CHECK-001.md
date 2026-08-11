@@ -1,5 +1,7 @@
 # SD-CHECK-001 — Pilot A設計整合検査
 
+> **Historical structural PASS:** この結果は記録時revisionの構造索引検査です。`SD-REV-PILOT-C-001`が共通Execution／Camera契約を変更したため、current Pilot A architecture reviewまたはDesign Gate PASSとして使用できません。
+
 ## 対象
 
 - 要件基準commit: `4df6fb1`

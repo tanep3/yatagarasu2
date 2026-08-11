@@ -1,5 +1,7 @@
 # SD-CHECK-002 — Pilot B設計整合検査
 
+> **Historical structural PASS:** この結果は記録時revisionの構造索引検査です。`SD-REV-PILOT-C-001`が共通Execution／Conversation／Agent契約を変更したため、current Pilot B architecture reviewまたはDesign Gate PASSとして使用できません。
+
 ## 対象
 
 - 要件基準commit: `4df6fb1`

@@ -8,3 +8,7 @@
 - [共通Presentation値](presentation.md)
 - [カメラ移動・撮影・画像解釈](camera-observation.md)
 - [有限Conversation・外部Thread・SemanticMemory](finite-conversation.md)
+- [設定文書・適用・権限](configuration-application.md)
+- [Runtime binding・Profile・readiness](runtime-binding.md)
+- [Behavior・推論route Policy](routing-policy.md)
+- [Runtime restart・Workspace migration](migration-and-restart.md)

@@ -117,9 +117,11 @@ Design Pilot Gate通過後も、Proof=`passing`でない義務を実装済み・
 
 | Pilot | Architecture review | Design slice | Evidence | 判定 |
 | --- | --- | --- | --- | --- |
-| Pilot A | Critical／Highなし | designed | planned／blocked-by-spike | Design slice PASS |
-| Pilot B | Critical／Highなし | designed | planned／blocked-by-spike | Design slice PASS |
-| Pilot C | 未実施 | 未設計 | unplanned | 未着手 |
+| Pilot A | current change-set再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
+| Pilot B | current change-set再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
+| Pilot C | 再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
 
-三本を合わせたDesign Pilot GateはPilot C完了まで未通過です。Pilot A/Bの実機・外部server証拠が
-未取得であることは、両sliceの設計PASSを取り消しません。
+Pilot A/B/Cは共通Execution vocabulary、Guard Fact、revision-use、runtime BindingUse、Recovery custodyを変更する[SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)の同一revisionで再審査します。旧Pilot A/Bの単独PASSはhistorical evidenceでありcurrent change-setの承認ではありません。
+構造索引の機械PASSは意味整合、Atomic Design Obligationの十分性、architecture review PASSを
+証明しません。Pilot Cの再審査とPrimary承認、参照canonical contractの`accepted`昇格が終わるまで、
+三本全体のDesign Pilot GateをPASSと表示しません。

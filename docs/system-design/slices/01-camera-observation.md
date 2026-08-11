@@ -1,6 +1,8 @@
 # Pilot A — TC70の移動・撮影・画像解釈
 
 このsliceは[canonical contract](../contracts/camera-observation.md)を観測可能な因果列へ接続します。型、owner、guardを再定義しません。
+Pilot Cで改訂した共通契約は変更集合`SD-REV-PILOT-C-001`として同じrevisionで再審査します。
+現在のarchitecture review statusは`pending`です。旧slice PASSはcurrent change-setの承認に使用しません。
 
 ## 対象scenario
 
@@ -10,7 +12,7 @@
 Initial snapshot
   device capability ready
   configuration snapshot / Profile candidate / Policy available
-  Active Interaction and Qualia
+  accepted admission candidate, but no Interaction/Qualia/lineage commit yet
   no conflicting resource lease
   reference deviceならvalid Device Test Exclusion lease
 
@@ -19,7 +21,8 @@ Inbound
 
 Decision and durable commit
   SD-RUL-CAM-001 -> SD-DEC-CAM-001
-  SD-TRN-EXE-001 and SD-TRN-ART-001 are committed in one SD-PER-EXE-001 Unit of Work
+  SD-PER-CAM-001 + SD-PER-EXE-007 atomically commit Interaction/Qualia,
+    generation 0 lineage, Profile/QPR uses, Artifact reservation, Graph, Occurrences and Pending
 
 Dispatch and results
   SD-TRN-EXE-002 claims attempt/profile/policy/resource durably
@@ -66,11 +69,11 @@ Final snapshot
 | DO-CAM-022 | AC-ARC-004 | JG-CAM-OWNER | partial | SD-PRT-PHY-001, SD-PRT-CAP-001, SD-PRT-INF-001, SD-PRT-ART-001, SD-EVT-EXE-002 | contract/architecture | Adapterからreducer到達 | 共通 | accounted-for | designed | planned |
 | DO-CAM-023 | AC-ARC-005 | JG-CAM-ARCH | partial | SD-EFX-PHY-001, SD-EFX-TIM-001, SD-EFX-TIM-002, SD-EFX-CAP-001, SD-EFX-INF-001, SD-EFX-ART-001 | pure | closure/callback Effect | 共通 | accounted-for | designed | planned |
 | DO-CAM-024 | AC-ARC-006 | JG-CAM-PHYSICAL | partial | SD-EVT-PHY-001, SD-EVT-PHY-002, SD-EVT-EXE-002 | contract | bool successへ圧縮 | 共通 | accounted-for | designed | planned |
-| DO-CAM-025 | AC-ARC-012 | JG-CAM-PROFILE | partial | SD-TRN-EXE-002, SD-PRF-PHY-001 | pure | claim後Profile変更 | 共通 | accounted-for | designed | planned |
+| DO-CAM-025 | AC-ARC-012 | JG-CAM-PROFILE | partial | SD-CTX-DPF-001, SD-TRN-DPF-003, SD-PRF-PHY-001 | pure | plan後Profile変更 | 共通 | accounted-for | designed | planned |
 | DO-CAM-026 | AC-ARC-017 | JG-CAM-OWNER | partial | SD-STA-EXE-001, SD-STA-PHY-001, SD-STA-ART-001, SD-STA-DAT-001, SD-STA-PAP-001, SD-STA-DEX-001 | architecture | 非owner reducer到達 | 共通 | accounted-for | designed | planned |
 | DO-CAM-027 | AC-OPS-002 | JG-CAM-PERSIST | partial | SD-PER-EXE-001 | crash-recovery | snapshot restart差分 | 共通 | accounted-for | designed | planned |
 | DO-CAM-028 | AC-OPS-003 | JG-CAM-PERSIST | partial | SD-PER-EXE-001 | architecture | journal replay dispatch | 共通 | accounted-for | designed | planned |
-| DO-CAM-029 | AC-OPS-004 | JG-CAM-PERSIST | partial | SD-TRN-EXE-001, SD-TRN-ART-001, SD-PER-EXE-001 | crash-recovery | commit後dispatch前crash | 共通 | accounted-for | designed | planned |
+| DO-CAM-029 | AC-OPS-004 | JG-CAM-PERSIST | partial | SD-TRN-EXE-001, SD-TRN-ART-001, SD-PER-CAM-001 | crash-recovery | 任意CAS競合、commit後dispatch前crash | 共通 | accounted-for | designed | planned |
 | DO-CAM-030 | AC-OPS-005 | JG-CAM-DISPATCH | partial | SD-RUL-EXE-002, SD-TRN-EXE-002, SD-MOD-EXE-001, SD-PER-EXE-001 | concurrency/contract | pendingなしdispatch | 共通 | accounted-for | designed | planned |
 | DO-CAM-031 | AC-OPS-006 | JG-CAM-DISPATCH | partial | SD-TRN-EXE-002, SD-PER-EXE-002, SD-REC-PHY-001, SD-REC-ART-001, SD-REC-DEX-001 | crash-recovery | 全Effect classのintent/result crash | 共通 | accounted-for | designed | planned |
 | DO-CAM-032 | AC-OPS-012 | JG-CAM-CANCEL | full | SD-TRN-EXE-004 | crash-recovery | revoke後restart | 共通 | accounted-for | designed | planned |
@@ -94,6 +97,10 @@ Final snapshot
 | DO-CAM-047 | AC-FR-004 | JG-CAM-PROJECTION | partial | SD-FAIL-CAM-001, SD-PRJ-CAM-001 | projection | raw exception表示 | 共通 | accounted-for | designed | planned |
 | DO-CAM-048 | AC-NFR-001 | JG-CAM-MEASURE | partial | SD-EVT-ING-001, SD-PRJ-CAM-001 | measurement | 区間相関欠落 | 実機Profile | accounted-for | designed | blocked-by-spike |
 | DO-CAM-049 | AC-NFR-003 | JG-CAM-MEASURE | partial | SD-PRJ-CAM-001 | measurement | 欠測理由なし | 実機Profile | accounted-for | designed | blocked-by-spike |
+| DO-CAM-050 | AC-PER-001 | JG-CAM-GUARD | partial | SD-EVT-EXE-004, SD-TRN-EXE-009, SD-GPH-CAM-001 | pure/integration | 未宣言factをguardに使う、producer自身の結果で自分をready化、DeclarationとRecordに別lifecycleを持つ | 共通Guard Fact | accounted-for | designed | planned |
+| DO-CAM-051 | AC-OPS-024 | JG-CAM-RECOVERY-CUSTODY | partial | SD-EVT-EXE-005, SD-RUL-EXE-003, SD-TRN-EXE-010, SD-TRN-EXE-011, SD-TRN-EXE-012, SD-PER-EXE-004, SD-PER-EXE-005, SD-REC-PHY-001 | concurrency/crash-recovery | custody移管/出口の部分commit、旧exclusive leaseでRecovery自己阻害、StillUnknownでrelease、Quarantined資源を通常再利用 | 物理資源Recovery | accounted-for | designed | planned |
+| DO-CAM-052 | AC-ARC-012 | JG-CAM-PROFILE-USE | partial | SD-PER-DPF-001, SD-TRN-DPF-003, SD-TRN-QPR-001 | concurrency/crash-recovery | Profile/QPR useの片側だけ取得・解放、retired revisionを無参照と誤認 | Camera Profile/QPR | accounted-for | designed | planned |
+| DO-CAM-053 | AC-OPS-004 | JG-CAM-INITIAL-LINEAGE | partial | SD-PER-CFG-005, SD-EVT-EXE-008, SD-RUL-EXE-006, SD-TRN-EXE-015, SD-PER-EXE-007, SD-PER-CAM-001 | concurrency/crash-recovery | CFG useだけ、BRP/IRP useだけ、INT/QLIだけ、lineage/Graphだけの部分commit、generation 1で初期化、同一admissionの二Graph、同じidentityの異payload再送 | Camera initial admission/Graph | accounted-for | designed | planned |
 
 ## Failure、取消、Recovery scenario
 

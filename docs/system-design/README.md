@@ -114,6 +114,6 @@ canonical Design IDへリンクし、新しいpayload、owner、guard、要件�
 横展開・FIXし、その後にproduction implementationへ進みます。実装とrelease証拠の合否は
 Implementation / Evidence Gateで別に管理します。
 
-Pilot Aは[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)、Pilot Bは[有限Conversation・外部Thread・SemanticMemoryのcanonical contract](contracts/finite-conversation.md)と[Pilot B slice](slices/02-finite-conversation.md)で設計します。
+Pilot Aは[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)、Pilot Bは[有限Conversation・外部Thread・SemanticMemoryのcanonical contract](contracts/finite-conversation.md)と[Pilot B slice](slices/02-finite-conversation.md)、Pilot Cは[設定適用契約](contracts/configuration-application.md)、[runtime binding契約](contracts/runtime-binding.md)、[routing契約](contracts/routing-policy.md)、[migration／restart契約](contracts/migration-and-restart.md)と[Pilot C slice](slices/03-configuration-capability.md)で設計します。三sliceともcurrent change-setの再審査待ちであり、構造索引PASSだけでDesign Pilot Gateを完了表示しません。
 
 技術spike待ちのIPC、process数、storage engine、Web更新transport、Skill権限強制方式、実測数値は、仮の既定値として設計へ紛れ込ませません。

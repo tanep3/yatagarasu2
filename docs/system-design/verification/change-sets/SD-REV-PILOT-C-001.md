@@ -1,0 +1,608 @@
+# SD-REV-PILOT-C-001 — Pilot C統合変更集合
+
+このArtifactは、Pilot C再審査へ投入するcanonical Design ID集合とsystem-design content revisionを固定します。architecture承認、contractのaccepted昇格、実装証拠ではありません。
+
+## 固定revision
+
+- 要件基準commit: `4df6fb1`
+- system-design content revision: `sha256:f0c85ec41234afc5399ba4e6d1ce464b1ae4bca30050a2f240ca5ec09ef60705`
+- structural verification policy revision: `sha256:617f6a338fba5b3a71a9a11dee6eade42204e57454df947e7f6d2904ac87681a`
+- lifecycle: `review-pending`
+
+## 集合の境界
+
+この集合は、Configuration／RuntimeControl／Migration payloadとGraphだけでなく、それらが変更した共通Execution、Camera Profile/QPR use、Conversation/Codex runtime bindingを同じrevisionで審査するため、次のcanonical contract filesに存在するDesign IDを明示的に含みます。IDの意味は各canonical definitionだけが所有します。
+
+### execution.md
+
+- SD-CTX-EXE-001
+- SD-STA-EXE-001
+- SD-EVT-ING-001
+- SD-EVT-EXE-001
+- SD-EVT-EXE-002
+- SD-EVT-EXE-003
+- SD-EVT-EXE-004
+- SD-RUL-EXE-001
+- SD-RUL-EXE-002
+- SD-TRN-EXE-001
+- SD-TRN-EXE-009
+- SD-TRN-EXE-010
+- SD-TRN-EXE-002
+- SD-TRN-EXE-003
+- SD-TRN-EXE-004
+- SD-TRN-EXE-006
+- SD-TRN-EXE-007
+- SD-TRN-EXE-008
+- SD-PER-EXE-001
+- SD-PER-EXE-002
+- SD-PER-EXE-003
+- SD-PER-EXE-004
+- SD-MOD-EXE-001
+
+### camera-observation.md
+
+- SD-CTX-PHY-001
+- SD-STA-PHY-001
+- SD-CTX-ART-001
+- SD-STA-ART-001
+- SD-CTX-DAT-001
+- SD-STA-DAT-001
+- SD-CTX-PAP-001
+- SD-STA-PAP-001
+- SD-CTX-DEX-001
+- SD-STA-DEX-001
+- SD-CMD-CAM-001
+- SD-CMD-INT-001
+- SD-CMD-ART-001
+- SD-CMD-DEX-001
+- SD-EVT-PHY-001
+- SD-EVT-PHY-002
+- SD-EVT-TIM-001
+- SD-EVT-TIM-002
+- SD-EVT-ART-001
+- SD-EVT-DAT-001
+- SD-EVT-ART-002
+- SD-EVT-ART-005
+- SD-EVT-ART-003
+- SD-EVT-ART-004
+- SD-EVT-INF-001
+- SD-EVT-INT-001
+- SD-EVT-DEX-001
+- SD-RUL-CAM-001
+- SD-DEC-CAM-001
+- SD-RUL-CAM-002
+- SD-RUL-TIM-001
+- SD-RUL-PHY-001
+- SD-RUL-DAT-001
+- SD-RUL-ART-001
+- SD-RUL-ART-002
+- SD-RUL-REC-001
+- SD-RUL-DEX-001
+- SD-TRN-PHY-001
+- SD-TRN-PHY-002
+- SD-TRN-ART-001
+- SD-TRN-ART-002
+- SD-TRN-DAT-001
+- SD-TRN-DAT-002
+- SD-TRN-PAP-001
+- SD-TRN-EXE-005
+- SD-PER-CAM-001
+- SD-TRN-DEX-001
+- SD-POL-PHY-001
+- SD-POL-PHY-002
+- SD-POL-REC-001
+- SD-POL-DAT-001
+- SD-POL-ART-001
+- SD-POL-DEX-001
+- SD-EFX-PHY-001
+- SD-EFX-TIM-001
+- SD-EFX-TIM-002
+- SD-EFX-CAP-001
+- SD-EFX-INF-001
+- SD-EFX-ART-001
+- SD-EFX-DEX-001
+- SD-GPH-CAM-001
+- SD-PRT-PHY-001
+- SD-PRT-TIM-001
+- SD-PRT-CAP-001
+- SD-PRT-INF-001
+- SD-PRT-ART-001
+- SD-PRT-DEX-001
+- SD-FAIL-CAM-001
+- SD-REC-PHY-001
+- SD-REC-ART-001
+- SD-REC-DEX-001
+- SD-PRJ-CAM-001
+- SD-PRF-PHY-001
+- SD-MOD-CAM-001
+- SD-MOD-DEX-001
+
+### finite-conversation.md
+
+- SD-CTX-QLI-001
+- SD-STA-QLI-001
+- SD-CTX-INT-001
+- SD-STA-INT-001
+- SD-CTX-CNV-001
+- SD-STA-CNV-001
+- SD-CTX-MEM-001
+- SD-STA-MEM-001
+- SD-CTX-AGT-001
+- SD-STA-AGT-001
+- SD-CTX-NOT-001
+- SD-STA-NOT-001
+- SD-TRN-NOT-001
+- SD-CMD-INT-002
+- SD-CMD-CNV-001
+- SD-CMD-QLI-001
+- SD-CMD-MEM-001
+- SD-CMD-MEM-004
+- SD-CMD-MEM-002
+- SD-CMD-MEM-003
+- SD-CMD-AGT-001
+- SD-CMD-AGT-002
+- SD-EVT-CNV-001
+- SD-EVT-MEM-001
+- SD-EVT-MEM-002
+- SD-EVT-MEM-003
+- SD-EVT-AGT-001
+- SD-EVT-AGT-002
+- SD-EVT-CNV-002
+- SD-EVT-OUT-001
+- SD-EVT-AGT-003
+- SD-EVT-AGT-004
+- SD-EVT-AGT-005
+- SD-EVT-AGT-006
+- SD-EVT-AGT-007
+- SD-EVT-AGT-008
+- SD-EVT-NOT-001
+- SD-EVT-AUD-001
+- SD-EVT-DAT-002
+- SD-EVT-TOL-001
+- SD-EVT-TOL-002
+- SD-EVT-TOL-003
+- SD-EVT-QLI-001
+- SD-RUL-INT-001
+- SD-RUL-MEM-001
+- SD-RUL-MEM-002
+- SD-RUL-MEM-003
+- SD-RUL-AGT-001
+- SD-RUL-AGT-002
+- SD-RUL-AGT-003
+- SD-RUL-CNV-001
+- SD-RUL-NOT-001
+- SD-RUL-CNV-002
+- SD-RUL-AGT-004
+- SD-RUL-CNV-003
+- SD-RUL-CNV-004
+- SD-RUL-AGT-005
+- SD-RUL-AGT-006
+- SD-RUL-AGT-007
+- SD-RUL-AGT-008
+- SD-RUL-TOL-001
+- SD-RUL-TOL-002
+- SD-TRN-QLI-001
+- SD-TRN-INT-001
+- SD-TRN-CNV-001
+- SD-TRN-CNV-002
+- SD-TRN-CNV-004
+- SD-TRN-MEM-001
+- SD-TRN-MEM-002
+- SD-TRN-MEM-003
+- SD-TRN-MEM-004
+- SD-TRN-MEM-005
+- SD-TRN-MEM-006
+- SD-TRN-MEM-007
+- SD-TRN-MEM-008
+- SD-TRN-MEM-009
+- SD-TRN-AGT-001
+- SD-TRN-AGT-002
+- SD-TRN-AGT-003
+- SD-TRN-AGT-004
+- SD-TRN-AGT-005
+- SD-TRN-AGT-006
+- SD-TRN-AGT-007
+- SD-TRN-AGT-008
+- SD-TRN-CNV-003
+- SD-EFX-AGT-007
+- SD-EFX-AGT-008
+- SD-EFX-MEM-001
+- SD-EFX-MEM-002
+- SD-EFX-MEM-003
+- SD-EFX-AGT-001
+- SD-EFX-AGT-002
+- SD-EFX-AGT-003
+- SD-EFX-AGT-004
+- SD-EFX-AGT-005
+- SD-EFX-AGT-006
+- SD-EFX-NOT-001
+- SD-EFX-OUT-001
+- SD-EFX-AUD-001
+- SD-EFX-DAT-001
+- SD-EFX-TOL-001
+- SD-EFX-TOL-002
+- SD-EFX-TOL-003
+- SD-GPH-CNV-001
+- SD-GPH-MEM-001
+- SD-PRT-MEM-001
+- SD-PRT-AGT-001
+- SD-PRT-AGT-002
+- SD-PRT-NOT-001
+- SD-PRT-OUT-001
+- SD-PRT-AUD-001
+- SD-PRT-DAT-001
+- SD-PRT-TOL-001
+- SD-FAIL-CNV-001
+- SD-REC-CNV-001
+- SD-REC-AGT-001
+- SD-REC-MEM-001
+- SD-REC-AGT-002
+- SD-REC-AGT-003
+- SD-REC-OUT-001
+- SD-REC-NOT-001
+- SD-REC-TOL-001
+- SD-PER-CNV-001
+- SD-PER-AGT-001
+- SD-PER-AGT-002
+- SD-PER-TOL-001
+- SD-PRJ-CNV-001
+- SD-PRJ-MEM-001
+- SD-PRJ-AGT-001
+- SD-PRJ-QLI-001
+- SD-MOD-CNV-001
+
+### configuration-application.md
+
+- SD-CTX-CFG-001
+- SD-STA-CFG-001
+- SD-STA-CFG-002
+- SD-CTX-AUT-001
+- SD-STA-AUT-001
+- SD-CMD-CFG-001
+- SD-CMD-CFG-002
+- SD-CMD-CFG-003
+- SD-EVT-CFG-001
+- SD-EVT-CFG-002
+- SD-EVT-CFG-003
+- SD-EVT-CFG-004
+- SD-EVT-CFG-005
+- SD-RUL-CFG-001
+- SD-RUL-CFG-002
+- SD-RUL-CFG-003
+- SD-RUL-CFG-004
+- SD-RUL-CFG-005
+- SD-TRN-CFG-001
+- SD-TRN-CFG-002
+- SD-TRN-CFG-003
+- SD-TRN-CFG-004
+- SD-TRN-CFG-005
+- SD-TRN-CFG-006
+- SD-TRN-AUT-001
+- SD-MOD-CFG-001
+- SD-EFX-CFG-001
+- SD-EFX-CFG-002
+- SD-EFX-CFG-003
+- SD-EFX-CFG-004
+- SD-EFX-CFG-005
+- SD-EVT-CFG-006
+- SD-RUL-CFG-006
+- SD-PRT-CFG-001
+- SD-GPH-CFG-001
+- SD-PER-CFG-001
+- SD-PER-CFG-002
+- SD-PER-CFG-003
+- SD-PER-CFG-004
+- SD-PER-CFG-005
+- SD-PER-CFG-006
+- SD-REC-CFG-001
+- SD-PRJ-CFG-001
+- SD-PRJ-AUT-001
+- SD-FAIL-CFG-001
+
+### runtime-binding.md
+
+- SD-MOD-RBI-001
+- SD-MOD-RBI-002
+- SD-CTX-SRC-001
+- SD-STA-SRC-001
+- SD-TRN-SRC-001
+- SD-CTX-WAK-001
+- SD-STA-WAK-001
+- SD-TRN-WAK-001
+- SD-CTX-STT-001
+- SD-STA-STT-001
+- SD-TRN-STT-001
+- SD-CTX-SBR-001
+- SD-STA-SBR-001
+- SD-TRN-SBR-001
+- SD-CTX-DEV-001
+- SD-STA-DEV-001
+- SD-TRN-DEV-001
+- SD-CTX-TTS-001
+- SD-STA-TTS-001
+- SD-TRN-TTS-001
+- SD-CTX-MBP-001
+- SD-STA-MBP-001
+- SD-TRN-MBP-001
+- SD-CTX-PRV-001
+- SD-STA-PRV-001
+- SD-TRN-PRV-001
+- SD-CTX-DPF-001
+- SD-STA-DPF-001
+- SD-TRN-DPF-001
+- SD-TRN-DPF-002
+- SD-TRN-DPF-003
+- SD-CTX-QPR-001
+- SD-STA-QPR-001
+- SD-TRN-QPR-001
+- SD-PER-DPF-001
+- SD-RUL-RBI-001
+- SD-RUL-RBI-002
+- SD-RUL-RBI-003
+- SD-RUL-RBI-004
+- SD-EVT-RBI-001
+- SD-EVT-RBI-002
+- SD-EVT-RBI-003
+- SD-EVT-RBI-004
+- SD-EFX-RBI-001
+- SD-EFX-RBI-002
+- SD-EFX-RBI-003
+- SD-EFX-RBI-004
+- SD-EFX-RBI-005
+- SD-EFX-RBI-006
+- SD-EFX-RBI-007
+- SD-PRT-RBI-001
+- SD-GPH-RBI-001
+- SD-PRT-RBI-002
+- SD-PER-RBI-001
+- SD-PER-RBI-002
+- SD-REC-RBI-001
+- SD-PRJ-RBI-001
+- SD-PRJ-RBI-002
+
+### routing-policy.md
+
+- SD-CTX-BRP-001
+- SD-STA-BRP-001
+- SD-CTX-IRP-001
+- SD-STA-IRP-001
+- SD-RUL-BRP-001
+- SD-RUL-IRP-001
+- SD-TRN-BRP-001
+- SD-TRN-BRP-002
+- SD-TRN-IRP-001
+- SD-TRN-IRP-002
+- SD-RUL-RTE-001
+- SD-PRJ-BRP-001
+- SD-PRJ-IRP-001
+
+### migration-and-restart.md
+
+- SD-CTX-RST-001
+- SD-STA-RST-001
+- SD-RUL-RST-001
+- SD-RUL-RST-002
+- SD-RUL-RST-003
+- SD-TRN-RST-001
+- SD-TRN-RST-002
+- SD-EVT-RST-001
+- SD-EVT-RST-002
+- SD-EVT-RST-003
+- SD-MOD-RST-001
+- SD-EFX-RST-001
+- SD-EFX-RST-002
+- SD-EFX-RST-003
+- SD-EFX-RST-004
+- SD-EFX-RST-005
+- SD-EFX-RST-006
+- SD-EFX-RST-007
+- SD-PRT-RST-001
+- SD-GPH-RST-001
+- SD-PER-RST-001
+- SD-PER-RST-002
+- SD-REC-RST-001
+- SD-CTX-MIG-001
+- SD-STA-MIG-001
+- SD-RUL-MIG-001
+- SD-RUL-MIG-002
+- SD-TRN-MIG-001
+- SD-EVT-MIG-001
+- SD-EFX-MIG-001
+- SD-EFX-MIG-002
+- SD-EFX-MIG-003
+- SD-EFX-MIG-004
+- SD-MOD-MIG-001
+- SD-PRT-MIG-001
+- SD-GPH-MIG-001
+- SD-PER-MIG-001
+- SD-REC-MIG-001
+- SD-PRJ-MIG-001
+
+### Third-review closure additions
+
+- SD-EVT-EXE-005
+- SD-RUL-EXE-003
+- SD-TRN-EXE-011
+- SD-TRN-EXE-012
+- SD-PER-EXE-005
+- SD-EVT-AGT-009
+- SD-EVT-AGT-010
+- SD-EVT-AGT-011
+- SD-EVT-AGT-012
+- SD-EVT-AGT-013
+- SD-RUL-AGT-009
+- SD-RUL-AGT-010
+- SD-RUL-TOL-003
+- SD-TRN-AGT-009
+- SD-TRN-AGT-010
+- SD-TRN-CNV-005
+- SD-EFX-AGT-009
+- SD-EFX-AGT-010
+- SD-EFX-AGT-011
+- SD-EFX-AGT-012
+- SD-EFX-AGT-013
+- SD-EFX-TOL-004
+- SD-EFX-TOL-005
+- SD-EVT-TOL-004
+- SD-EVT-TOL-005
+- SD-GPH-AGT-001
+- SD-GPH-AGT-002
+- SD-GPH-TOL-001
+- SD-EVT-CFG-007
+- SD-TRN-CFG-007
+- SD-PER-CFG-007
+- SD-PER-CFG-008
+- SD-EVT-RBI-005
+- SD-PER-RBI-003
+- SD-EVT-RST-004
+- SD-TRN-RST-003
+- SD-PER-RST-003
+- SD-EVT-MIG-002
+- SD-TRN-MIG-002
+- SD-EFX-MIG-005
+- SD-PER-MIG-002
+
+### Fourth-review closure additions
+
+- SD-EVT-AGT-014
+- SD-TRN-AGT-011
+- SD-EVT-MIG-003
+- SD-TRN-MIG-003
+- SD-EVT-AGT-015
+- SD-TRN-AGT-012
+- SD-EVT-TOL-006
+- SD-TRN-CNV-006
+
+### Fifth-review closure additions
+
+- SD-RUL-QLI-001
+- SD-EVT-QLI-002
+- SD-TRN-QLI-002
+- SD-RUL-AGT-011
+- SD-EVT-AGT-016
+- SD-TRN-AGT-013
+- SD-PER-AGT-003
+- SD-RUL-RST-004
+- SD-EVT-RST-005
+- SD-TRN-RST-004
+- SD-PER-RST-004
+- SD-RUL-MIG-003
+- SD-EVT-MIG-004
+- SD-TRN-MIG-004
+- SD-PER-MIG-003
+
+### Sixth-review closure additions
+
+- SD-MOD-EXE-002
+- SD-EVT-EXE-006
+- SD-RUL-EXE-004
+- SD-TRN-EXE-013
+- SD-EVT-CNV-003
+- SD-RUL-CNV-005
+- SD-TRN-CNV-007
+- SD-PER-MIG-004
+- SD-RUL-MIG-004
+- SD-EVT-MIG-005
+- SD-TRN-MIG-005
+
+### Seventh-review closure additions
+
+- SD-MOD-EXE-003
+- SD-EVT-EXE-007
+- SD-RUL-EXE-005
+- SD-TRN-EXE-014
+- SD-PER-EXE-006
+- SD-EVT-CNV-004
+- SD-RUL-CNV-006
+- SD-TRN-CNV-008
+- SD-PER-CNV-002
+- SD-MOD-RST-002
+- SD-RUL-RBI-005
+- SD-RUL-RBI-006
+- SD-EVT-RBI-006
+- SD-EVT-RBI-007
+- SD-PER-RBI-004
+- SD-RUL-CFG-007
+
+### Eighth-review closure additions
+
+- SD-EVT-EXE-008
+- SD-RUL-EXE-006
+- SD-TRN-EXE-015
+- SD-PER-EXE-007
+- SD-EVT-CNV-005
+- SD-RUL-CNV-007
+- SD-TRN-CNV-009
+- SD-TRN-INT-002
+- SD-PER-CNV-003
+- SD-PRF-RBI-001
+- SD-RUL-RBI-007
+- SD-RUL-RBI-008
+
+### Ninth-review closure additions
+
+- SD-CTX-RCP-001
+- SD-STA-RCP-001
+- SD-EVT-RCP-001
+- SD-EVT-RCP-002
+- SD-RUL-RCP-001
+- SD-RUL-RCP-002
+- SD-RUL-RCP-003
+- SD-TRN-RCP-001
+- SD-TRN-RCP-002
+- SD-TRN-RCP-003
+- SD-TRN-RCP-004
+- SD-PER-RCP-001
+
+### Tenth-review closure additions
+
+- SD-MOD-RCP-001
+- SD-CMD-RCP-001
+- SD-CMD-RCP-002
+- SD-EVT-RCP-003
+- SD-EVT-RCP-004
+- SD-RUL-RCP-004
+- SD-RUL-RCP-005
+- SD-TRN-RCP-005
+- SD-PER-RCP-002
+- SD-PER-RCP-003
+- SD-PRT-RCP-001
+- SD-RUL-RBI-009
+- SD-EVT-RBI-008
+- SD-PER-RBI-005
+
+### Eleventh-review closure additions
+
+- SD-RUL-RBI-010
+- SD-EVT-RBI-009
+- SD-EFX-RBI-008
+- SD-PER-RBI-006
+
+### Twelfth-review closure additions
+
+- SD-EVT-RBI-010
+- SD-PER-RBI-007
+
+初期releaseのcandidate cardinalityをCapability／mode／Adapter classごとに1へ固定し、candidate generation、
+RCP RevisionUse、BindingChange Graph、candidate slot、generation-lifecycle NamedInterval leaseを単一UoWで
+admitします。既存candidateがMaterialize／Probe／cleanup／Recovery／Quarantineのいずれにあってもslotを
+解放せず、後続admissionはtyped BusyまたはQuarantinedとしてgeneration／Graph／use／leaseを作らず拒否します。
+activationまたは安全なRejected終端だけがslotとleaseを原子的に解放し、terminalと後続admissionの競合は
+同じrevision CASで一方だけを成立させます。将来の複数candidateは、version付きcardinalityと資源分離proof、
+Owner採用、slot/resource契約更新なしには許可しません。
+
+### Thirteenth-review closure clarification
+
+candidate slotはRCP Profile登録時に先行生成しません。valid current Passing Profileに対するfirst admissionが、
+Capability runtime ownerのslot mapへ決定論的identityとrevision 0のHeld entryをcompare-not-exists CASで
+generation／RCP use／Graph／NamedInterval leaseと原子生成します。既存Freeはrevision CAS、既存Held／
+QuarantinedはBusy／Quarantinedとして扱います。missing／Superseded／Blocked／key mismatch Profileからの
+自動生成を禁止し、同一Absent keyの並行admission、同値replay、profile supersede競合を同じruntime／RCP／
+EXE revision境界で一意に解決します。
+
+## 除外
+
+- verification表やscenarioが新しいDomain意味を定義すること
+- architecture review PASSまたはPrimary承認の推測
+- production implementation、実機、外部runtime、測定Proof
+- このrevision以外の同名Design ID定義

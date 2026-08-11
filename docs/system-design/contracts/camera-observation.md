@@ -1,5 +1,7 @@
 # カメラ移動・撮影・画像解釈のcanonical contract
 
+`SD-PRF-PHY-001`のProfile revisionは`SD-CTX-DPF-001`が唯一所有します。Camera、CFG、Bootstrap、AdapterはProfile本文を所有せず、revision refとread viewだけを利用します。
+
 この文書はPilot AのBehavior固有契約です。[共通Execution契約](execution.md)へplanned/dispatch/result payloadを寄与します。TC70とC210はProfile／Adapter／Bootstrapの名前であり、Domain型には現れません。
 
 ## 閉じたCamera値
@@ -526,7 +528,34 @@ CameraObservationPlan = Rejected(CameraObservationFailure) |
   }
 ```
 
+commit候補は読取りviewと同じexpected revisionを必ず持ちます。
+
+```text
+CameraPlanCommitCandidate {
+  decision: CameraObservationPlan,
+  accepted_admission_identity,
+  interaction_id, qualia_session_id,
+  behavior_identity, behavior_version,
+  initial_execution_subject,
+  expected_interaction_state_revision,
+  expected_qualia_state_revision,
+  expected_configuration_snapshot_record_generation,
+  exact_pinned_configuration_snapshot_ref,
+  expected_dpf_state_revision,
+  expected_physical_profile_record_generation,
+  exact_physical_profile_revision_ref,
+  expected_qpr_state_revision,
+  expected_quality_profile_record_generation,
+  exact_quality_profile_revision_ref,
+  expected_artifact_state_revision,
+  expected_execution_state_revision,
+  graph, planned_effect_specs, artifact_reservation_decision
+}
+```
+
 `ArtifactId`は`interaction_id + graph_id + capture ordinal`から純粋なtyped constructorで導出し、同じPlanの再評価で変化させません。外部乱数やfilesystem pathをID生成に使いません。
+
+Profile/QPRのRevisionUseはInteraction admissionでは取得しません。`StartCameraObservation`のplan後、`SD-PER-CAM-001`でexact Profile/QPR revisionとGraphを同時に固定します。
 
 ### SD-RUL-CAM-002 — BuildCameraDispatchEffect
 
@@ -578,11 +607,25 @@ Started captureを`Reserved -> Writing`、Started deleteを`DeletePending -> Del
 
 ### SD-TRN-DAT-001 — RecordClassificationDecision
 
-Data Classification Contextだけを変更し、決定EventをArtifact／Executionへ渡します。
+分類導出とauthorization DecisionをData Classification Stateだけへ適用し、決定EventをArtifact／Executionへ渡します。Provider、Skill、FetcherはこのStateを変更しません。
+
+### SD-TRN-DAT-002 — ApplyDataPolicyConfiguration
+
+CFGのatomic group activation候補が持つtyped data Policy revisionをexpected Data State revisionへ純粋に適用します。CFG State、Skill grant、Artifact Stateを変更しません。
+
+### SD-TRN-PAP-001 — ApplyPhysicalActionPolicyConfiguration
+
+Assumed進行、開始確認、physical retry、resource Recoveryのversion付きPolicy revisionをexpected Physical Action Policy State revisionへ純粋に適用します。`PhysicalCapabilityProfile`の数値とdevice bindingは変更しません。
 
 ### SD-TRN-EXE-005 — ApplyStartConfirmationRace
 
 `SD-RUL-TIM-001`のDecisionだけを適用します。Started勝者ならdeadlineをrevokeし、deadline勝者ならmoveと未dispatch子孫をRecovering／Revokedへ進めます。後着Eventで勝敗を反転しません。
+
+### SD-PER-CAM-001 — CameraPlanRegistrationUoW
+
+`CameraPlanCommitCandidate`が固定したCFG、BRP、IRP、INT、QLI、pin済みCFG snapshot record、DPF、QPR、ART、EXEのexpected revisionを一つのState Snapshot transactionで全CASします。全て成功した場合だけ、`SD-PER-CFG-005`と`SD-PER-EXE-007`を合成し、exact CFG/BRP/IRP RevisionUse、`SD-RUL-EXE-006`、`SD-EVT-EXE-008`、`SD-TRN-EXE-015`によるgeneration 0のinitial lineage/subject、Interaction/Qualia admission、exact Profile/QPRの`RevisionUse(ExecutionGraph)`、Camera Plan、Artifact reservation、`SD-TRN-EXE-001`による初期Graph、PlannedEffectSpec、`OccurrenceOrigin.InitialAdmission`、pending leaseを同一Snapshot revisionへcommitします。
+
+同じadmission identityと同じinteraction/session/Behavior/revision binding/Graph digestの再送は既存結果を返し、二つ目のlineage、Graph、Artifact、RevisionUseを作りません。同じlineageまたはadmission identityを異なるpayloadへ再利用した場合はConflictです。一つでもCASが競合した場合は全書込みを棄却します。Plan read後のCFG/BRP/IRPまたはProfile/QPR GC、ART reservation、EXE Graph登録とのraceで、CFG useだけ、BRP/IRP useだけ、lineageだけ、Profile/QPR Useだけ、Artifactだけ、Graph/pendingだけを残しません。Interaction admissionはCamera Profile/QPR Useを先行取得しません。Graph terminalまたはdurable Recoveryへの責任移管後にだけUseを解放します。
 
 ### SD-TRN-DEX-001 — ApplyDeviceTestExclusionResult
 
@@ -671,13 +714,14 @@ terminal/handoff + no dependents/holds --> Delete temporary Artifact
 ```
 
 - 各M、D、Sは別Occurrenceです。
+- Graph登録時に、`DispatchIntentCommitted`、`PhysicalProgressAssumed`、`ArtifactAvailable`、`DataAuthorized`、`PurposeValid`を不変`GuardFactDeclaration`と、lifecycleの唯一正本である`GuardFactRecord.status=Pending`として登録します。Occurrence由来factはproducer occurrenceとCamera/PHY/ART/DAT owner Event kindを固定し、Policy/State由来factは`OwnerStateDerived`を明示します。未宣言factとsource不明を拒否します。
 - Dのguardは`DispatchIntentCommitted(M, attempt)`です。Startedとdeadlineの競合は`SD-RUL-TIM-001`と`SD-TRN-EXE-005`で同じrevision列へ直列化します。
 - DefinitelyNotApplied、Failure、OutcomeUnknownは未dispatch子孫をrevokeします。
 - late blocking evidenceは現在assessmentを更新します。既dispatch子孫を未実行にせず、取消可能なら別Cancel Effect、不能ならRecoveryへ渡します。
 - successor dispatch時の`InferenceBasis`を固定します。後着evidenceで前提が無効になればProjectionを新revisionの`PremiseInvalidated`／Recoveringへ進め、既Eventを改変しません。
 - visual-frame区間leaseは最初のmove claimからcapture terminal／Recovery handoffまで他Graphの競合を防ぎます。意味順序には使いません。
 - 複数resourceは正規化したResourceKey順に一つのclaim Decisionで全件取得し、一件でも競合すれば一件も取得しません。releaseは各leaseの閉じた`release_guard`をTransitionが評価します。
-- cycle、self edge、別Graph edge、guard/result型不一致をcommit前に拒否します。
+- dependency cycle、self edge、別Graph edge、guard/result型不一致に加え、producerがconsumer自身またはdescendantになるfuture factをcommit前に拒否します。
 
 ## Port
 
@@ -787,6 +831,8 @@ PhysicalCapabilityProfile {
 ```
 
 TC70は第一基準、C210は同じschemaの第二基準Profileです。数値、firmware、protocol、Tapo API、WorkingTimeはProfile／Adapterだけに置きます。候補ProfileはInteractionのconfiguration snapshotから選び、`SD-TRN-EXE-002`のdispatch claimでeffective bindingをOccurrenceへ固定します。
+
+Profile本文とrevision lifecycleの唯一Ownerは`SD-CTX-DPF-001`です。CFG snapshotはrevision refだけを持ち、`SD-RUL-CAM-001`はDPF/QPR read viewからcandidateを選びます。`SD-PER-CAM-001`がそのcandidateとQPR useをGraphと同時固定し、`SD-RUL-CAM-002`はcurrent Profileへ差し替えず、同じretained candidate revisionをdispatch用effective bindingへ変換します。Profile更新は既存Interaction／Occurrenceへ遡及しません。
 
 ## 実装責務
 

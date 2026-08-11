@@ -93,4 +93,4 @@ Evidence Refとして保存します。
 
 全214 ACの入口索引は、要件基準commit `4df6fb1`からpilot設計前に固定します。Requirement、AC、source anchorを一対一で記録し、要件側の[トレーサビリティ](../../requirements/traceability.md)と機械照合します。
 
-atomic obligationへの分解は三本のpilot sliceから開始します。pilot Gate通過後に分解を全ACへ横展開します。入口索引の追加、脱落、重複、source移動は、基準commitとの差分として明示しない限りGateを通しません。
+atomic obligationへの分解は三本のpilot sliceで進めています。Pilot Cは変更集合[SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)として、設定、Capability binding、routing、restart、migrationと、Pilot A/Bへ及ぶrevision-use法則を同一revisionで追跡します。Pilot C再審査後に全ACへの横展開可否を判定します。入口索引の追加、脱落、重複、source移動は、基準commitとの差分として明示しない限りGateを通しません。

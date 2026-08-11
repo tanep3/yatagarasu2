@@ -1,6 +1,8 @@
 # Pilot B — 有限Conversation・外部Thread・SemanticMemory
 
 このsliceは[canonical contract](../contracts/finite-conversation.md)を観測可能な因果列へ接続します。型、owner、guardを再定義しません。
+Pilot Cで改訂した共通契約は変更集合`SD-REV-PILOT-C-001`として同じrevisionで再審査します。
+現在のarchitecture review statusは`pending`です。旧slice PASSはcurrent change-setの承認に使用しません。
 
 ## 対象scenario
 
@@ -20,14 +22,17 @@ Inbound
 
 Atomic open
   SD-RUL-INT-001
+  SD-RUL-EXE-006 -> SD-EVT-EXE-008 -> SD-TRN-EXE-015
   SD-TRN-QLI-001 + SD-TRN-INT-001 + SD-TRN-CNV-001
   SD-GPH-CNV-001 registration
-  committed by SD-PER-CNV-001
+  committed by SD-PER-CNV-001 + SD-PER-EXE-007
 
 Memory and Agent
   SD-RUL-MEM-001 -> SD-EFX-MEM-001 -> SD-EVT-MEM-001
   SD-RUL-MEM-002 / SD-RUL-MEM-003 fix selection
-  SD-RUL-AGT-001 fixes exact continuity and SD-STA-AGT-001 binding
+  SD-RUL-AGT-001 fixes app-server runtime generation, external continuity generation,
+  Agent turn binding generation and Execution attempt generation as distinct newtypes
+  SD-STA-AGT-001 owns Codex runtime readiness and BindingUse
   SD-EFX-AGT-001 or SD-EFX-AGT-002
   SD-EVT-AGT-001 / SD-EVT-AGT-002
 
@@ -101,7 +106,7 @@ Final snapshot
 | DO-OPS-030 | AC-OPS-030 | JG-CNV-NOTICE | full | SD-GPH-CNV-001, SD-EFX-NOT-001, SD-EVT-NOT-001, SD-TRN-EXE-003 | pure/integration | 通知FailureでAgent停止、final音声と相関混同 | 初期会話 | accounted-for | designed | planned |
 | DO-OPS-015 | AC-OPS-015 | JG-CNV-NOTICE | full | SD-STA-NOT-001, SD-RUL-NOT-001, SD-PRJ-CNV-001 | pure/integration | silentで内部Projectionまで抑止 | 共通通知 | accounted-for | designed | planned |
 | DO-OPS-016 | AC-OPS-016 | JG-CNV-NOTICE | full | SD-EVT-NOT-001, SD-TRN-EXE-003, SD-REC-NOT-001 | contract/integration | Policy Stateへ結果を混入、成功・Failure・OutcomeUnknownを圧縮 | 共通通知 | accounted-for | designed | planned |
-| DO-OPS-024 | AC-OPS-024 | JG-CNV-RECOVERY | partial | SD-REC-CNV-001, SD-TRN-QLI-001 | crash-recovery | restart後自動再開 | 初期会話 | accounted-for | designed | planned |
+| DO-OPS-024 | AC-OPS-024 | JG-CNV-RECOVERY | full | SD-MOD-EXE-002, SD-RUL-EXE-004, SD-EVT-EXE-006, SD-TRN-EXE-013, SD-RUL-CNV-005, SD-EVT-CNV-003, SD-TRN-CNV-007, SD-REC-CNV-001, SD-RUL-QLI-001, SD-EVT-QLI-002, SD-TRN-QLI-001, SD-TRN-QLI-002, SD-RUL-RST-004, SD-EVT-RST-005, SD-TRN-RST-004, SD-PER-RST-002, SD-PER-RST-004, SD-PER-AGT-001, SD-PER-TOL-001, SD-PER-RBI-002 | pure/concurrency/crash-recovery | checkpointなしResume、Behavior ContributionなしResume、stale digest/revisionでResume、QLIだけActive、Behavior checkpointだけConsumed、置換Occurrenceと同時にattempt/outbox生成、旧Occurrence再dispatch、restart中のgrant/DAT revoke、readiness stale、binding generation交代、normal claim CAS競合時にBindingUse/intent/outbox残存、OutcomeUnknown再attempt、未終端ownerでHome、AwaitOwnerDecisionでhandoff release、Quarantine前のresource再利用、restart後自動再開 | Starting/Active/Terminatingの同session Recovery、Behavior+EXE pre-claim resume、通常dispatch再認可、四値Decision | accounted-for | designed | planned |
 | DO-OPS-025 | AC-OPS-025 | JG-CNV-ISOLATION | partial | SD-REC-AGT-001, SD-TRN-AGT-001 | crash-recovery | 旧session結果が新session更新 | Agent部分 | accounted-for | designed | planned |
 | DO-FR-009 | AC-FR-009 | JG-CNV-QUALIA | full | SD-STA-QLI-001, SD-TRN-QLI-001 | pure | Home以外で開始受理 | 共通 | accounted-for | designed | planned |
 | DO-FR-010 | AC-FR-010 | JG-CNV-QUALIA | full | SD-RUL-INT-001 | pure | Busy時Effect/queue生成 | 共通 | accounted-for | designed | planned |
@@ -121,6 +126,19 @@ Final snapshot
 | DO-CNV-004C | AC-CNV-004 | JG-CNV-TERMINAL | full | SD-GPH-CNV-001, SD-RUL-CNV-004, SD-REC-OUT-001, SD-PER-CNV-001 | integration/crash-recovery | Agent失敗・timeout・Projection commit失敗で永久Active | 初期有限会話 | accounted-for | designed | planned |
 | DO-EFX-004B | AC-EFX-004 | JG-CNV-EXECUTION | partial | SD-STA-EXE-001, SD-RUL-CNV-003, SD-PER-EXE-001, SD-PER-EXE-002 | architecture/integration | Conversation専用dispatcher、共通結果envelope未使用 | Pilot B Effect | accounted-for | designed | planned |
 | DO-SKL-002B | AC-SKL-002 | JG-CNV-TOOL | partial | SD-RUL-TOL-002, SD-EFX-TOL-001, SD-EFX-TOL-002, SD-EFX-TOL-003, SD-EVT-TOL-001, SD-RUL-TOL-001, SD-PRT-TOL-001, SD-REC-TOL-001 | pure/contract/integration | dispatch前revocation無視、grant外副作用、tool無期限停止、cancel/timeout後late結果採用 | Skill実行部分 | accounted-for | designed | planned |
+| DO-CNV-005B | AC-OPS-024 | JG-CNV-RECOVERY-CUSTODY | partial | SD-EVT-EXE-005, SD-RUL-EXE-003, SD-TRN-EXE-010, SD-TRN-EXE-011, SD-TRN-EXE-012, SD-PER-EXE-004, SD-PER-EXE-005, SD-EVT-AGT-014, SD-TRN-AGT-011, SD-REC-AGT-001 | concurrency/crash-recovery | custody移管/出口の部分commit、StillUnknownでrelease、二回目Recovery attempt、BindingだけTerminalでUse/custodyがRecovery残留、late結果でcurrent turn変更 | Agent Recovery custody | accounted-for | designed | planned |
+| DO-CNV-006A | AC-AGT-001 | JG-CNV-AGENT-RUNTIME | full | SD-MOD-RBI-002, SD-EFX-AGT-007, SD-EVT-AGT-007, SD-RUL-AGT-007, SD-TRN-AGT-007 | contract/integration | RuntimeControl payloadでCodex probe結果を代用、fresh probeなしでready | Codex app-server runtime | accounted-for | designed | planned |
+| DO-CNV-006B | AC-AGT-003 | JG-CNV-AGENT-BINDING | full | SD-PER-AGT-001, SD-PER-AGT-002, SD-EVT-AGT-008, SD-TRN-AGT-008 | concurrency/crash-recovery | DAT transferなしのAgent dispatch、AGT/EXE/BindingUseの部分commit、Home時のuse解放漏れ | Agent turn binding | accounted-for | designed | planned |
+| DO-CNV-006C | AC-SKL-002 | JG-CNV-TOOL-AUTH | partial | SD-PER-TOL-001, SD-RUL-TOL-002, SD-EFX-TOL-001 | concurrency/crash-recovery | 失効grant、失効DAT transfer、AUT/DAT/EXEの部分commit、Agent requestへSkill grantを誤要求 | Tool dispatch authorization | accounted-for | designed | planned |
+| DO-CNV-007A | AC-AGT-003 | JG-CNV-AGENT-RECOVERY | full | SD-GPH-AGT-001, SD-EFX-AGT-009, SD-EFX-AGT-010, SD-EVT-AGT-009, SD-EVT-AGT-010, SD-EVT-AGT-014, SD-RUL-AGT-009, SD-TRN-AGT-009, SD-TRN-AGT-011 | concurrency/crash-recovery | crash-before-external-IDをnew turnで再送、runtime Probe queryをAgentTurn queryに流用、Q/Rの二回目attempt、StillUnknown後にBinding/Useを非終端、late resultをcurrent turnへ適用 | Agent turn Recovery | accounted-for | designed | planned |
+| DO-CNV-007B | AC-AGT-004 | JG-CNV-AGENT-CANCEL | full | SD-EFX-AGT-003, SD-EVT-AGT-003, SD-GPH-AGT-001, SD-PER-EXE-004, SD-PER-EXE-005 | concurrency/crash-recovery | stale cancel送信、cancel受付をturn未実行と推定、cancel OutcomeUnknownでlease解放 | Agent cancel Recovery | accounted-for | designed | planned |
+| DO-CNV-007C | AC-AGT-007 | JG-CNV-THREAD-RESET-RECOVERY | full | SD-GPH-AGT-002, SD-EFX-AGT-011, SD-EFX-AGT-012, SD-EFX-AGT-013, SD-EVT-AGT-011, SD-EVT-AGT-012, SD-EVT-AGT-013, SD-EVT-AGT-015, SD-EVT-AGT-016, SD-RUL-AGT-010, SD-RUL-AGT-011, SD-TRN-AGT-010, SD-TRN-AGT-012, SD-TRN-AGT-013, SD-PER-AGT-003 | concurrency/crash-recovery | reset不明時に暗黙new Thread、Q/Rを再attempt、StillUnknownでbarrier非終端、DefinitelyNotAppliedで旧Thread自動復活または同operation再送、Owner明示restartなしでfresh barrier、prior barrier上書き、current refだけ更新、旧late結果をcurrent replacementへ適用 | Thread reset barrier MapとRecovery | accounted-for | designed | planned |
+| DO-CNV-007D | AC-OPS-006 | JG-CNV-TOOL-RECOVERY | partial | SD-GPH-TOL-001, SD-EFX-TOL-002, SD-EFX-TOL-004, SD-EFX-TOL-005, SD-EVT-TOL-002, SD-EVT-TOL-004, SD-EVT-TOL-005, SD-EVT-TOL-006, SD-RUL-TOL-003, SD-TRN-CNV-005, SD-TRN-CNV-006 | concurrency/crash-recovery | journal replayからtool再実行、queryを新tool実行へ変換、Q/Rの二回目attempt、StillUnknownでToolRecovery非終端または資源再利用、late successで次Agentをready化 | Tool operation Recovery | accounted-for | designed | planned |
+| DO-CNV-008A | AC-OPS-024 | JG-CNV-RESUME-LINEAGE | partial | SD-MOD-EXE-003, SD-RUL-EXE-004, SD-TRN-EXE-013, SD-RUL-EXE-005, SD-EVT-EXE-007, SD-TRN-EXE-014, SD-PER-EXE-006 | pure/concurrency/crash-recovery | replacementが旧subject/generation再利用、resume requestだけClaimed、Resume専用dispatch、normal claimがrequestを変更しない | Resume lineageとnormal claim接続 | accounted-for | designed | planned |
+| DO-CNV-008B | AC-OPS-024 | JG-CNV-MULTI-RESUME | partial | SD-EVT-CNV-004, SD-RUL-CNV-006, SD-TRN-CNV-008, SD-PER-CNV-002, SD-STA-CNV-001 | pure/concurrency/crash-recovery | Qualia一件keyで二回目resume拒否、明示progressなしcheckpoint、completed Agent node再実行、旧subject late progressで新checkpoint | 同一有限Qualiaの複数resume generation | accounted-for | designed | planned |
+| DO-CNV-008C | AC-OPS-006 | JG-CNV-LINEAGE-CANCEL | partial | SD-MOD-EXE-003, SD-TRN-EXE-004, SD-RUL-EXE-005, SD-PER-EXE-006 | pure/concurrency | exact generationだけ取消、取消後resume generation生成、旧resultでreplacement変更 | Interaction lineage取消 | accounted-for | designed | planned |
+| DO-CNV-009A | AC-OPS-004 | JG-CNV-INITIAL-LINEAGE | partial | SD-PER-CFG-005, SD-EVT-EXE-008, SD-RUL-EXE-006, SD-TRN-EXE-015, SD-PER-EXE-007, SD-PER-CNV-001 | concurrency/crash-recovery | CFG useだけ、BRP/IRP useだけ、INT/QLI/CNVだけ、lineage/Graphだけの部分commit、同一admissionで二Graph、異payload replay | 有限Conversation initial admission/Graph | accounted-for | designed | planned |
+| DO-CNV-009B | AC-OPS-024 | JG-CNV-RESUME-REJECTION | partial | SD-EVT-EXE-007, SD-MOD-EXE-002, SD-EVT-CNV-005, SD-RUL-CNV-007, SD-TRN-CNV-009, SD-TRN-INT-002, SD-PER-CNV-003 | pure/concurrency/crash-recovery | EXE Rejected後にQualia Active+turn Open、LLMによる拒否説明捏造、新checkpoint、CNV/INT/QLI/EXEの部分commit、crash後Home不能 | resume claim恒久拒否の有限終端 | accounted-for | designed | planned |
 
 ## Failure、取消、Recovery scenario
 
@@ -137,6 +155,17 @@ Final snapshot
 | cancel後Proposal | response/toolとして承認せず旧Bindingへ隔離 |
 | Thread reset中に旧turn active | cancel要求、durable handoff、barrier、fresh continuityの順。cancel terminalは待たない |
 | reset barrier後crash | 旧Threadをfuture turnへ戻さずRecovery |
+| Thread resetがDefinitelyNotApplied | `NotAppliedAwaitingExplicitRestart`へ終端し旧Threadを復活させない。Ownerのfresh reset commandだけをadmit |
+| prior Thread reset terminal後のfresh Owner reset | prior map entryを保持しfresh barrierを追加、current refだけをfresh IDへ進める |
+| restart Recoveryにsafe checkpointと適合Behavior Contributionあり | RST/QLI/Behavior owner/EXEの全CASでcheckpoint、session、resume nodeを同時に進める |
+| resume replacementのnormal claim成功 | current Policy/authorization/readinessとlineageを再評価し、request Claimed、attempt、BindingUse、lease、intent、outboxを同一commit。Resume UoWから直接dispatchしない |
+| resume replacementの一時的resource Busy | requestをReplacementRegisteredに維持し、永久Rejectedや部分attemptを作らない |
+| execution generation 1で明示safe progress到達後に再restart | checkpoint generation 1を作り、同じ有限Qualiaでexecution generation 2へresumeする |
+| final response受理後checkpointからresume | response生成を再実行せず、未実行のPresentation／Memory nodeだけを置換する |
+| lineage cancel後にresumeまたはlate旧結果 | future generation claimを拒否し、late結果を旧subjectのRecovery／auditだけへ隔離する |
+| safe checkpointはあるがContribution不在またはstale | `ResumeFromCheckpoint`を拒否し`AwaitOwnerDecision`へ留める |
+| restart Recoveryに未終端ownerあり | `AwaitOwnerDecision`で同じsessionをRecoveringに維持 |
+| terminateまたはresource quarantineを選択 | 全責任移管を同一UoWで確認してからTerminatingを経てHome |
 | Memory reset後に旧save成功 | 旧generationへ隔離しrecordを復活させない |
 | explicit save/delete/reset後にduplicate結果 | pending mutation／stable operation ID一致の一件だけを適用 |
 | ThinkingNotice Failure | Agent requestを止めない |
