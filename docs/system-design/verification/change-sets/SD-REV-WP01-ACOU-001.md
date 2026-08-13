@@ -1,20 +1,21 @@
-# SD-REV-WP01-ACOU-001 — WP-01 Acoustic review candidate
+# SD-REV-WP01-ACOU-001 — WP-01 Acoustic accepted tranche
 
-このArtifactは、全214 AC横展開の最初の通常trancheとして、REQ-ACOU-001のAC-ACOU-001〜007をarchitecture challengeへ渡す変更集合とapproval入力を固定します。review verdict、Primary／Owner approval、accepted昇格、production implementation、実機proofは記録しません。
+このArtifactは、全214 AC横展開の最初の通常trancheとして、REQ-ACOU-001のAC-ACOU-001〜007について独立architecture review PASSとOwner承認を受けた変更集合とapproval入力を固定します。production implementation、実機proof、system-design FIX、releaseは記録しません。
 
 ## Candidate identity
 
-- lifecycle: `review-pending`
+- lifecycle: `accepted`
 - tranche: `TR-WP01-ACOU-001`
 - package: `WP-01`
 - dependency: `TR-PILOT-ABC`
 - requirement baseline: `4df6fb1`
 - accepted method basis: `8b1bf9807e3f191339c98aefa2ed500fc3f0bdd5`
-- candidate system-design revision: `sha256:b1f5f2708c71777cb7fc8ebb121fee210ecc5cbf9a2dc5748e1e1ec60d7d9080`
-- review source commit: `unbound — reviewer must bind a committed source revision`
+- reviewed system-design revision: `sha256:b1f5f2708c71777cb7fc8ebb121fee210ecc5cbf9a2dc5748e1e1ec60d7d9080`
+- review source commit: `4126537ab4e220a0ce130431ebef1637ec5f414a`
+- independent architecture review: `PASS — Critical 0 / High 0 / Medium 0`
 - prior external review source commit: `56e99ec`
 - prior external review verdict: `REVISE — Critical 0 / High 1 / Medium 1`
-- approval set: `unassigned — content-address after review source is bound`
+- approval set: `APR-WP01-ACOU-001-DF73500F`
 - contract write authority: `one WP-01 Acoustic write owner; overlapping writers prohibited`
 - parent AC count: `7 / 12`
 - atomic obligation count: `20 / 30`
@@ -28,7 +29,7 @@
 | Obligation review | `docs/system-design/verification/approvals/SD-REV-WP01-ACOU-001-obligations.tsv` | `sha256:0b44b3a695e4e26d9748b6a35d7c9f55adda6ec157451ddf6ee462efc21b523a` | 20行、16 semantic columns |
 | Tranche scope | `docs/system-design/verification/approvals/TR-WP01-ACOU-001-scope.tsv` | `sha256:8078495ee406a259fb3cb46d2047c75db0cac33d5ba507ab0ca2abe8b9fc9be4` | exact WP-01／7 AC／20 DO／86 definitions |
 
-これらはcandidate WORKTREEから生成したreview inputであり、Accepted Approval Artifactではありません。architecture reviewはcommit済みsourceから全4入力を再生成し、一致した場合だけreview verdictを記録します。Primary／Owner approvalはarchitecture PASS後に別Artifactとして作り、Design Approval Manifestへappendします。
+これらはsource commit `4126537ab4e220a0ce130431ebef1637ec5f414a`から再生成一致したreview inputです。独立architecture reviewとOwner approvalは別Artifactとして固定し、Design Approval Manifestの`APR-WP01-ACOU-001-DF73500F`行へappendしました。後続trancheはこのApproval setを拡張しません。
 
 ## Problem framing
 
@@ -46,7 +47,7 @@ Y1のprompt回り込み、最初の発話欠落、空session、遅延buffer、�
 - canonical contract: `contracts/acoustic-interaction.md`
 - versioned Execution extension: `contracts/execution-acoustic-v2.md`
 - acceptance slice: `slices/04-acoustic-one-wake-one-command.md`
-- new draft definitions: 82（Acoustic contract 64、Execution V2 contract 18）
+- newly accepted definitions: 82（Acoustic contract 64、Execution V2 contract 18）
 - reused accepted definitions: `SD-CMD-INT-001`, `SD-CMD-INT-002`, `SD-CMD-QLI-001`, `SD-CTX-EXE-001`
 
 Commandは受理後の依頼、Eventは候補／観測／結果／owner factです。Adapter候補を直接Commandにせず、pure RuleのStop／wake／empty DecisionとAcoustic Transitionを通します。音声StopのAdapter targetはhint/evidenceだけで、playback中はExecution subject、playback外はInteraction owner read viewからexact targetを一度だけ導出します。Kernelはpayload意味、device、Conversation、Providerを判断しません。
@@ -77,12 +78,12 @@ ExecutionStateV2の全top-level mapはGraphRecordV2、OccurrenceRecordV2、Dispa
 6. speech bindingはexact occurrence、canonical全文、Stop Policy／normalization versionsをdispatch前にpinし、current versionへ読み替えない。
 7. TC70実測＋Owner採否とC210独立profile gateはProofへ残り、Designをblockedにせずpassing／release-readyを主張しない。
 8. accepted V1定義を変更せず、Execution V2のclosed concrete records、四field Acoustic identity、complete-record InjectV1 migration、durable migration control、resume分離、RevocationId／元target key、全field round-trip、whole-record compatibility rejection、downgrade blockをこのtranche approval setだけに含める。gap-free append/seal CAS、atomic reducer handoff、ordered cursor UoWによりbarrier race／duplicate/conflict／late／OutcomeUnknownでもresult loss、winner mutation、V1/V2 dual mutation、reducer gapを作らない。
-9. review-pendingでもdefinitions／obligations／scopeのhash、source/current再生成、obligation→definition closureを`check-ac-expansion.sh`が検証し、approvalを意味しない。
-10. review-pendingで通る全artifact checkがPASSし、system-design FIX検査だけは未accepted／未coveredを理由にFAILする。
+9. accepted後もdefinitions／obligations／scopeのhash、source/current再生成、obligation→definition closureを`check-ac-expansion.sh`が検証し、review sourceからのdriftを拒否する。
+10. tranche固有のartifact checkがPASSし、system-design FIX検査だけはWP-01を含む全package未完了を理由にFAILする。
 
-## Architecture challenge inputs
+## Architecture challenge result
 
-Reviewerは少なくとも次を反証します。
+独立architecture reviewはsource commit `4126537ab4e220a0ce130431ebef1637ec5f414a`を対象に、次の反証観点を含めてCritical 0／High 0／Medium 0でPASSしました。
 
 - normal wake overlap discardがAdapterの「自己音声」断定に依存していないか。
 - prompt OutcomeUnknownでもfirst speechを不当に常時discardする隠れ手順がないか。
@@ -100,19 +101,19 @@ Reviewerは少なくとも次を反証します。
 - TC70／C210、source、transport、raw buffer、clockがCore型またはKernel分岐へ漏れていないか。
 - cancel／HomeとOutcomeUnknown resource custodyが外部停止を捏造していないか。
 
-Critical／Highが一件でも残る場合は`challenge-pending`へ進めずcandidateを改訂します。commit `56e99ec`への外部reviewはHigh-01（音声Stop exact target）とMedium-01（移行中result ingress）により`REVISE`でした。本revisionは両findingへの契約修正ですが、再review PASSを自己認定しません。PASS、reviewer identity、source commit、reviewed system-design revisionは別architecture-review Artifactだけに記録します。
+commit `56e99ec`への先行reviewはHigh-01（音声Stop exact target）とMedium-01（移行中result ingress）により`REVISE`でした。source commit `4126537…`は両findingを修正し、後続の独立reviewがPASSしました。reviewer個人identityは提供事実に含まれないため捏造せず、review種別、verdict、finding counts、source commit、reviewed system-design revisionだけをarchitecture-review Artifactへ記録します。
 
-## Owner approval inputs
+## Owner approval
 
-既存Accepted判断を変更しません。Ownerへ後続承認時に提示する事実は次です。
+既存Accepted判断を変更せず、Owner承認時に次の事実を維持しました。
 
 - 実TTS回答全文に登録Stop語があれば、実利用者Stopも抑止され得る既存の意図的制約。
 - TC70は実測＋Owner採否前に初期release不可。現時点の採否は未決。
 - C210は対応を主張するprofileだけが独立gateを満たし、未達はTC70をblockしない。
 - pre-roll／guard数値、flush／reconnect方式は未決で、profile spike後に固定する。
 
-このcandidateから生じた新規Owner decision requestは0件です。architecture PASS後も、Primary／Ownerの明示承認なしにdraftをacceptedへ昇格しません。
+このtrancheから生じた新規Owner decision requestは0件です。Owner statement「Owner承認します。acceptedへ昇格し、次工程に進んで下さい。」により、Approval set内の新規82 definitionsだけを`draft`から`accepted`へ昇格しました。再利用した既accepted 4 definitionsは変更していません。
 
 ## Open questions and explicit non-goals
 
-open questionsは実測profile値、TC70採否、C210対応profile採否だけで、いずれもDesign contractを停止しません。continuous conversation、streaming TTS、production implementation、実機proof生成、数値／採否の代行、Y1環境へのY2混在、commit作成はnon-goalです。
+open questionsは実測profile値、TC70採否、C210対応profile採否だけで、いずれもDesign contractを停止しません。continuous conversation、streaming TTS、production implementation、実機proof生成、数値／採否の代行、Y1環境へのY2混在、system-design FIX／release主張、commit作成はnon-goalです。

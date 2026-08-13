@@ -31,13 +31,13 @@
 | REQ-API-004 | AC-API-017 | `4df6fb1:api-and-web-requirements.md:52` | — | `inventoried` | `unmapped` |
 | REQ-API-004 | AC-API-018 | `4df6fb1:api-and-web-requirements.md:53` | — | `inventoried` | `unmapped` |
 | REQ-API-004 | AC-API-019 | `4df6fb1:api-and-web-requirements.md:54` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-001 | `4df6fb1:approved-bounded-contract.md:17` | JG-ACO-OWNER, JG-ACO-EXECUTION-V2 | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-002 | `4df6fb1:approved-bounded-contract.md:18` | JG-ACO-FIRST-SPEECH, JG-ACO-ONE-COMMAND, JG-ACO-GRAPH-EXTENSION | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-003 | `4df6fb1:approved-bounded-contract.md:19` | JG-ACO-DISCARD, JG-ACO-RECONNECT | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-004 | `4df6fb1:approved-bounded-contract.md:20` | JG-ACO-PROFILE, JG-ACO-CORRELATION | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-005 | `4df6fb1:approved-bounded-contract.md:21` | JG-ACO-REAL-AUDIO, JG-ACO-SELF-AUDIO, JG-ACO-EMPTY | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-006 | `4df6fb1:approved-bounded-contract.md:22` | JG-ACO-STOP-POLICY, JG-ACO-STOP-CONTROL, JG-ACO-TC70-GATE, JG-ACO-C210-GATE | `accounted-for` | `partial` |
-| REQ-ACOU-001 | AC-ACOU-007 | `4df6fb1:approved-bounded-contract.md:23` | JG-ACO-BINDING-OWNER, JG-ACO-ADAPTER-RULE, JG-ACO-RECOVERY | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-001 | `4df6fb1:approved-bounded-contract.md:17` | JG-ACO-OWNER, JG-ACO-EXECUTION-V2 | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-002 | `4df6fb1:approved-bounded-contract.md:18` | JG-ACO-FIRST-SPEECH, JG-ACO-ONE-COMMAND, JG-ACO-GRAPH-EXTENSION | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-003 | `4df6fb1:approved-bounded-contract.md:19` | JG-ACO-DISCARD, JG-ACO-RECONNECT | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-004 | `4df6fb1:approved-bounded-contract.md:20` | JG-ACO-PROFILE, JG-ACO-CORRELATION | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-005 | `4df6fb1:approved-bounded-contract.md:21` | JG-ACO-REAL-AUDIO, JG-ACO-SELF-AUDIO, JG-ACO-EMPTY | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-006 | `4df6fb1:approved-bounded-contract.md:22` | JG-ACO-STOP-POLICY, JG-ACO-STOP-CONTROL, JG-ACO-TC70-GATE, JG-ACO-C210-GATE | `accounted-for` | `covered` |
+| REQ-ACOU-001 | AC-ACOU-007 | `4df6fb1:approved-bounded-contract.md:23` | JG-ACO-BINDING-OWNER, JG-ACO-ADAPTER-RULE, JG-ACO-RECOVERY | `accounted-for` | `covered` |
 | REQ-MEM-001 | AC-MEM-001 | `4df6fb1:approved-bounded-contract.md:39` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-MEM-001 | AC-MEM-002 | `4df6fb1:approved-bounded-contract.md:40` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-MEM-001 | AC-MEM-003 | `4df6fb1:approved-bounded-contract.md:41` | JG-CNV-* | `accounted-for` | `partial` |
