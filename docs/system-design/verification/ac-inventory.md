@@ -5,8 +5,8 @@
 - Requirement: 62件
 - Acceptance Criteria: 214件
 - Source locator: `4df6fb1:<file>:<line>`
-- Accounting status: Pilot A/B/C対象128件とreview-pending Acoustic tranche対象7件、計135件は`accounted-for`、残り79件は`inventoried`
-- Coverage status: 前記135件は`partial`、残り79件は`unmapped`
+- Accounting status: Pilot A/B/C対象128件とaccepted Acoustic tranche対象7件、計135件は`accounted-for`、残り79件は`inventoried`
+- Coverage status: accepted Acoustic tranche対象7件は`covered`、Pilot由来128件は`partial`、残り79件は`unmapped`
 
 `inventoried`は入口に存在することだけを意味し、`accounted-for`は少なくとも一つのAtomic Design Obligationへ接続されたことだけを意味します。`partial`は親ACに未設計の兄弟義務または横展開で確認すべき残余がある状態であり、実装済み・試験済みを意味しません。Pilot契約のaccepted昇格だけで親ACを`covered`へ変えず、[AC横展開実施契約](ac-expansion-plan.md)で全兄弟義務を再監査します。要件基準を変更した場合は、要件変更またはAccepted ADRとともにこの索引を再生成し、差分を確認します。
 
@@ -184,8 +184,8 @@
 | REQ-ARC-011 | AC-ARC-025 | `4df6fb1:architecture-requirements.md:112` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-026 | `4df6fb1:architecture-requirements.md:113` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-027 | `4df6fb1:architecture-requirements.md:114` | — | `inventoried` | `unmapped` |
-| REQ-PER-001 | AC-PER-001 | `4df6fb1:architecture-requirements.md:122` | JG-CAM-* | `accounted-for` | `partial` |
-| REQ-PER-001 | AC-PER-002 | `4df6fb1:architecture-requirements.md:123` | JG-CAM-* | `accounted-for` | `partial` |
+| REQ-PER-001 | AC-PER-001 | `4df6fb1:architecture-requirements.md:122` | JG-PER-R3-SCHEMA, JG-PER-R3-TOPOLOGY, JG-PER-R3-READY, JG-PER-R3-CYCLE, JG-PER-R3-OCCURRENCE, JG-PER-R3-DEADLINE, JG-PER-R3-MIGRATION, JG-PER-REVIEW-CLOSURE | `accounted-for` | `partial` |
+| REQ-PER-001 | AC-PER-002 | `4df6fb1:architecture-requirements.md:123` | JG-PER-R3-RESOURCE-KEY, JG-PER-R3-RESOURCE-ALGEBRA, JG-PER-R3-CLAIM-ATOMICITY, JG-PER-R3-DISPATCH, JG-PER-R3-RESULT, JG-PER-R3-RECOVERY, JG-PER-R3-MIGRATION, JG-PER-TRANCHE-DAG | `accounted-for` | `partial` |
 | REQ-PHY-001 | AC-PHY-001 | `4df6fb1:architecture-requirements.md:131` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-PHY-001 | AC-PHY-002 | `4df6fb1:architecture-requirements.md:132` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-PHY-002 | AC-PHY-003 | `4df6fb1:architecture-requirements.md:140` | JG-CAM-* | `accounted-for` | `partial` |

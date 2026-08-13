@@ -15,6 +15,9 @@ trap 'rm -r "$check_tmp"' EXIT
 authoritative_parent_limit=12
 authoritative_obligation_limit=30
 
+docs/system-design/verification/check-ac-expansion-negative-fixtures.sh
+docs/system-design/verification/check-tranche-dependency-dag.sh "$tranches"
+
 field_value() {
   local file="$1" field="$2"
   awk -F '|' -v field="$field" '
@@ -150,6 +153,32 @@ done < <(tail -n +2 "$obligations")
 tail -n +2 "$tranches" | cut -f1 | sort > "$check_tmp/tranche-ids"
 sort -u "$check_tmp/tranche-ids" > "$check_tmp/tranche-ids-unique"
 diff -u "$check_tmp/tranche-ids" "$check_tmp/tranche-ids-unique"
+
+# Review tranche dependencies form their own DAG. Every review-ready dependency is already accepted;
+# same-package dependencies are valid semantic dependencies and remain distinct from package edges.
+: > "$check_tmp/tranche-edges"
+while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count parent_limit obligation_limit dependencies review_status approval_set limit_exception reviewed_revision provenance; do
+  if test "$dependencies" != pilot-baseline && test "$dependencies" != —; then
+    printf '%s\n' "$dependencies" | tr ',' '\n' | while IFS= read -r dependency; do
+      test "$dependency" != "$tranche_id"
+      rg -qx "$dependency" "$check_tmp/tranche-ids"
+      test "$(awk -F '\t' -v id="$dependency" 'NR > 1 && $1 == id { print $8 }' "$tranches")" = accepted
+      dependency_line="$(awk -F '\t' -v id="$dependency" 'NR > 1 && $1 == id { print NR }' "$tranches")"
+      tranche_line="$(awk -F '\t' -v id="$tranche_id" 'NR > 1 && $1 == id { print NR }' "$tranches")"
+      test "$dependency_line" -lt "$tranche_line"
+      printf '%s %s\n' "$dependency" "$tranche_id" >> "$check_tmp/tranche-edges"
+    done
+  fi
+done < <(tail -n +2 "$tranches")
+cp "$check_tmp/tranche-edges" "$check_tmp/tranche-graph"
+if ! tsort "$check_tmp/tranche-graph" > "$check_tmp/tranche-topology" 2> "$check_tmp/tranche-cycle"; then
+  echo 'tranche dependency cycle detected:' >&2
+  cat "$check_tmp/tranche-cycle" >&2
+  exit 1
+fi
+# The self-edge path above is an explicit identity rejection; this fixture proves multi-node cycles fail.
+if printf 'A B\nB A\n' | tsort >/dev/null 2>&1; then exit 1; fi
+
 while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count parent_limit obligation_limit dependencies review_status approval_set limit_exception reviewed_revision provenance; do
   printf '%s\n' "$package_ids" | tr ',' '\n' | while IFS= read -r package_id; do rg -qx "$package_id" "$check_tmp/package-ids"; done
 
@@ -173,7 +202,13 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
       if test "$dependency_tranche" != TR-PILOT-ABC; then
         awk -F '\t' -v id="$dependency_tranche" 'NR > 1 && $1 == id { print $2 }' "$tranches" | tr ',' '\n'
       fi
-    done | sort -u > "$check_tmp/$tranche_id-actual-package-dependencies"
+    done | sort -u | while IFS= read -r dependency_package; do
+      # A later tranche may depend on an accepted contract from the same package.
+      # It is a semantic tranche dependency, not an additional package dependency.
+      if ! printf '%s\n' "$package_ids" | tr ',' '\n' | rg -qx "$dependency_package"; then
+        printf '%s\n' "$dependency_package"
+      fi
+    done > "$check_tmp/$tranche_id-actual-package-dependencies"
   fi
   if test "$tranche_id" = TR-PILOT-ABC; then
     test "$dependencies" = pilot-baseline
@@ -199,18 +234,6 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
   else
     test "$limit_exception" = —
   fi
-  if test "$dependencies" != — && test "$dependencies" != pilot-baseline; then
-    printf '%s\n' "$dependencies" | tr ',' '\n' | while IFS= read -r dependency; do
-      rg -qx "$dependency" "$check_tmp/tranche-ids"
-      if test "$review_status" = accepted; then
-        dependency_status="$(awk -F '\t' -v id="$dependency" 'NR > 1 && $1 == id { print $8 }' "$tranches")"
-        dependency_line="$(awk -F '\t' -v id="$dependency" 'NR > 1 && $1 == id { print NR }' "$tranches")"
-        tranche_line="$(awk -F '\t' -v id="$tranche_id" 'NR > 1 && $1 == id { print NR }' "$tranches")"
-        test "$dependency_status" = accepted
-        test "$dependency_line" -lt "$tranche_line"
-      fi
-    done
-  fi
   if test "$review_status" != accepted; then
     candidate_id="${provenance%%@*}"
     source_revision="${provenance##*@}"
@@ -224,7 +247,8 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
     candidate_definitions_ref="docs/system-design/verification/approvals/$candidate_id-definitions.tsv"
     candidate_obligations_ref="docs/system-design/verification/approvals/$candidate_id-obligations.tsv"
     candidate_scope_ref="docs/system-design/verification/approvals/$tranche_id-scope.tsv"
-    for candidate_input in "$candidate_change_set" "$candidate_ids_ref" "$candidate_definitions_ref" "$candidate_obligations_ref" "$candidate_scope_ref"; do
+    candidate_dependencies_ref="docs/system-design/verification/approvals/$candidate_id-dependencies.tsv"
+    for candidate_input in "$candidate_change_set" "$candidate_ids_ref" "$candidate_definitions_ref" "$candidate_obligations_ref" "$candidate_scope_ref" "$candidate_dependencies_ref"; do
       test -f "$candidate_input"
     done
 
@@ -233,10 +257,35 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
     test "$(table_cell "$candidate_change_set" 'Definitions' 3)" = "$candidate_definitions_ref"
     test "$(table_cell "$candidate_change_set" 'Obligation review' 3)" = "$candidate_obligations_ref"
     test "$(table_cell "$candidate_change_set" 'Tranche scope' 3)" = "$candidate_scope_ref"
+    test "$(table_cell "$candidate_change_set" 'Dependency manifest' 3)" = "$candidate_dependencies_ref"
     test "$(table_cell "$candidate_change_set" 'Design IDs' 4)" = "sha256:$(sha256sum "$candidate_ids_ref" | awk '{print $1}')"
     test "$(table_cell "$candidate_change_set" 'Definitions' 4)" = "sha256:$(sha256sum "$candidate_definitions_ref" | awk '{print $1}')"
     test "$(table_cell "$candidate_change_set" 'Obligation review' 4)" = "sha256:$(sha256sum "$candidate_obligations_ref" | awk '{print $1}')"
     test "$(table_cell "$candidate_change_set" 'Tranche scope' 4)" = "sha256:$(sha256sum "$candidate_scope_ref" | awk '{print $1}')"
+    test "$(table_cell "$candidate_change_set" 'Dependency manifest' 4)" = "sha256:$(sha256sum "$candidate_dependencies_ref" | awk '{print $1}')"
+
+    # A pending review includes every canonical definition from every accepted dependency tranche,
+    # plus every draft definition owned by this canonical contract. This deliberately conservative
+    # complete closure prevents a second-hop accepted dependency or sibling row from disappearing.
+    : > "$check_tmp/$tranche_id-expected-review-ids"
+    printf '%s\n' "$dependencies" | tr ',' '\n' | while IFS= read -r dependency_tranche; do
+      test "$dependency_tranche" = pilot-baseline && continue
+      dependency_approval="$(awk -F '\t' -v id="$dependency_tranche" 'NR>1 && $1==id {print $9}' "$tranches")"
+      test -n "$dependency_approval" && test "$dependency_approval" != —
+      dependency_ids_ref="$(awk -F '|' -v id="$dependency_approval" '
+        /^\| APR-/ { for(i=2;i<=12;i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i); if($2==id) print $5 }
+      ' docs/system-design/verification/design-approval.md)"
+      test -f "$dependency_ids_ref"
+      cat "$dependency_ids_ref"
+    done >> "$check_tmp/$tranche_id-expected-review-ids"
+    awk -F '|' '/^\| SD-/ {
+      for(i=2;i<=10;i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i)
+      if($4 ~ /contracts\/execution-revision-3.md#/ && $9=="draft") print $2
+    }' docs/system-design/00-design-authority.md >> "$check_tmp/$tranche_id-expected-review-ids"
+    sort -u "$check_tmp/$tranche_id-expected-review-ids" > "$check_tmp/$tranche_id-expected-review-ids-sorted"
+    diff -u "$check_tmp/$tranche_id-expected-review-ids-sorted" "$candidate_ids_ref"
+    docs/system-design/verification/check-canonical-dependency-closure.sh \
+      "$candidate_ids_ref" "$candidate_definitions_ref" "$candidate_dependencies_ref" "$source_revision"
 
     docs/system-design/verification/canonical-definition-set.sh \
       "$candidate_ids_ref" "$source_revision" > "$check_tmp/$tranche_id-source-definitions"
@@ -289,6 +338,16 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
       "$approval_ids_ref" WORKTREE > "$check_tmp/$tranche_id-current-definitions"
     diff -u "$approval_definitions_ref" "$check_tmp/$tranche_id-current-definitions"
 
+    dependency_manifest_ref="$(field_value "$approval_review_ref" 'Dependency Manifest Ref')"
+    dependency_manifest_sha="$(field_value "$approval_review_ref" 'Dependency Manifest SHA-256')"
+    if test -n "$dependency_manifest_ref"; then
+      case "$dependency_manifest_ref" in docs/system-design/verification/approvals/*-dependencies.tsv) ;; *) exit 1 ;; esac
+      test -f "$dependency_manifest_ref"
+      test "$dependency_manifest_sha" = "sha256:$(sha256sum "$dependency_manifest_ref" | awk '{print $1}')"
+      docs/system-design/verification/check-canonical-dependency-closure.sh \
+        "$approval_ids_ref" "$approval_definitions_ref" "$dependency_manifest_ref" "$review_source_commit"
+    fi
+
     tranche_scope_ref="$(field_value "$approval_review_ref" 'Tranche Scope Ref')"
     tranche_scope_sha="$(field_value "$approval_review_ref" 'Tranche Scope SHA-256')"
     obligation_review_ref="$(field_value "$approval_review_ref" 'Obligation Review Ref')"
@@ -338,8 +397,9 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
   test -n "$provenance" && test "$provenance" != —
 done < <(tail -n +2 "$tranches")
 
-# A covered flag alone is insufficient: every covered AC must have a full set of designed obligations
-# assigned to an accepted tranche. Partial contribution is never sufficient.
+# A covered flag alone is insufficient: every obligation must be designed and assigned to an
+# accepted tranche, and an accepted non-pilot expansion tranche must contribute a full completion.
+# Historical partial contributions remain immutable review evidence but are never sufficient alone.
 awk -F '|' '
   /^\| REQ-/ {
     for (i = 2; i <= 7; i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i)
@@ -351,22 +411,9 @@ awk -F '|' '
 ' "$inventory" | sort -u > "$check_tmp/covered-ac"
 while IFS= read -r covered_ac; do
   test -n "$covered_ac"
-  rows="$(awk -F '|' -v ac="$covered_ac" '
-    /^\| DO-/ {
-      for (i = 2; i <= 12; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
-      if ($3 == ac) print $2 "\t" $5 "\t" $10 "\t" $11 "\t" $12
-    }
-  ' docs/system-design/slices/*.md)"
-  test -n "$rows"
-  while IFS=$'\t' read -r obligation_id contribution accounting design proof; do
-    test "$contribution" = full
-    test "$accounting" = accounted-for
-    test "$design" = designed
-    case "$proof" in planned|implemented|passing|blocked-by-spike) ;; *) exit 1 ;; esac
-    tranche_id="$(awk -F '\t' -v id="$obligation_id" 'NR > 1 && $1 == id { print $4 }' "$obligations")"
-    test "$(awk -F '\t' -v id="$tranche_id" 'NR > 1 && $1 == id { print $8 }' "$tranches")" = accepted
-  done <<< "$rows"
 done < "$check_tmp/covered-ac"
+docs/system-design/verification/check-covered-completion-set.sh \
+  "$inventory" "$obligations" "$tranches" docs/system-design/slices/*.md
 
 printf 'PASS(ac-expansion) requirements=62 ac=214 packages=8 obligations=%s tranches=%s covered=%s\n' \
   "$(wc -l < "$check_tmp/assigned-obligations")" "$(( $(wc -l < "$tranches") - 1 ))" "$(wc -l < "$check_tmp/covered-ac")"

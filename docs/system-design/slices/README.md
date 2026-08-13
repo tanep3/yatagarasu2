@@ -34,4 +34,5 @@ pilotとして次の三本を作成し、[Design Pilot Gate](../verification/pil
 
 Pilot accepted後の全AC横展開sliceは、各trancheのreview statusを明記し、accepted前にPilot Gate成果へ混入させません。
 
-- [04-acoustic-one-wake-one-command.md](04-acoustic-one-wake-one-command.md) — `TR-WP01-ACOU-001` review-pending
+- [04-acoustic-one-wake-one-command.md](04-acoustic-one-wake-one-command.md) — `TR-WP01-ACOU-001` accepted
+- [05-effect-graph-readiness.md](05-effect-graph-readiness.md) — `TR-WP01-PER-GRAPH-001` review-pending
