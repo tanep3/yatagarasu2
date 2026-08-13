@@ -2,8 +2,8 @@
 
 Execution Revision 3（R3）はYatagarasu 2内部のExecution契約改訂です。製品`Yatagarasu 3`ではありません。
 accepted V1/V2のDesign ID、Version、definition、Approval setを変更せず、active V2を完全値として包む
-new versioned/superseding contractです。この文書のdefinitionは`TR-WP01-PER-GRAPH-001`のreview-pendingであり、
-accepted昇格、production readiness、passing proofを表しません。
+new versioned/superseding contractです。この文書のdefinitionは`TR-WP01-PER-GRAPH-001`でacceptedとなりましたが、
+production readiness、passing proof、releaseを表しません。
 
 ## Schema、State、閉じたtopology
 

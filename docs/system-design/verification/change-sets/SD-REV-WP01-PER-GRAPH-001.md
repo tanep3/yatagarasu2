@@ -1,26 +1,27 @@
-# SD-REV-WP01-PER-GRAPH-001 — Execution Revision 3 review candidate
+# SD-REV-WP01-PER-GRAPH-001 — Execution Revision 3 accepted tranche
 
-Rejected predecessor candidateをOwner決定に従い全面再設計したreview入力です。R3はYatagarasu 2内部Execution
+Rejected predecessor candidateをOwner決定に従い全面再設計し、独立reviewとOwner承認を通過した変更集合です。R3はYatagarasu 2内部Execution
 契約のRevision 3で、製品Yatagarasu 3ではありません。accepted V1/V2と過去Approval setは変更しません。
 
-## Candidate identity
+## Accepted identity
 
-- lifecycle: `review-pending`
+- lifecycle: `accepted`
 - tranche/package: `TR-WP01-PER-GRAPH-001` / `WP-01`
 - dependencies: `TR-PILOT-ABC,TR-WP01-ACOU-001`（両方accepted）
 - baseline/start: `4df6fb1` / `080c4004233f0e8157ebd439dc94342c10a355ef`
-- review source/revision: `WORKTREE` / `—`
-- architecture review/approval set: `pending` / `—`
+- review source/revision: `751717f70a700492b0954b67e9a6bc2790e11e8f` / `sha256:de71dc55c75143825d90b2e5a1d88deff554bf78e04f14e5e79565fa9a10f5e0`
+- architecture review: `PASS — Critical 0 / High 0; external PASS minor correction corrected CLOSED`
+- approval set: `APR-WP01-PER-GRAPH-001-11ADAE3D`
 - write authority: one WP-01 Persistence Graph owner; overlapping writers prohibited
 - parent/obligation limits: `2 / 12`, `16 / 30`
-- definition delta: `62 new draft / 0 accepted changed / 601 accepted dependency definitions in complete review closure`
+- definition delta: `62 newly accepted / 0 prior accepted changed / 601 accepted dependency definitions in complete review closure`
 - Owner decision: Yatagarasu 2内部Execution契約をRevision 3へ正式改訂。製品世代変更ではない
 
 ## Content-addressed review inputs
 
 | Input | Ref | SHA-256 | Meaning |
 | --- | --- | --- | --- |
-| Design IDs | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-design-ids.txt` | `sha256:bca3f6c9bef36a79476c05b252c4a1cad3c3e3ff0a918dfad0abe66bb37c99f7` | 62 R3 draft + complete 601-definition accepted dependency closure |
+| Design IDs | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-design-ids.txt` | `sha256:bca3f6c9bef36a79476c05b252c4a1cad3c3e3ff0a918dfad0abe66bb37c99f7` | 62 new R3 + complete 601-definition accepted dependency closure |
 | Definitions | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-definitions.tsv` | `sha256:3f2efead185ffd4151771494bf6a9ead4d1304c859b176daefcda239603a9608` | exact versions/refs/meaning hashes |
 | Dependency manifest | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-dependencies.tsv` | `sha256:3a92f0d7f979c1854c28be14aee7bff8720d88b7d49cbf4ae94c664a9a3fc1cd` | every draft/accepted source and recursively closed canonical references |
 | Obligation review | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-obligations.tsv` | `sha256:2c0674806236964b1ed4850413312201356cf851a2c494ba58e9e89ae4225058` | 16 rows / 16 semantic columns |
@@ -86,7 +87,7 @@ Bootstrapはconcrete bindingだけを担当します。storage/process/IPC/fairn
 
 Checkerはtranche DAG self/cycle/unaccepted dependencyを全lifecycleで拒否し、same-WP accepted semantic dependencyを許可します。
 coveredはcontent-addressed accepted non-Pilot full completion setを必須にし、partial sibling bypassを拒否します。dependency
-manifestはdependency trancheのaccepted 601件とR3 draft 62件の全source、status、canonical reference closureを検証します。
+manifestはdependency trancheのaccepted 601件とR3 62件の全source、status、canonical reference closureを検証します。
 
 ## 7. Testable acceptance criteria
 
@@ -96,7 +97,19 @@ abort exact-next catch-up/open、activation handoff、tranche DAGとmanifest
 row/status mutation fixtures、review hash再生成一致をarchitecture/pure/concurrency/
 crash-recovery proofとしてplannedに固定します。passing/implementation/release/FIXは主張しません。
 
+## Architecture challenge and external review
+
+Architecture challengerはsource commit `751717f70a700492b0954b67e9a6bc2790e11e8f`をCritical 0／High 0でPASSしました。
+外部reviewもPASSで、minor correctionは同sourceで修正済みCLOSEDです。review artifactは
+`approvals/SD-ARCH-REVIEW-WP01-PER-GRAPH-001-2026-08-14.md`に固定しました。
+
+## Owner approval
+
+Owner指示「続けて下さい」を本trancheのaccepted昇格・次工程進行承認として固定し、新規62 definitionsだけをacceptedへ昇格しました。
+review closure内の既accepted 601 definitionsは変更していません。Owner artifactは
+`approvals/SD-OWNER-APPROVAL-WP01-PER-GRAPH-001-2026-08-14.md`です。
+
 ## 8. Open questions and non-goals
 
 新しいOwner判断はありません。capacity数値、fairness/priority、storage/process/timer製品は後続判断です。
-accepted/Owner artifact、accepted昇格、V1/V2変更、Yatagarasu 3製品、production、passing proof、release、FIX、commitはnon-goalです。
+accepted V1/V2/Pilot/Acoustic変更、Yatagarasu 3製品、production、passing proof、release、FIX、commitはnon-goalです。

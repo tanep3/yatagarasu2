@@ -1,7 +1,7 @@
 # WP-01 Persistence Graph — Execution Revision 3
 
 このsliceはREQ-PER-001のAC-PER-001〜002を、Yatagarasu 2内部の
-[Execution Revision 3](../contracts/execution-revision-3.md)へ接続するreview用縦断索引です。
+[Execution Revision 3](../contracts/execution-revision-3.md)へ接続するaccepted縦断索引です。
 R3は製品Yatagarasu 3ではありません。accepted V1/V2を変更せず、active V2からlossless migrationする
 versioned/superseding contractです。要件基準は`4df6fb1`、依存はaccepted `TR-PILOT-ABC`と
 `TR-WP01-ACOU-001`です。
@@ -105,7 +105,7 @@ storage engine、transaction API、process/IPC、fairness/priority、capacity数
 ## 7. Testable acceptance criteria
 
 1. 2 parent ACが16 DOへ完全分解され、各DOはexact-one assignment、full/designed/plannedを持つ。
-2. accepted V1/V2のdefinition hash/approvalが不変で、62 R3 draft definitionだけが新規review対象である。
+2. accepted V1/V2のdefinition hash/approvalが不変で、62 R3 definitionsだけが本trancheで新規acceptedとなる。
 3. 全causal edge、consumer/issuer/source/statusがclosedで、cycle/self-causal/unknown ref/既存consumer遡及変更を全体拒否する。
 4. 全dependency/guard前はnot-ready。同値Effect二件は別identity。capacity/lease/resource順はsemantic readinessへ影響しない。
 5. physical identityとprofile evidenceを分離し、同identity異profileはmismatch、全algebra/named/recovery claimをpure fixtureで証明する。
@@ -130,8 +130,9 @@ storage engine、transaction API、process/IPC、fairness/priority、capacity数
 
 ## 8. Open questions and non-goals
 
-新しいOwner判断はありません。Owner決定「Yatagarasu 2内部Execution契約をRevision 3へ正式改訂する」をそのまま採用しました。
+新しいOwner判断はありません。Owner決定「Yatagarasu 2内部Execution契約をRevision 3へ正式改訂する」と、承認指示
+「続けて下さい」をそのまま採用しました。
 capacity数値、fairness、priority、storage、process、timer製品はR3 lawを変えず後続で決められます。
 
-non-goal: accepted/Owner artifact、accepted昇格、V1/V2変更、Yatagarasu 3製品、runtime plugin、Behavior workflow、
+non-goal: accepted V1/V2/Pilot/Acoustic artifact変更、Yatagarasu 3製品、runtime plugin、Behavior workflow、
 public UI、production implementation、実proof、passing、release、system-design FIX、commit。

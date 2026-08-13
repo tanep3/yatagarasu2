@@ -184,8 +184,8 @@
 | REQ-ARC-011 | AC-ARC-025 | `4df6fb1:architecture-requirements.md:112` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-026 | `4df6fb1:architecture-requirements.md:113` | — | `inventoried` | `unmapped` |
 | REQ-ARC-011 | AC-ARC-027 | `4df6fb1:architecture-requirements.md:114` | — | `inventoried` | `unmapped` |
-| REQ-PER-001 | AC-PER-001 | `4df6fb1:architecture-requirements.md:122` | JG-PER-R3-SCHEMA, JG-PER-R3-TOPOLOGY, JG-PER-R3-READY, JG-PER-R3-CYCLE, JG-PER-R3-OCCURRENCE, JG-PER-R3-DEADLINE, JG-PER-R3-MIGRATION, JG-PER-REVIEW-CLOSURE | `accounted-for` | `partial` |
-| REQ-PER-001 | AC-PER-002 | `4df6fb1:architecture-requirements.md:123` | JG-PER-R3-RESOURCE-KEY, JG-PER-R3-RESOURCE-ALGEBRA, JG-PER-R3-CLAIM-ATOMICITY, JG-PER-R3-DISPATCH, JG-PER-R3-RESULT, JG-PER-R3-RECOVERY, JG-PER-R3-MIGRATION, JG-PER-TRANCHE-DAG | `accounted-for` | `partial` |
+| REQ-PER-001 | AC-PER-001 | `4df6fb1:architecture-requirements.md:122` | JG-PER-R3-SCHEMA, JG-PER-R3-TOPOLOGY, JG-PER-R3-READY, JG-PER-R3-CYCLE, JG-PER-R3-OCCURRENCE, JG-PER-R3-DEADLINE, JG-PER-R3-MIGRATION, JG-PER-REVIEW-CLOSURE | `accounted-for` | `covered` |
+| REQ-PER-001 | AC-PER-002 | `4df6fb1:architecture-requirements.md:123` | JG-PER-R3-RESOURCE-KEY, JG-PER-R3-RESOURCE-ALGEBRA, JG-PER-R3-CLAIM-ATOMICITY, JG-PER-R3-DISPATCH, JG-PER-R3-RESULT, JG-PER-R3-RECOVERY, JG-PER-R3-MIGRATION, JG-PER-TRANCHE-DAG | `accounted-for` | `covered` |
 | REQ-PHY-001 | AC-PHY-001 | `4df6fb1:architecture-requirements.md:131` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-PHY-001 | AC-PHY-002 | `4df6fb1:architecture-requirements.md:132` | JG-CAM-* | `accounted-for` | `partial` |
 | REQ-PHY-002 | AC-PHY-003 | `4df6fb1:architecture-requirements.md:140` | JG-CAM-* | `accounted-for` | `partial` |
