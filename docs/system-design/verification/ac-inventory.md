@@ -5,8 +5,8 @@
 - Requirement: 62件
 - Acceptance Criteria: 214件
 - Source locator: `4df6fb1:<file>:<line>`
-- Accounting status: Pilot A/B/C対象128件は`accounted-for`、残り86件は`inventoried`
-- Coverage status: Pilot A/B/C対象128件は`partial`、残り86件は`unmapped`
+- Accounting status: Pilot A/B/C対象128件とreview-pending Acoustic tranche対象7件、計135件は`accounted-for`、残り79件は`inventoried`
+- Coverage status: 前記135件は`partial`、残り79件は`unmapped`
 
 `inventoried`は入口に存在することだけを意味し、`accounted-for`は少なくとも一つのAtomic Design Obligationへ接続されたことだけを意味します。`partial`は親ACに未設計の兄弟義務または横展開で確認すべき残余がある状態であり、実装済み・試験済みを意味しません。Pilot契約のaccepted昇格だけで親ACを`covered`へ変えず、[AC横展開実施契約](ac-expansion-plan.md)で全兄弟義務を再監査します。要件基準を変更した場合は、要件変更またはAccepted ADRとともにこの索引を再生成し、差分を確認します。
 
@@ -31,13 +31,13 @@
 | REQ-API-004 | AC-API-017 | `4df6fb1:api-and-web-requirements.md:52` | — | `inventoried` | `unmapped` |
 | REQ-API-004 | AC-API-018 | `4df6fb1:api-and-web-requirements.md:53` | — | `inventoried` | `unmapped` |
 | REQ-API-004 | AC-API-019 | `4df6fb1:api-and-web-requirements.md:54` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-001 | `4df6fb1:approved-bounded-contract.md:17` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-002 | `4df6fb1:approved-bounded-contract.md:18` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-003 | `4df6fb1:approved-bounded-contract.md:19` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-004 | `4df6fb1:approved-bounded-contract.md:20` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-005 | `4df6fb1:approved-bounded-contract.md:21` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-006 | `4df6fb1:approved-bounded-contract.md:22` | — | `inventoried` | `unmapped` |
-| REQ-ACOU-001 | AC-ACOU-007 | `4df6fb1:approved-bounded-contract.md:23` | — | `inventoried` | `unmapped` |
+| REQ-ACOU-001 | AC-ACOU-001 | `4df6fb1:approved-bounded-contract.md:17` | JG-ACO-OWNER, JG-ACO-EXECUTION-V2 | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-002 | `4df6fb1:approved-bounded-contract.md:18` | JG-ACO-FIRST-SPEECH, JG-ACO-ONE-COMMAND, JG-ACO-GRAPH-EXTENSION | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-003 | `4df6fb1:approved-bounded-contract.md:19` | JG-ACO-DISCARD, JG-ACO-RECONNECT | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-004 | `4df6fb1:approved-bounded-contract.md:20` | JG-ACO-PROFILE, JG-ACO-CORRELATION | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-005 | `4df6fb1:approved-bounded-contract.md:21` | JG-ACO-REAL-AUDIO, JG-ACO-SELF-AUDIO, JG-ACO-EMPTY | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-006 | `4df6fb1:approved-bounded-contract.md:22` | JG-ACO-STOP-POLICY, JG-ACO-STOP-CONTROL, JG-ACO-TC70-GATE, JG-ACO-C210-GATE | `accounted-for` | `partial` |
+| REQ-ACOU-001 | AC-ACOU-007 | `4df6fb1:approved-bounded-contract.md:23` | JG-ACO-BINDING-OWNER, JG-ACO-ADAPTER-RULE, JG-ACO-RECOVERY | `accounted-for` | `partial` |
 | REQ-MEM-001 | AC-MEM-001 | `4df6fb1:approved-bounded-contract.md:39` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-MEM-001 | AC-MEM-002 | `4df6fb1:approved-bounded-contract.md:40` | JG-CNV-* | `accounted-for` | `partial` |
 | REQ-MEM-001 | AC-MEM-003 | `4df6fb1:approved-bounded-contract.md:41` | JG-CNV-* | `accounted-for` | `partial` |

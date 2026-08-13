@@ -25,6 +25,16 @@ field_value() {
   ' "$file"
 }
 
+table_cell() {
+  local file="$1" row="$2" column="$3"
+  awk -F '|' -v row="$row" -v column="$column" '
+    /^\|/ {
+      for (i = 2; i <= NF - 1; i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i)
+      if ($2 == row) print $column
+    }
+  ' "$file"
+}
+
 docs/system-design/verification/rebuild-requirements-baseline.sh 4df6fb1 > "$check_tmp/rebuilt-baseline"
 diff -u "$baseline" "$check_tmp/rebuilt-baseline"
 test "$(tail -n +2 "$baseline" | wc -l)" -eq 214
@@ -160,13 +170,19 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
   : > "$check_tmp/$tranche_id-actual-package-dependencies"
   if test "$dependencies" != — && test "$dependencies" != pilot-baseline; then
     printf '%s\n' "$dependencies" | tr ',' '\n' | while IFS= read -r dependency_tranche; do
-      awk -F '\t' -v id="$dependency_tranche" 'NR > 1 && $1 == id { print $2 }' "$tranches" | tr ',' '\n'
+      if test "$dependency_tranche" != TR-PILOT-ABC; then
+        awk -F '\t' -v id="$dependency_tranche" 'NR > 1 && $1 == id { print $2 }' "$tranches" | tr ',' '\n'
+      fi
     done | sort -u > "$check_tmp/$tranche_id-actual-package-dependencies"
   fi
   if test "$tranche_id" = TR-PILOT-ABC; then
     test "$dependencies" = pilot-baseline
     test ! -s "$check_tmp/$tranche_id-expected-package-dependencies-sorted"
   else
+    if ! printf '%s\n' "$dependencies" | tr ',' '\n' | rg -qx TR-PILOT-ABC; then
+      echo "expansion tranche does not bind the accepted pilot basis: $tranche_id" >&2
+      exit 1
+    fi
     diff -u "$check_tmp/$tranche_id-expected-package-dependencies-sorted" \
       "$check_tmp/$tranche_id-actual-package-dependencies"
   fi
@@ -176,7 +192,7 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
   test "$parent_count" -eq "$actual_parents"
   test "$parent_limit" -eq "$authoritative_parent_limit"
   test "$obligation_limit" -eq "$authoritative_obligation_limit"
-  case "$review_status" in pending|challenge-pending|owner-pending|accepted) ;; *) echo "invalid tranche review status: $review_status" >&2; exit 1 ;; esac
+  case "$review_status" in review-pending|challenge-pending|owner-pending|accepted) ;; *) echo "invalid tranche review status: $review_status" >&2; exit 1 ;; esac
   if test "$parent_count" -gt "$parent_limit" || test "$obligation_count" -gt "$obligation_limit"; then
     test "$tranche_id" = TR-PILOT-ABC
     test "$limit_exception" = design-pilot-baseline
@@ -195,18 +211,83 @@ while IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count par
       fi
     done
   fi
+  if test "$review_status" != accepted; then
+    candidate_id="${provenance%%@*}"
+    source_revision="${provenance##*@}"
+    case "$candidate_id" in SD-REV-*) ;; *) echo "invalid pending tranche provenance: $tranche_id" >&2; exit 1 ;; esac
+    if test "$source_revision" != WORKTREE && ! git cat-file -e "$source_revision^{commit}" 2>/dev/null; then
+      echo "pending tranche source revision is unreachable: $tranche_id" >&2
+      exit 1
+    fi
+    candidate_change_set="docs/system-design/verification/change-sets/$candidate_id.md"
+    candidate_ids_ref="docs/system-design/verification/approvals/$candidate_id-design-ids.txt"
+    candidate_definitions_ref="docs/system-design/verification/approvals/$candidate_id-definitions.tsv"
+    candidate_obligations_ref="docs/system-design/verification/approvals/$candidate_id-obligations.tsv"
+    candidate_scope_ref="docs/system-design/verification/approvals/$tranche_id-scope.tsv"
+    for candidate_input in "$candidate_change_set" "$candidate_ids_ref" "$candidate_definitions_ref" "$candidate_obligations_ref" "$candidate_scope_ref"; do
+      test -f "$candidate_input"
+    done
+
+    # Pending lifecycle validates review-input integrity only; it grants no approval.
+    test "$(table_cell "$candidate_change_set" 'Design IDs' 3)" = "$candidate_ids_ref"
+    test "$(table_cell "$candidate_change_set" 'Definitions' 3)" = "$candidate_definitions_ref"
+    test "$(table_cell "$candidate_change_set" 'Obligation review' 3)" = "$candidate_obligations_ref"
+    test "$(table_cell "$candidate_change_set" 'Tranche scope' 3)" = "$candidate_scope_ref"
+    test "$(table_cell "$candidate_change_set" 'Design IDs' 4)" = "sha256:$(sha256sum "$candidate_ids_ref" | awk '{print $1}')"
+    test "$(table_cell "$candidate_change_set" 'Definitions' 4)" = "sha256:$(sha256sum "$candidate_definitions_ref" | awk '{print $1}')"
+    test "$(table_cell "$candidate_change_set" 'Obligation review' 4)" = "sha256:$(sha256sum "$candidate_obligations_ref" | awk '{print $1}')"
+    test "$(table_cell "$candidate_change_set" 'Tranche scope' 4)" = "sha256:$(sha256sum "$candidate_scope_ref" | awk '{print $1}')"
+
+    docs/system-design/verification/canonical-definition-set.sh \
+      "$candidate_ids_ref" "$source_revision" > "$check_tmp/$tranche_id-source-definitions"
+    diff -u "$candidate_definitions_ref" "$check_tmp/$tranche_id-source-definitions"
+    docs/system-design/verification/canonical-definition-set.sh \
+      "$candidate_ids_ref" WORKTREE > "$check_tmp/$tranche_id-current-definitions"
+    diff -u "$candidate_definitions_ref" "$check_tmp/$tranche_id-current-definitions"
+    docs/system-design/verification/obligation-review-set.sh \
+      "$obligations" "$tranche_id" "$source_revision" > "$check_tmp/$tranche_id-source-obligations"
+    diff -u "$candidate_obligations_ref" "$check_tmp/$tranche_id-source-obligations"
+    docs/system-design/verification/obligation-review-set.sh \
+      "$obligations" "$tranche_id" WORKTREE > "$check_tmp/$tranche_id-current-obligations"
+    diff -u "$candidate_obligations_ref" "$check_tmp/$tranche_id-current-obligations"
+    docs/system-design/verification/tranche-review-set.sh \
+      "$obligations" "$tranches" "$tranche_id" "$candidate_definitions_ref" "$candidate_obligations_ref" \
+      > "$check_tmp/$tranche_id-current-scope"
+    diff -u "$candidate_scope_ref" "$check_tmp/$tranche_id-current-scope"
+
+    tail -n +2 "$candidate_definitions_ref" | cut -f1 | sort -u > "$check_tmp/$tranche_id-candidate-design-ids"
+    tail -n +2 "$candidate_obligations_ref" | cut -f9 | tr ',' '\n' \
+      | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | rg '^SD-' | sort -u \
+      > "$check_tmp/$tranche_id-obligation-design-ids"
+    comm -23 "$check_tmp/$tranche_id-obligation-design-ids" "$check_tmp/$tranche_id-candidate-design-ids" \
+      > "$check_tmp/$tranche_id-missing-design-ids"
+    if test -s "$check_tmp/$tranche_id-missing-design-ids"; then
+      echo "pending tranche obligations reference definitions outside review input: $tranche_id" >&2
+      cat "$check_tmp/$tranche_id-missing-design-ids" >&2
+      exit 1
+    fi
+  fi
   if test "$review_status" = accepted; then
     test "$approval_set" != —
     approval_manifest_row="$(awk -F '|' -v id="$approval_set" '
-      /^\| APR-/ { for(i=2;i<=12;i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i); if($2==id) print $7 "\t" $9 "\t" $11 }
+      /^\| APR-/ { for(i=2;i<=12;i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i); if($2==id) print $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $11 }
     ' docs/system-design/verification/design-approval.md)"
     test -n "$approval_manifest_row"
-    IFS=$'\t' read -r approval_definitions_ref approval_review_ref approval_owner_ref <<< "$approval_manifest_row"
+    IFS=$'\t' read -r approval_ids_ref approval_ids_sha approval_definitions_ref approval_definitions_sha approval_review_ref approval_owner_ref <<< "$approval_manifest_row"
     review_source_commit="$(field_value "$approval_review_ref" 'Source commit')"
     review_revision="$(field_value "$approval_review_ref" 'System design revision')"
     test "$reviewed_revision" = "$review_revision"
     case "$provenance" in *@"$review_source_commit") ;; *) echo "tranche provenance does not bind review source: $tranche_id" >&2; exit 1 ;; esac
     test "$reviewed_revision" != —
+
+    test "$approval_ids_sha" = "sha256:$(sha256sum "$approval_ids_ref" | awk '{print $1}')"
+    test "$approval_definitions_sha" = "sha256:$(sha256sum "$approval_definitions_ref" | awk '{print $1}')"
+    docs/system-design/verification/canonical-definition-set.sh \
+      "$approval_ids_ref" "$review_source_commit" > "$check_tmp/$tranche_id-reviewed-definitions"
+    diff -u "$approval_definitions_ref" "$check_tmp/$tranche_id-reviewed-definitions"
+    docs/system-design/verification/canonical-definition-set.sh \
+      "$approval_ids_ref" WORKTREE > "$check_tmp/$tranche_id-current-definitions"
+    diff -u "$approval_definitions_ref" "$check_tmp/$tranche_id-current-definitions"
 
     tranche_scope_ref="$(field_value "$approval_review_ref" 'Tranche Scope Ref')"
     tranche_scope_sha="$(field_value "$approval_review_ref" 'Tranche Scope SHA-256')"

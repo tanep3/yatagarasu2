@@ -31,3 +31,7 @@ pilotとして次の三本を作成し、[Design Pilot Gate](../verification/pil
 - [01-camera-observation.md](01-camera-observation.md)
 - [02-finite-conversation.md](02-finite-conversation.md)
 - [03-configuration-capability.md](03-configuration-capability.md)
+
+Pilot accepted後の全AC横展開sliceは、各trancheのreview statusを明記し、accepted前にPilot Gate成果へ混入させません。
+
+- [04-acoustic-one-wake-one-command.md](04-acoustic-one-wake-one-command.md) — `TR-WP01-ACOU-001` review-pending

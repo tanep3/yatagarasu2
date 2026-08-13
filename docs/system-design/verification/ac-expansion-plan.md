@@ -63,6 +63,10 @@ accepted trancheのreviewed revisionとprovenance commitは、指定Approval set
 Review／Owner ArtifactはTranche ID、Package ID、親AC、obligation、definitionのexact setをcontent-addressed scopeとして共有します。別trancheへのApproval set流用は禁止です。package dependencyが同一Joint tranche内で閉じない場合、必要packageを提供するaccepted dependency trancheを過不足なく`Dependencies`へ導出します。
 全accepted trancheはPilotと同じ16 semantic columnsのObligation Reviewを持ち、review Source commitとcurrentからの再生成結果が保存hashへ一致しなければなりません。Tranche Scopeは各obligationのmeaning hashも含みます。obligation参照Design IDのApproval set外欠落は拒否し、同じintegrated reviewに含まれる余分definitionsは許容してexact scopeへ固定します。
 
+横展開trancheは`review-pending -> challenge-pending -> owner-pending -> accepted`だけを進みます。`review-pending`はcanonical draft、Obligation Review、definition set、scopeがarchitecture challengeへ渡せる状態であり、review PASSまたはOwner承認を意味しません。全横展開trancheは方法論のaccepted basisとして`TR-PILOT-ABC`を依存に明記します。これはWP package依存を満たしたことには数えず、別WP依存はそのpackageを提供するaccepted横展開trancheで追加します。
+
+`review-pending`以降は、未承認でもDesign IDs、Definitions、Obligation Review、Tranche Scopeの参照とSHA-256をchange-setへ固定します。`check-ac-expansion.sh`はprovenance sourceとcurrent worktreeからdefinitions／obligations／scopeを再生成し、保存artifactとの一致とobligation→definition closureを検証します。これはreview inputの改ざん／drift拒否であり、architecture verdict、Primary／Owner approval、accepted statusを付与しません。accepted後もApproval manifestのID／definition hashとreview source/currentの再生成を同じ検査内で継続します。
+
 ### 214 ACの排他的work package
 
 prefix集合は相互排他的で、合計は214です。package artifactを将来作る場合も、AC本文とcanonical定義を複製せず、担当AC ID、tranche、review result、差分参照だけを持たせます。

@@ -716,11 +716,23 @@ rg -q '別stageはそのstage固有generation' "$migration_contract"
 rg -q 'S1 Recovery終端後にS2がOutcomeUnknown' docs/system-design/slices/03-configuration-capability.md
 rg -q 'S2の同OutcomeUnknownをduplicate取込' docs/system-design/slices/03-configuration-capability.md
 
-# Pilot C review inputはcanonical Design ID全体と完全一致する。
-change_set='docs/system-design/verification/change-sets/SD-REV-PILOT-C-001.md'
-rg -o --no-filename '^- SD-[A-Z]+-[A-Z]+-[0-9]+' "$change_set" \
-  | sed -E 's/^- //' | sort -u > "$check_tmp/change-set-design-ids"
-diff -u "$check_tmp/canonical-unique" "$check_tmp/change-set-design-ids"
+# accepted Pilot inputは固定したPilot canonical集合と一致し、横展開で追加した
+# canonical定義はaccepted／review-pendingを問わず一つ以上のreview inputへ登録する。
+pilot_change_set='docs/system-design/verification/change-sets/SD-REV-PILOT-C-001.md'
+pilot_design_ids='docs/system-design/verification/approvals/SD-REV-PILOT-C-001-design-ids.txt'
+rg -o --no-filename '^- SD-[A-Z]+-[A-Z]+-[0-9]+' "$pilot_change_set" \
+  | sed -E 's/^- //' | sort -u > "$check_tmp/pilot-change-set-design-ids"
+diff -u "$pilot_design_ids" "$check_tmp/pilot-change-set-design-ids"
+
+for review_ids in docs/system-design/verification/approvals/*-design-ids.txt; do
+  sort -u "$review_ids"
+done | sort -u > "$check_tmp/review-input-design-ids"
+comm -23 "$check_tmp/review-input-design-ids" "$check_tmp/canonical-unique" \
+  > "$check_tmp/unknown-review-input-design-ids"
+test ! -s "$check_tmp/unknown-review-input-design-ids"
+comm -23 "$check_tmp/canonical-unique" "$check_tmp/review-input-design-ids" \
+  > "$check_tmp/unregistered-canonical-design-ids"
+test ! -s "$check_tmp/unregistered-canonical-design-ids"
 
 git diff --check
 
