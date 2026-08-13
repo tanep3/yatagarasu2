@@ -503,7 +503,7 @@ dispatch barrier statusを完全相関します。append acknowledgement、resul
 
 migration attempt/generation、operation、prior/resulting `SD-MOD-EXE-012` view、control expected/resulting revision、dispatch/apply gate、
 accepted V2 State/tail/inbox/apply cursor expected/resulting revision/sequence/digest、cut、winner key、command/Event correlationを固定する
-Execution owner Eventです。pauseはapply済み、abort requestはcatch-up完了、catch-up完了はR3 activationを意味しません。
+Execution owner Eventです。pauseは既存resultのapply完了を意味せず、abort requestはcatch-up完了を意味せず、catch-up完了はR3 activationを意味しません。
 
 ### SD-EVT-EXE-021 — V2PublicationFenceAdvancedR3
 

@@ -207,7 +207,7 @@ definition	SD-EVT-EXE-016@3	contracts/execution-revision-3.md#sd-evt-exe-016--di
 definition	SD-EVT-EXE-017@3	contracts/execution-revision-3.md#sd-evt-exe-017--executioncancellationresolvedr3	sha256:b7cfc9714e3d145a9f936608cf3fbe60b20d912eb97695c8bdaefa53785f1808
 definition	SD-EVT-EXE-018@3	contracts/execution-revision-3.md#sd-evt-exe-018--executionmigrationadvancedr3	sha256:6667c438b120995a3267b6513ee2274338ec6a7b96b0ceded338f0e6e5364293
 definition	SD-EVT-EXE-019@3	contracts/execution-revision-3.md#sd-evt-exe-019--orderedresultcatchupadvancedr3	sha256:bd51e5604bd95e3a04a5eae3147c26972cf548d7810a9e2b8cd6ef6953d06f66
-definition	SD-EVT-EXE-020@3	contracts/execution-revision-3.md#sd-evt-exe-020--v2forr3operationalcontroladvancedr3	sha256:b3e7d65b50da1b2342866232a38a59255d2de5d13165a76facca2836638f71df
+definition	SD-EVT-EXE-020@3	contracts/execution-revision-3.md#sd-evt-exe-020--v2forr3operationalcontroladvancedr3	sha256:ede3cbcddd7f21f8ddbca0be68507c243956acef75ce2a4edcb21ddf36c35d9b
 definition	SD-EVT-EXE-021@3	contracts/execution-revision-3.md#sd-evt-exe-021--v2publicationfenceadvancedr3	sha256:ed5161e7aeb3a6c4cb99532d1f0e6e3bf66eb79397982e1a6352a0c46efdfb6c
 definition	SD-EVT-INF-001@1	contracts/camera-observation.md#sd-evt-inf-001--imageinterpretationresolved	sha256:98cbbe697b03ecd1cce51136741772af5fc5ebad8d82228f0360af5275b02460
 definition	SD-EVT-ING-001@1	contracts/execution.md#sd-evt-ing-001--ingestedexternalevent	sha256:4bc112aa4796be3f7b796b37368fca72cc743a866d5e41c75359344bec0a8092

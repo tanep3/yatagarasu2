@@ -21,10 +21,10 @@ Rejected predecessor candidateをOwner決定に従い全面再設計したreview
 | Input | Ref | SHA-256 | Meaning |
 | --- | --- | --- | --- |
 | Design IDs | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-design-ids.txt` | `sha256:bca3f6c9bef36a79476c05b252c4a1cad3c3e3ff0a918dfad0abe66bb37c99f7` | 62 R3 draft + complete 601-definition accepted dependency closure |
-| Definitions | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-definitions.tsv` | `sha256:45498ab69dd4090dffa53497bb9e66e67dcf2985b48db94f41e4d6d83a772477` | exact versions/refs/meaning hashes |
+| Definitions | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-definitions.tsv` | `sha256:3f2efead185ffd4151771494bf6a9ead4d1304c859b176daefcda239603a9608` | exact versions/refs/meaning hashes |
 | Dependency manifest | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-dependencies.tsv` | `sha256:3a92f0d7f979c1854c28be14aee7bff8720d88b7d49cbf4ae94c664a9a3fc1cd` | every draft/accepted source and recursively closed canonical references |
 | Obligation review | `docs/system-design/verification/approvals/SD-REV-WP01-PER-GRAPH-001-obligations.tsv` | `sha256:2c0674806236964b1ed4850413312201356cf851a2c494ba58e9e89ae4225058` | 16 rows / 16 semantic columns |
-| Tranche scope | `docs/system-design/verification/approvals/TR-WP01-PER-GRAPH-001-scope.tsv` | `sha256:ab2bd7e5c7fb99d4082f669b6de87e4bfaca130bc6cce1f4ca71439a3f399820` | exact WP/AC/DO/663 definitions |
+| Tranche scope | `docs/system-design/verification/approvals/TR-WP01-PER-GRAPH-001-scope.tsv` | `sha256:41ac97754503021dfe7c5289829e745c13a6c9b11f75c979bc34f9594971eed2` | exact WP/AC/DO/663 definitions |
 
 ## 1. Problem framing
 
