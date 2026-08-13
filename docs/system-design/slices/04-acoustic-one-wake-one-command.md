@@ -10,8 +10,9 @@ Y1で観測した問題は、wake後promptの回り込み、pre-rollから最初
 | --- | --- | --- |
 | wake acceptance、session、immutable pre-wake history、post-wake collection cursor/interval、retain subrange、guard、empty | SD-CTX-ACO-001 | source／TTS／STT Adapter、Kernel |
 | 登録Stop語、Stop Policy version | SD-CTX-ACO-001 | audio Adapter、Execution |
-| playback occurrence→canonical全文／Policy version binding | SD-CTX-EXE-001（SD-STA-EXE-002のInjectV1内） | Acoustic、Conversation、TTS Adapter |
+| playback occurrence→canonical全文／Policy version／exact Interaction binding | SD-CTX-EXE-001（SD-STA-EXE-002のInjectV1内） | Acoustic、Conversation、TTS Adapter |
 | pre-Interaction Acoustic Graph／occurrence／lease／custody | SD-CTX-EXE-001（SD-STA-EXE-002） | Acoustic、Kernel、Adapter |
+| V1/V2 migration lifecycle、barrier、active reducer、ingress tail/cut/apply cursor、handoff/conflict quarantine | SD-CTX-EXE-001（SD-STA-EXE-002のschema control） | migration process、Adapter、dispatcher |
 | raw bytes／ring buffer／connection | source Adapter operational state | Core Context |
 | Interaction admission／cancel | SD-CTX-INT-001 | Acoustic、source worker |
 | Conversation text／turn | SD-CTX-CNV-001 | Acoustic、Python worker |
@@ -20,7 +21,7 @@ Y1で観測した問題は、wake後promptの回り込み、pre-rollから最初
 
 - Inbound observations/result: SD-EVT-ACO-001〜006、009〜013。候補と外部結果でありCommandではない。
 - Acoustic owner facts: SD-EVT-ACO-007、008、014。
-- Outbound Commands: accepted commandだけSD-CMD-INT-002、voice HomeはSD-CMD-QLI-001、unsuppressed voice StopはSD-CMD-INT-001。
+- Outbound Commands: accepted commandだけSD-CMD-INT-002、voice HomeはSD-CMD-QLI-001、unsuppressed voice Stopはexact `interaction_id`をpinしたSD-CMD-INT-001。Adapter target hintや「current」はCommand targetにしない。
 - Web Home／Cancel: Acousticを経由せず既存共通Commandへ入り、StopSuppressionPolicyの対象外。
 - Pure Decisions: SD-RUL-ACO-001〜012。State mutationとI/Oを持たない。
 - Transitions: SD-TRN-ACO-001〜008だけがAcoustic Stateを変更する。Execution／Interaction／Conversationを直接変更しない。
@@ -31,7 +32,7 @@ Y1で観測した問題は、wake後promptの回り込み、pre-rollから最初
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | DO-ACO-001A | AC-ACOU-001 | JG-ACO-OWNER | full | SD-CTX-ACO-001, SD-STA-ACO-001, SD-TRN-ACO-001, SD-TRN-ACO-002, SD-TRN-ACO-003, SD-TRN-ACO-007, SD-TRN-ACO-008 | architecture/pure | owner重複、Adapter／KernelからState変更 | 共通Core | accounted-for | designed | planned |
 | DO-ACO-001B | AC-ACOU-001 | JG-ACO-OWNER | full | SD-PRT-ACO-001, SD-PRT-ACO-002, SD-MOD-ACO-001, SD-MOD-ACO-003, SD-RUL-ACO-008, SD-RUL-ACO-011 | architecture/contract | raw buffer所有をhistory/post-wake collection判断所有へ昇格、両intervalを混同 | source境界 | accounted-for | designed | planned |
-| DO-ACO-001C | AC-ACOU-001 | JG-ACO-EXECUTION-V2 | full | SD-MOD-EXE-004, SD-STA-EXE-002, SD-MOD-EXE-005, SD-RUL-EXE-008, SD-TRN-EXE-017, SD-PER-EXE-009, SD-PRJ-EXE-001, SD-PRF-EXE-001, SD-FAIL-EXE-001 | architecture/contract/crash-recovery | V1 complete recordのfield欠落、resume request/commit統合、revocation key drift、Graph内Occurrence複製owner、in-flight identity消失 | Execution V2 snapshot境界 | accounted-for | designed | planned |
+| DO-ACO-001C | AC-ACOU-001 | JG-ACO-EXECUTION-V2 | full | SD-MOD-EXE-004, SD-STA-EXE-002, SD-MOD-EXE-005, SD-RUL-EXE-008, SD-RUL-EXE-009, SD-EVT-EXE-011, SD-TRN-EXE-017, SD-TRN-EXE-018, SD-PER-EXE-009, SD-PER-EXE-010, SD-PRJ-EXE-001, SD-PRF-EXE-001, SD-FAIL-EXE-001 | architecture/contract/crash-recovery | V1 complete recordのfield欠落、resume request/commit統合、revocation key drift、Graph内Occurrence複製owner、in-flight identity消失、migration control非耐久、reserved sequence／gap、abort/activation reducer dual/gap、result loss／二重apply、conflictでwinner上書き | Execution V2 snapshot／migration control境界 | accounted-for | designed | planned |
 | DO-ACO-002A | AC-ACOU-002 | JG-ACO-FIRST-SPEECH | full | SD-RUL-ACO-002, SD-RUL-ACO-008, SD-RUL-ACO-011, SD-RUL-ACO-012, SD-EVT-ACO-004, SD-EVT-ACO-011, SD-EFX-ACO-003, SD-EFX-ACO-004, SD-PRF-ACO-001 | pure/integration | historyをpost-wakeへ延長、prompt/guard全span discard、query issuer欠落、prompt failureでsession未終端 | 実profile | accounted-for | designed | planned |
 | DO-ACO-002B | AC-ACOU-002 | JG-ACO-ONE-COMMAND | full | SD-RUL-ACO-003, SD-TRN-ACO-003, SD-GPH-ACO-001, SD-CMD-INT-002, SD-PER-ACO-001 | pure/concurrency/crash-recovery | 一wakeから二Submit、emptyなのにT生成、無音fixtureだけで合格 | 初期one-wake-one-command | accounted-for | designed | planned |
 | DO-ACO-002C | AC-ACOU-002 | JG-ACO-GRAPH-EXTENSION | full | SD-MOD-ACO-002, SD-RUL-ACO-009, SD-RUL-ACO-012, SD-EVT-EXE-009, SD-RUL-EXE-007, SD-TRN-EXE-016, SD-PER-EXE-008, SD-GPH-ACO-001 | architecture/pure/concurrency | future cursor payload、prompt resultが複数/無分岐、Acoustic subject四field不一致でlease継続、typed close/custodyでCなし | Execution V2 Graph | accounted-for | designed | planned |
@@ -43,7 +44,7 @@ Y1で観測した問題は、wake後promptの回り込み、pre-rollから最初
 | DO-ACO-005B | AC-ACOU-005 | JG-ACO-SELF-AUDIO | full | SD-RUL-ACO-001, SD-RUL-ACO-004, SD-MOD-ACO-001, SD-POL-ACO-002 | pure/integration/real-device | 実TTS waveformから通常wake／Interaction／LLM、Home/Stop経路停止 | 実profile | accounted-for | designed | blocked-by-spike |
 | DO-ACO-005C | AC-ACOU-005 | JG-ACO-EMPTY | full | SD-RUL-ACO-003, SD-TRN-ACO-003, SD-CMD-QLI-001, SD-PRJ-ACO-001 | pure/integration | 空命令からLLM/body Effect、通知をAcousticへ直結 | 共通 | accounted-for | designed | planned |
 | DO-ACO-006A | AC-ACOU-006 | JG-ACO-STOP-POLICY | full | SD-POL-ACO-002, SD-RUL-ACO-004, SD-EVT-ACO-007 | pure | Stop語あり全文で利用者Stopだけ特別に通す | 全対応profile | accounted-for | designed | planned |
-| DO-ACO-006B | AC-ACOU-006 | JG-ACO-STOP-CONTROL | full | SD-RUL-ACO-004, SD-POL-ACO-003, SD-EVT-ACO-014, SD-TRN-ACO-004, SD-PER-ACO-002, SD-CMD-INT-001, SD-CMD-QLI-001 | pure/integration/crash-recovery | replayで二Cancel、同ID異payload受理、比較不能を抑止と記録、Web Home/Cancel抑止 | 共通 | accounted-for | designed | planned |
+| DO-ACO-006B | AC-ACOU-006 | JG-ACO-STOP-CONTROL | full | SD-RUL-ACO-004, SD-POL-ACO-003, SD-EVT-ACO-014, SD-TRN-ACO-004, SD-PER-ACO-002, SD-CMD-INT-001, SD-CMD-QLI-001 | pure/integration/crash-recovery | Adapter hint／暗黙currentをtarget化、0／複数cancellableからCancel、replay／late raceで別Interactionへ読替、同ID異payload受理、Web Home/Cancel抑止 | 共通 | accounted-for | designed | planned |
 | DO-ACO-006C | AC-ACOU-006 | JG-ACO-TC70-GATE | full | SD-PRF-ACO-001, SD-PRJ-ACO-001 | real-device/measurement/owner-gate | 実測またはOwner採否なしでTC70 release-ready | TC70初期release | accounted-for | designed | blocked-by-spike |
 | DO-ACO-006D | AC-ACOU-006 | JG-ACO-C210-GATE | full | SD-PRF-ACO-001, SD-PRJ-ACO-001 | real-device/measurement/owner-gate | C210未達でTC70をblock、または証拠なしでC210対応主張 | C210対応profile | accounted-for | designed | blocked-by-spike |
 | DO-ACO-007A | AC-ACOU-007 | JG-ACO-BINDING-OWNER | full | SD-CTX-ACO-001, SD-CTX-EXE-001, SD-STA-ACO-001, SD-STA-EXE-002, SD-MOD-ACO-001, SD-RUL-ACO-005, SD-EVT-ACO-008, SD-TRN-ACO-006, SD-PER-ACO-001 | architecture/pure | binding二重所有、dispatch後Policy/current全文読替 | Acoustic／Execution V2 | accounted-for | designed | planned |
@@ -72,14 +73,21 @@ Y1で観測した問題は、wake後promptの回り込み、pre-rollから最初
 | voice candidate replay同payload／異payload | same processed Event/outbox replay／Conflict quarantine。二Cancelなし |
 | clock-domain/profile比較不能 | exact overlapを主張せずtyped temporal unknown。normal wakeはfail-safe discard、voice Stopは推測Cancelなし |
 | playback中Stop語あり | 実利用者Stopも含めSuppress。Web Home/Cancel・音声Homeは生存 |
-| playback中Stop語なし | exact InteractionへCancel Command。TTS waveformは通常wakeにならない |
-| playback binding欠落／version不一致 | typed invariant violation、推測抑止／Cancelなし、Web controlsは生存 |
+| playback中Stop語なし | playback Execution subjectから導出したexact InteractionへCancel Command。Adapter hintで上書きせず、TTS waveformは通常wakeにならない |
+| playback外Stop、cancellable Interaction 0／1／複数 | `NoCancellableInteraction`／exact一件へCancel／typed invariant。暗黙currentやhintで選ばない |
+| playback binding欠落／non-Interaction subject／target不一致／version不一致 | typed invariant violation、推測抑止／Cancelなし、Web controlsは生存 |
+| voice Stop decision後target terminal・別Interaction開始 | ledger/outbox/Commandの保存済みexact targetを維持し、別currentへ読み替えない |
 | Home／Cancelとsource result race | owner revision winner一件、late resultは元session auditだけ |
-| Execution V1→V2 migration crash | commit前V1Active／commit後V2Activeの一方だけ。in-flight identity、lease、custody、outboxを保持 |
+| Execution V1→V2 migration中にdispatch済みresult到着 | schema-neutral durable ingress／ackを継続しDomain applyだけ停止。watermark/digest cut後、V2 InjectV1 correlationへ一度だけapply |
+| append／seal race | append commit時だけgap-free sequenceを割当。shared tail CAS winnerによりcut以下commit済みまたはcut超のexact一方。reservation不可 |
+| duplicate／conflicting ingress | same key/same payloadはwinner replay。異payloadは別Conflict ID/recordでwinner／tail／outbox不変 |
+| abort／activation reducer handoff | `MigrationPaused`からV1またはV2 exact一方へatomic handoff。dual reducer／reducer gapなし |
+| Execution V1→V2 migration crash／race | barrier前・中・commit競合、append abort/CAS retry/gap、ack crashを型付きに処理。late、cancel、OutcomeUnknown、inbox/outbox identityを保持しloss／double applyなし |
 
 ## Proof designとapproval boundary
 
-- deterministic: owner registry、Policy、wake/span/Stop Rule、Transition、duplicate、late、restart、Graph cycle/resource fixture。
+- deterministic: owner registry、Policy、wake/span/Stop Rule、exact cancel targetの0／1／複数・hint conflict・replay/race、Transition、duplicate、late、restart、Graph cycle/resource fixture。
+- migration contract: barrier前／中／commit race、reserved-before-seal impossible、append commit-after-seal、append abort、CAS retry、gap、ack後crash、same/different payload、late/cancel/OutcomeUnknown、abort/activation handoff、inbox/outboxを含むV1→V2 result ingress fixture。
 - contract: source／prompt／boundary Adapterがresult Eventだけを返し、State reducerへ到達しない。
 - real-device: prompt「はい」、first speech、self TTS、Stop語あり／なし、実利用者Stop、reconnect、late buffer。
 - release gate: TC70 spike evidence＋Owner採否。C210は対応主張profileだけの独立gate。

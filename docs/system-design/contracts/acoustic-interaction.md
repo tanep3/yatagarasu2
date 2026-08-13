@@ -73,6 +73,22 @@ AcousticSessionRecord {
 VoiceControlProcessedRecord {
   candidate_id, payload_fingerprint,
   temporal_evidence_digest, pinned_stop_policy_version,
+  target_resolution: HomeNotApplicable |
+    PlaybackBound {
+      playback_occurrence_id, exact_interaction_id,
+      execution_subject_digest, execution_state_revision
+    } |
+    InteractionViewSelected {
+      exact_interaction_id, interaction_view_revision,
+      eligible_set_digest
+    } |
+    NoCancellableInteraction { interaction_view_revision,
+      eligible_set_digest } |
+    TemporalUnknown {
+      evidence_digest, reason,
+      pinned_stop_policy_version
+    } |
+    UnresolvedInvariant { evidence_digest },
   decision_event_id, decision_digest,
   outbox: None | { command_id, command_fingerprint, status },
   suppression_audit?: {
@@ -97,15 +113,28 @@ AcousticDiscardReason = DuplicateCandidate | BusyWithOpenSession |
 SpeechAcousticBindingView {
   playback_occurrence_id,
   execution_subject,
+  exact_interaction_id,
   canonical_response_full_text,
   stop_suppression_policy_version,
   normalization_rule_version,
   playback_lifecycle,
   playback_interval_evidence: AcousticTemporalEvidence
 }
+
+CancellableInteractionReadView {
+  interaction_state_revision,
+  entries: Set<{
+    interaction_id,
+    lifecycle: Admitted | Running | Cancelling | Terminal | Recovering,
+    cancellation_already_recorded: Boolean
+  }>,
+  view_digest
+}
 ```
 
-このviewは`SD-STA-EXE-002 ExecutionStateV2`の`InjectV1`として保持されたexact `SD-EFX-AUD-001 PlayNonStreamingSpeech` occurrenceのplanned payload、`policy_refs`、result lifecycleからだけ導きます。Execution V2 activation前のaccepted V1 snapshotでは同じ情報を`SD-PRJ-EXE-001`互換view経由で読めますがAcoustic admissionを開始しません。別Stateを複製せず、canonical全文とPolicy versionをGraph登録前に固定し、dispatch後の応答編集またはcurrent Policyへの読み替えを拒否します。
+`SpeechAcousticBindingView`は`SD-STA-EXE-002 ExecutionStateV2`の`InjectV1`として保持されたexact `SD-EFX-AUD-001 PlayNonStreamingSpeech` occurrenceのplanned payload、`policy_refs`、result lifecycleからだけ導きます。`execution_subject`が`InjectV1(InteractionSubject(InteractionExecutionSubject))`で、そのsubject内の`interaction_id`とoccurrence／Graph／correlationが一致する場合だけ`exact_interaction_id`を導出できます。Management／Acoustic subject、部分一致、別generation、payload内の別targetはtyped invariant violationであり、current Interactionへ読み替えません。Execution V2 activation前のaccepted V1 snapshotでは同じ情報を`SD-PRJ-EXE-001`互換view経由で読めますがAcoustic admissionを開始しません。別Stateを複製せず、canonical全文、exact Interaction、Policy versionをGraph登録前に固定し、dispatch後の応答編集またはcurrent Policyへの読み替えを拒否します。
+
+`CancellableInteractionReadView`は`SD-CTX-INT-001`が所有する`SD-STA-INT-001`から、同じowner revisionで導くread-only valueです。`Admitted | Running`かつ取消未記録だけをcancellableとし、Acoustic ContextはこのStateを複製／変更しません。`Cancelling | Terminal | Recovering`を暗黙のcurrent targetへ昇格せず、同revision内の重複ID、矛盾lifecycle、digest不一致をtyped invariant violationにします。
 
 ### SD-MOD-ACO-002 — AcousticGraphContributionV2
 
@@ -240,13 +269,13 @@ VoiceControlCandidateObserved {
   candidate: Home | Stop,
   source_span_ref, source_epoch,
   observed_interval: AcousticTemporalEvidence,
-  target_interaction_id?,
+  target_interaction_hint?,
   overlapping_playback_occurrence_ids,
   adapter_observation_ref
 }
 ```
 
-候補EventであってCommandではありません。AdapterはHome／Stop候補を返せますが、Stop抑止、Cancellation、Home受理を決定しません。
+候補EventであってCommandではありません。`target_interaction_hint`はsource Adapterが観測した非権威のhint/evidenceにすぎず、Cancel targetでもfallbackでもありません。AdapterはHome／Stop候補を返せますが、Stop抑止、Cancellation target、Home受理を決定しません。
 
 ### SD-EVT-ACO-007 — AcousticDecisionRecorded
 
@@ -267,17 +296,25 @@ AcousticDecisionRecorded =
   VoiceHomeForwarded { candidate_id, stable_home_command_id } |
   VoiceStopSuppressed { candidate_id, playback_occurrence_id,
     stop_policy_version, matched_registered_term: true } |
-  VoiceStopForwarded { candidate_id, playback_occurrence_id?,
-    stable_cancel_command_id } |
+  VoiceStopForwarded { candidate_id, exact_interaction_id,
+    target_basis: PlaybackExecutionSubject { playback_occurrence_id } |
+      InteractionOwnerReadView { interaction_state_revision,
+        eligible_set_digest },
+    stable_cancel_command_id, cancel_reason, target_evidence_digest } |
+  VoiceStopNoCancellableInteraction { candidate_id,
+    interaction_state_revision, eligible_set_digest } |
+  VoiceControlInvariantViolation { candidate_id, violation,
+    evidence_digest } |
   VoiceControlConflict { candidate_id, existing_payload_fingerprint,
     conflicting_payload_fingerprint } |
-  VoiceControlTemporalUnknown { candidate_id, possible_playback_ids } |
+  VoiceControlTemporalUnknown { candidate_id, possible_playback_ids,
+    evidence_digest, reason, pinned_stop_policy_version } |
   AcousticRecoveryRequired { session_id, occurrence_id,
     recovery_reason, custody_ref? } |
   AcousticSessionClosed { session_id, terminal_reason }
 ```
 
-Acoustic ownerの確定事実です。`VoiceStopSuppressed`は利用者発話と自己音声を識別した事実を持ちません。`CommandCommitted`はInteraction admission、Conversation開始、LLM実行を意味せず、同じstable Commandをoutboxへ確定した事実です。
+Acoustic ownerの確定事実です。`VoiceStopSuppressed`は利用者発話と自己音声を識別した事実を持ちません。`VoiceStopForwarded`の`exact_interaction_id`は後続のEvent、ledger、outbox、`SD-CMD-INT-001 CancelRequested.interaction_id`まで不変です。`VoiceStopNoCancellableInteraction`は「現在対象」を作らないno-effectの確定事実です。`CommandCommitted`はInteraction admission、Conversation開始、LLM実行を意味せず、同じstable Commandをoutboxへ確定した事実です。
 
 ## Policy、Rule、Decision、Transition
 
@@ -327,15 +364,40 @@ OneWakeCommandDecision =
 
 ### SD-RUL-ACO-004 — DecideVoiceControlCandidate
 
-Homeはplayback bindingやStop Policyを読まず常に`ForwardHome`へ進めます。Stopは候補のobserved intervalに重なるexact speech playback occurrenceを最大一件に検証し、存在する場合はそのimmutable `SpeechAcousticBindingView`と同versionの`StopSuppressionPolicy`を読みます。全文に登録Stop語があれば`SuppressStop`、なければ`ForwardCancel`です。playback外のStopも`ForwardCancel`です。
+Homeはplayback binding、Interaction view、Adapter hint、Stop Policyを読まず常に`ForwardHome`へ進めます。Stopは候補のobserved intervalに重なるexact speech playback occurrenceを最大一件に検証し、次のclosed Decisionのexact一つをpureに返します。
+
+```text
+VoiceControlDecision =
+  ForwardHome { stable_home_command_id } |
+  SuppressStop { playback_occurrence_id, stop_policy_version,
+    evidence_digest } |
+  ForwardCancel { exact_interaction_id,
+    reason: VoiceStopDuringOwnedPlayback | VoiceStopOutsideOwnedPlayback,
+    target_basis, target_evidence_digest,
+    stable_cancel_command_id,
+    cancel_command_payload: CancelRequested {
+      interaction_id: exact_interaction_id,
+      source: VoiceControl,
+      requested_event_id: candidate.event_id
+    } } |
+  NoCancellableInteraction { interaction_state_revision,
+    eligible_set_digest } |
+  TemporalUnknown { possible_playback_ids, evidence_digest,
+    reason, pinned_stop_policy_version } |
+  InvariantViolationRequireRecovery { violation, evidence_digest }
+```
+
+exact playbackが一件ある場合は、immutable `SpeechAcousticBindingView.execution_subject`から導出した`exact_interaction_id`だけをtargetにします。subjectがInteractionでない、subject／occurrence／correlationのInteractionが不一致、または存在する`target_interaction_hint`が導出targetと不一致なら`InvariantViolationRequireRecovery`です。全文に登録Stop語があれば`SuppressStop`、なければそのexact IDを持つ`ForwardCancel`です。
+
+exact playbackがないStopは、同一revisionの`CancellableInteractionReadView`から`Admitted | Running`かつ取消未記録のexact ID集合を作ります。cardinalityが一件で、存在する`target_interaction_hint`もそのIDと一致する場合だけ、そのIDを`ForwardCancel`へpinします。0件かつhint absenceなら`NoCancellableInteraction`としてCommandを作りません。複数件、重複ID、矛盾lifecycle、revision／digest不整合、0件なのにhintあり、exact-oneとhint不一致は`InvariantViolationRequireRecovery`です。Adapter hintが集合選択を上書きせず、0件または複数件を一件へ狭めません。
 
 overlapping playbackにbinding欠落、Policy version欠落、複数overlap、normalization不一致があれば`InvariantViolationRequireRecovery`だけを返し、比較不能なtemporal evidenceなら`TemporalUnknown`だけを返し、推測で抑止／Cancelを作りません。この状態はspeech occurrence登録時に拒否すべき整合性違反であり、Web Home／Cancelと音声Homeは引き続き共通境界から受理します。
 
-candidateをRuleが読む時点でplaybackがTerminalでも、candidateの`observed_interval`がimmutable playback interval evidenceに重なるなら「再生中に得た候補」として同じpin済みbindingで判定します。現在lifecycleだけを見てlate candidateを通常wake／unsuppressed Stopへ昇格しません。
+candidateをRuleが読む時点でplaybackがTerminalでも、candidateの`observed_interval`がimmutable playback interval evidenceに重なるなら「再生中に得た候補」として同じpin済みbindingで判定します。現在lifecycleだけを見てlate candidateを通常wake／unsuppressed Stopへ昇格しません。一度commitしたDecisionのreplay、outbox再公開、late result、cancelとのraceでは保存済みexact targetを使い、更新後のInteraction read viewから別の「current」を再選択しません。
 
 ### SD-RUL-ACO-005 — ValidateSpeechAcousticBinding
 
-final response canonicalization結果、planned `PlayNonStreamingSpeech` occurrence、current Acoustic stop Policy view、Execution expected revisionをpureに検証します。canonical回答全文、exact occurrence、Stop Policy version、同じnormalization rule versionが`PlannedEffectSpec`へ固定される場合だけGraph登録を許可します。空の全文、mutable refだけ、current-version lookup、別occurrence binding、dispatch後bindingを拒否します。
+final response canonicalization結果、planned `PlayNonStreamingSpeech` occurrence、current Acoustic stop Policy view、Execution expected revisionをpureに検証します。canonical回答全文、exact occurrence、Stop Policy version、同じnormalization rule version、および`InteractionExecutionSubject`から導出したexact Interaction IDが`PlannedEffectSpec`へ固定される場合だけGraph登録を許可します。Management／Acoustic subject、subject／payload／correlationのInteraction不一致、空の全文、mutable refだけ、current-version lookup、別occurrence binding、dispatch後bindingを拒否します。
 
 ### SD-RUL-ACO-006 — DecideAcousticRecovery
 
@@ -422,7 +484,7 @@ exact prompt operation cancelについて`CancellationConfirmed(terminal_evidenc
 
 ### SD-EVT-ACO-014 — VoiceControlProcessed
 
-candidate ID、payload fingerprint、temporal evidence digest、pin済みPolicy、closed Decision、decision Event ID、outbox command identity／fingerprintまたはsuppression audit digestを持つAcoustic owner Eventです。同ID同fingerprint replayは同Event／outbox identityを返し、新規Eventを作りません。同ID異fingerprintは`VoiceControlConflict`だけを記録してCommandを出しません。
+candidate ID、payload fingerprint、temporal evidence digest、pin済みPolicy、closed Decision、decision Event ID、target resolution basis、exact Interaction IDまたはtyped no-target/invariant、outbox command identity／fingerprintまたはsuppression audit digestを持つAcoustic owner Eventです。`ForwardCancel`では`CancelRequested` payload全体を含むdecision digestへexact targetをpinします。同ID同fingerprint replayは同Event／outbox identityを返し、新規Eventを作らずInteraction viewを再読しません。同ID異fingerprintは`VoiceControlConflict`だけを記録してCommandを出しません。
 
 ### SD-TRN-ACO-001 — ApplyWakeAcceptance
 
@@ -438,7 +500,7 @@ candidate ID、payload fingerprint、temporal evidence digest、pin済みPolicy�
 
 ### SD-TRN-ACO-004 — ApplyVoiceControlDecision
 
-`SD-EVT-ACO-014`とpayload fingerprintをexpected revisionへ適用します。未処理IDならledger、decision Event、`ForwardHome`／`ForwardCancel`のoutboxまたは`SuppressStop`／typed temporal unknownのauditを原子的に記録します。同ID同fingerprintは保存済みEvent／outboxをreplayして新規Commandを作らず、同ID異fingerprintはConflict／QuarantineとしてCommandを作りません。Acoustic session、Execution occurrence、Interaction Stateを直接変更しません。
+`SD-EVT-ACO-014`とpayload fingerprintをexpected revisionへ適用します。未処理IDならledger、decision Event、`ForwardHome`／exact-target `ForwardCancel`のoutbox、または`SuppressStop`／`NoCancellableInteraction`／typed temporal unknown／invariantのauditを原子的に記録します。TemporalUnknownはevidence digest、reason、判定に使ったPolicy pinを専用`target_resolution` variantへ保存し、Invariantへ畳みません。ForwardCancelのEvent、ledger、outbox、Command payloadのinteraction ID、reason、evidence digestが一致しなければ全体を拒否します。同ID同fingerprintは保存済みEvent／outboxをreplayして新規Commandを作らずtargetを再解決せず、同ID異fingerprintはConflict／QuarantineとしてCommandを作りません。Acoustic session、Execution occurrence、Interaction Stateを直接変更しません。
 
 ### SD-TRN-ACO-005 — ApplySourceRecoveryDecision
 
@@ -563,7 +625,7 @@ OutcomeUnknownの元O／T／Cには`QueryAcousticSourceOperation`、Pには`Quer
 
 ### SD-PRT-ACO-001 — AcousticCandidateIngressPort
 
-常時sourceからnormal wake、span／reconnect、Home／Stop候補を対応する`SD-EVT-ACO-*`へ翻訳します。外部schema、model score、buffer pointerをDomain型にせず、stable candidate/event identity、logical source/epoch/cursor、`SD-MOD-ACO-003` evidenceを付けます。wake受理、discard、Stop suppression、Command生成を実装しません。
+常時sourceからnormal wake、span／reconnect、Home／Stop候補を対応する`SD-EVT-ACO-*`へ翻訳します。外部schema、model score、buffer pointerをDomain型にせず、stable candidate/event identity、logical source/epoch/cursor、`SD-MOD-ACO-003` evidenceを付けます。外部targetを得た場合も`target_interaction_hint`という非権威evidenceとしてだけ渡し、current Interaction lookup、target選択、wake受理、discard、Stop suppression、Command生成を実装しません。
 
 ### SD-PRT-ACO-002 — AcousticSourcePort
 
@@ -587,16 +649,17 @@ pin済みguard／operation deadline boundaryを待ち、`SD-EVT-ACO-005`また�
 - owner factごとの`SD-RUL-ACO-009` contribution、Acoustic progress、`SD-EVT-EXE-009`、immutable Occurrence/edge/guard/deadlineを`SD-PER-EXE-008`で同時commitする。
 - Command／Empty Decision、Acoustic owner Event、session terminal intent、同じstable `SubmitInteraction`または`ReturnToHomeRequested` outboxを同時commitする。crash後は同じCommand identityを再公開し、二Interactionを作らない。
 - final speech Graph登録時、`SD-RUL-ACO-005`に適合するcanonical全文／Stop Policy versionをexact `PlayNonStreamingSpeech` planned occurrenceへ固定し、`SD-TRN-EXE-001`と同じExecution commitに保存する。Acoustic Stateへbindingを複製しない。
+- final speech Graph登録時、playback occurrenceの`InteractionExecutionSubject`からexact Interaction IDを導出し、planned payload／correlationとの一致を検証する。Management／Acoustic subjectまたは不一致targetを持つspeech occurrenceは登録せず、後のvoice candidateで補完しない。
 - Acoustic Policy revision登録はconfiguration application identity、expected revisions、`SD-EVT-ACO-008`、`SD-TRN-ACO-006`を同時commitし、active session／speech occurrenceの既存pinを書き換えない。
 - Port resultは`SD-PER-EXE-002`のstable inbox keyで先に保存し、Acoustic／Execution Transitionを同じSnapshot revisionへ適用する。同値duplicateはno-op、異payloadはConflict quarantineとする。
 
 ### SD-PER-ACO-002 — DurableVoiceControlDecisionUoW
 
-candidate inbox、full payload fingerprint、temporal evidence digest、pin済みPolicy/binding、pure Decision、`SD-EVT-ACO-014`、processed ledger、suppression audit、必要なHome/Cancel outboxを一つのAcoustic expected-revision commitへ保存します。commit前crashは未処理、commit後crashは同じEvent/outbox identityを復元します。同candidate ID同fingerprint replayは保存済み結果を返し、同ID異fingerprintはConflict quarantine、outbox未送信はsame stable commandだけを再公開します。抑止auditは全文／Stop語を保存せずdigestとpinを保存します。
+candidate inbox、full payload fingerprint、temporal evidence digest、pin済みPolicy/binding、playback branchのExecution binding revision/digestまたはplayback外branchのInteraction owner read revision/digest、pure Decision、`SD-EVT-ACO-014`、processed ledger、suppression audit、必要なHome/exact-target Cancel outboxを一つのAcoustic expected-revision commitへ保存します。`ForwardCancel`ではexact Interaction ID、target basis、reason、evidence digest、`CancelRequested` payload fingerprintを全artifactで一致させます。commit前crashは未処理、commit後crashは同じEvent/outbox identityを復元します。同candidate ID同fingerprint replayは保存済み結果を返し、Interaction Stateが変化していてもtargetを再選択しません。同ID異fingerprintはConflict quarantine、outbox未送信はsame stable exact-target commandだけを再公開します。抑止auditは全文／Stop語を保存せずdigestとpinを保存します。0件選択はdurable `NoCancellableInteraction`でoutboxなし、複数／不整合はdurable invariantでoutboxなしです。
 
 ### SD-PRJ-ACO-001 — AcousticSessionProjection
 
-session／candidate correlation、logical source/profile/Policy versions、wake受理、immutable historical window、別のpost-wake collection interval、prompt outcome partition、guard、最初のretain subrangeの存在、command commit、discard reason、empty、Recovery／Quarantine、proof gate statusを投影します。raw audio、buffer pointer、canonical回答全文、登録Stop語、secret、transport IDを公開しません。
+session／candidate correlation、logical source/profile/Policy versions、wake受理、immutable historical window、別のpost-wake collection interval、prompt outcome partition、guard、最初のretain subrangeの存在、command commit、discard reason、empty、voice controlの`Forwarded(exact interaction) | Suppressed | NoCancellableInteraction | TemporalUnknown | InvariantViolation`、Recovery／Quarantine、proof gate statusを投影します。raw audio、buffer pointer、canonical回答全文、登録Stop語、secret、transport IDを公開しません。
 
 ### SD-FAIL-ACO-001 — AcousticFailure
 
@@ -608,6 +671,7 @@ AcousticFailure =
   TranscriptionFailed | EmptyCommand | OperationOutcomeUnknown |
   DuplicateOrConflictingResult | LateAfterTerminal |
   PlaybackBindingInvariantViolation | PolicyRevisionUnavailable |
+  CancellationTargetInvariantViolation |
   TemporalRelationUnknown | DeadlineElapsed | CancellationFailed |
   GraphContributionConflict | ExecutionV2Unavailable |
   ResourceQuarantined
@@ -639,6 +703,8 @@ deterministic cursor fixtureは少なくとも次を固定します。`H=[h0,wak
 prompt partition fixtureはdirect 5 terminal/progress variantsとOutcomeUnknown、query 7 variants、prior Started有無、cancel variantsをcross-productし、各caseがSafeGuardIssuer／DefiniteBypass／TypedCloseFailure／CustodyQuarantineのexact一つ、P output lease terminal、Cによるinput session terminalへ到達することを検証します。
 
 TC70初期releaseは、Stop語あり／なしの回答全文、自己音声、実利用者Stop、同時発話、近似語、遅延bufferを含む実測と、そのevidenceに対するOwner採否を必須release gateにします。数値、採否、passingをこの設計では記入しません。C210はrelease-readyを主張するprofileだけが同じ独立gateを満たし、未達／欠測はC210 profileを非readyにしますがTC70 gateを変更しません。製品名はproof/profile metadataに限定し、Core Policy分岐へ入れません。
+
+voice cancellationのtable fixtureは、(a) playback overlapかつInteraction subject一致、(b) non-Interaction subject、(c) subject／hint不一致、(d) playback外でcancellable 0／1／複数、(e) same candidate replay、(f) decision後に元target terminal＋別Interaction開始、(g) cancel/outbox/late raceを含みます。(a)と(d=1)だけが一件のexact `CancelRequested`を作り、0件は`NoCancellableInteraction`、複数／不整合はtyped invariantとなります。replay／late／raceは保存済みtargetを別のcurrent Interactionへ読み替えず、Homeの全fixtureはtarget解決を通りません。
 
 ## 明示的non-goals
 
