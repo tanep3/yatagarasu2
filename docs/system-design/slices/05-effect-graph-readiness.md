@@ -19,7 +19,10 @@ R3はこれらを新しいclosed State/Rule/Transition/UoWへまとめ、旧defi
 
 | State／fact | 唯一owner | 非owner |
 | --- | --- | --- |
-| R3 Graph/Occurrence/attempt/lease/guard/revocation/custody/inbox/outbox/migration control | SD-CTX-EXE-001 | Kernel、scheduler、dispatcher、Adapter、Projection、Python worker |
+| R3 Graph/Occurrence/attempt/lease/guard/revocation/custody/inbox/outbox | SD-CTX-EXE-001（Activate後だけ） | Kernel、scheduler、dispatcher、Adapter、Projection、Python worker |
+| R3 migration-attempt coordination record | SD-CTX-EXE-001（preactivationからterminalまで） | accepted V2 operational State、Kernel、Adapter |
+| active V2 data/tail/inbox/apply cursor | accepted SD-STA-EXE-002 | R3 coordination/control、Kernel、Adapter |
+| V2-for-R3 migration phase/gate/apply authorization/publication fence | SD-CTX-EXE-001 / SD-STA-EXE-005 | accepted V2 data/outbox State、STA-EXE-004、publisher、Adapter |
 | guardを発行する業務結果／Policy判断 | 各Behavior／operationの既存owner | Execution、Adapter |
 | capacity profile本文 | pin元ConfigurationまたはCapability Profile owner | Execution、scheduler |
 | 外部operation接続／buffer | Adapter operational state | Core WorldState |
@@ -29,36 +32,36 @@ mutable ownerはR3一つだけです。V2 snapshotはimmutable audit/rollback ar
 
 ## 3. Proposed domain contract
 
-- Commands: 新設なし。result/deadline/candidateをCommandへ昇格しない。
-- Events: topology commit、claim commit、deadline result、R3 activationをtyped owner Eventにする。
-- Rules: topology、readiness、resource claim、deadline、migrationをsnapshotからpureに決める。
+- Commands: `SD-CMD-EXE-001` cancel要求と`SD-CMD-EXE-002` migration advance要求を新設する。result/deadline/candidateはCommandへ昇格しない。
+- Events: topology commit、claim commit、deadline result、R3 activation、V2 publication fenceをtyped owner Eventにする。
+- Rules: topology、readiness、resource claim、deadline、migration、publication fenceをsnapshotからpureに決める。
 - Transitions: R3 State ownerだけがtopology、claim、result、activationを決定論的に変更する。
 - Effects: planned/dispatch値はimmutableで、attempt/generation/stable operation/intentへ固定する。
-- Ports: dispatch Effectを受け完全相関result Eventを返すだけで、ready、lease、成功を決めない。
+- Ports: commit済みEffect/publication claimだけを受け完全相関result Eventを返し、ready、lease、成功、fenceを決めない。
 - Projection: V2 inverse viewと診断だけでmutation/dispatch sourceにならない。
 
 ### Atomic Design Obligations
 
 | Obligation ID | Parent AC | Joint group | Parent contribution | Canonical Design IDs | Proof type | Negative case | Target profile / scope | Accounting status | Design status | Proof status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| DO-PER-003A | AC-PER-001 | JG-PER-R3-SCHEMA | full | SD-CTX-EXE-001, SD-MOD-EXE-006, SD-MOD-EXE-010, SD-STA-EXE-003, SD-MOD-EXE-008 | architecture/contract | accepted V1/V2 in-place変更、audit injectionとoperational mapを二重mutable正本化、R3を製品世代化 | Execution R3 | accounted-for | designed | planned |
+| DO-PER-003A | AC-PER-001 | JG-PER-R3-SCHEMA | full | SD-CTX-EXE-001, SD-MOD-EXE-006, SD-MOD-EXE-010, SD-STA-EXE-003, SD-STA-EXE-004, SD-MOD-EXE-008 | architecture/contract | accepted V1/V2 in-place変更、coordination recordへoperational ownershipを複製、audit injectionとoperational mapを二重mutable正本化、R3を製品世代化 | Execution R3 | accounted-for | designed | planned |
 | DO-PER-003B | AC-PER-001 | JG-PER-R3-TOPOLOGY | full | SD-MOD-EXE-008, SD-RUL-EXE-010, SD-TRN-EXE-019, SD-PER-EXE-011, SD-EVT-EXE-012 | pure/crash-recovery | unknown consumer／別Graph edge／未宣言issuer、DependencyTerminal cycle、既存consumer前提の遡及変更、digest encoding差 | initial+extensions topology | accounted-for | designed | planned |
 | DO-PER-003C | AC-PER-001 | JG-PER-R3-READY | full | SD-RUL-EXE-011, SD-MOD-EXE-008, SD-STA-EXE-003 | pure | dependency一件不足、Failed／Pending／Revoked／OutcomeUnknown guard、capacity/leaseをsemantic ready input化 | common semantic ready set | accounted-for | designed | planned |
 | DO-PER-003D | AC-PER-001 | JG-PER-R3-CYCLE | full | SD-RUL-EXE-010, SD-MOD-EXE-008, SD-FAIL-EXE-002 | pure | self-edge、dependency cycle、producer自身／descendant guard fact | topology validation | accounted-for | designed | planned |
 | DO-PER-003E | AC-PER-001 | JG-PER-R3-OCCURRENCE | full | SD-STA-EXE-003, SD-TRN-EXE-021, SD-PER-EXE-013 | pure/concurrency | 同値Effectを一Occurrenceへ畳む、旧attempt／generation resultを現workへ付替え | occurrence/result identity | accounted-for | designed | planned |
 | DO-PER-003F | AC-PER-001 | JG-PER-R3-DEADLINE | full | SD-EVT-EXE-014, SD-RUL-EXE-013, SD-TRN-EXE-021, SD-PER-EXE-013 | pure/concurrency/crash-recovery | deadline/target attempt・generation・timer epoch不一致、Elapsedをtarget未適用／停止へ昇格、二winner | common deadline | accounted-for | designed | planned |
-| DO-PER-003G | AC-PER-001 | JG-PER-R3-MIGRATION | full | SD-CMD-EXE-002, SD-EVT-EXE-018, SD-MOD-EXE-010, SD-RUL-EXE-014, SD-RUL-EXE-017, SD-RUL-EXE-018, SD-TRN-EXE-022, SD-TRN-EXE-025, SD-PER-EXE-014, SD-EVT-EXE-015, SD-PRJ-EXE-002, SD-PRF-EXE-002, SD-PRF-EXE-004 | architecture/crash-recovery | injection validationだけcommit、operational map/occupancyなしactivation、closed表外edge、RetrySameCut dead-end | atomic active V2→R3 activation | accounted-for | designed | planned |
+| DO-PER-003G | AC-PER-001 | JG-PER-R3-MIGRATION | full | SD-STA-EXE-004, SD-STA-EXE-005, SD-CMD-EXE-002, SD-EVT-EXE-018, SD-EVT-EXE-019, SD-EVT-EXE-020, SD-EVT-EXE-021, SD-MOD-EXE-010, SD-MOD-EXE-011, SD-MOD-EXE-012, SD-RUL-EXE-014, SD-RUL-EXE-017, SD-RUL-EXE-018, SD-RUL-EXE-020, SD-RUL-EXE-021, SD-RUL-EXE-022, SD-TRN-EXE-022, SD-TRN-EXE-025, SD-TRN-EXE-027, SD-TRN-EXE-028, SD-TRN-EXE-029, SD-PER-EXE-014, SD-PER-EXE-018, SD-PER-EXE-019, SD-PER-EXE-020, SD-EVT-EXE-015, SD-PRJ-EXE-002, SD-PRF-EXE-002, SD-PRF-EXE-004 | architecture/crash-recovery | accepted V1→V2 pause lawをactive V2→R3へ流用、RequestPause片側commit、pause/dispatch/apply/publication race、Abort catch-up gap、active publication claimのActivate | migration attempt + V2 operational/publication control + phase-specific handoff | accounted-for | designed | planned |
 | DO-PER-003H | AC-PER-001 | JG-PER-REVIEW-CLOSURE | full | SD-MOD-EXE-006, SD-PRF-EXE-002, SD-PRF-EXE-003 | architecture/contract | transitive dependency definition欠落、Pilot partial一件だけでcovered、未accepted／self依存tranche | review integrity | accounted-for | designed | planned |
 | DO-PER-004A | AC-PER-002 | JG-PER-R3-RESOURCE-KEY | full | SD-MOD-EXE-007, SD-MOD-EXE-009, SD-STA-EXE-003, SD-RUL-EXE-018, SD-PRF-EXE-004 | pure/contract | V2 active leaseをoccupancy外に置く、同physical identityを異profileで別resource扱い、Adapter自己申告idempotency | physical identity / trusted evidence | accounted-for | designed | planned |
 | DO-PER-004B | AC-PER-002 | JG-PER-R3-RESOURCE-ALGEBRA | full | SD-MOD-EXE-007, SD-RUL-EXE-012, SD-RUL-EXE-019, SD-TRN-EXE-026, SD-PER-EXE-017, SD-PRF-EXE-003 | pure/concurrency | named continuation Transitionなし、replayでuse count二重増、holder terminalとrelease別commit、全holder terminal前release | conflict / named interval algebra | accounted-for | designed | planned |
 | DO-PER-004C | AC-PER-002 | JG-PER-R3-CLAIM-ATOMICITY | full | SD-RUL-EXE-012, SD-TRN-EXE-020, SD-PER-EXE-012, SD-EVT-EXE-013 | concurrency/crash-recovery | multi-claim subset、same-key二winner、phantom insert、global revisionで非競合claim直列化 | per-resource occupancy CAS | accounted-for | designed | planned |
-| DO-PER-004D | AC-PER-002 | JG-PER-R3-DISPATCH | full | SD-MOD-EXE-009, SD-STA-EXE-003, SD-EVT-EXE-013, SD-TRN-EXE-020, SD-TRN-EXE-023, SD-RUL-EXE-012, SD-RUL-EXE-015, SD-PER-EXE-012, SD-PER-EXE-015, SD-PRF-EXE-003 | concurrency/crash-recovery | Attempt/Eventへevidence tuple未保存、capacityのみCASしdispatch profile race見逃し、V2 outbox class再推測 | durable dispatch/evidence | accounted-for | designed | planned |
-| DO-PER-004E | AC-PER-002 | JG-PER-R3-RESULT | full | SD-TRN-EXE-021, SD-PER-EXE-013, SD-FAIL-EXE-002 | concurrency/crash-recovery | result_event_id差でduplicateを別winner化、same canonical key異payloadでwinner上書き、lease二重解放 | canonical inbox identity | accounted-for | designed | planned |
+| DO-PER-004D | AC-PER-002 | JG-PER-R3-DISPATCH | full | SD-MOD-EXE-009, SD-STA-EXE-003, SD-STA-EXE-005, SD-EVT-EXE-013, SD-EVT-EXE-021, SD-TRN-EXE-020, SD-TRN-EXE-023, SD-TRN-EXE-029, SD-RUL-EXE-012, SD-RUL-EXE-015, SD-RUL-EXE-022, SD-PER-EXE-012, SD-PER-EXE-015, SD-PER-EXE-020, SD-PRF-EXE-003 | concurrency/crash-recovery | V2Running DNSからre-arm不可、running/aborted法則差、parallel re-arm二winner、pause race、TransportAcked/Unknown/HandedOff re-arm | durable dispatch/evidence/publication generation fence | accounted-for | designed | planned |
+| DO-PER-004E | AC-PER-002 | JG-PER-R3-RESULT | full | SD-STA-EXE-003, SD-MOD-EXE-011, SD-EVT-EXE-019, SD-RUL-EXE-020, SD-TRN-EXE-021, SD-TRN-EXE-027, SD-PER-EXE-013, SD-PER-EXE-018, SD-FAIL-EXE-002 | concurrency/crash-recovery | parallel append同sequence、append crashでwinner/tail片側、duplicate/conflictでtail進行、OpenBarrier tail CASなし | canonical ingress tail / catch-up | accounted-for | designed | planned |
 | DO-PER-004F | AC-PER-002 | JG-PER-R3-RECOVERY | full | SD-GPH-EXE-001, SD-CMD-EXE-001, SD-EVT-EXE-017, SD-RUL-EXE-016, SD-TRN-EXE-021, SD-TRN-EXE-024, SD-PER-EXE-011, SD-PER-EXE-012, SD-PER-EXE-013, SD-PER-EXE-016, SD-STA-EXE-003 | concurrency/crash-recovery | cancel/query/reconcileをimperative送信、RecoveryPrivilegedをnormal claim/UoW bypass、subset custody | recovery occurrence/custody | accounted-for | designed | planned |
 | DO-PER-004G | AC-PER-002 | JG-PER-R3-MIGRATION | full | SD-RUL-EXE-014, SD-RUL-EXE-018, SD-PER-EXE-014, SD-PRF-EXE-002, SD-PRF-EXE-004, SD-PRJ-EXE-002 | architecture/crash-recovery | V2 active lease reservationをoccupancyへ写さずR3 claim許可、empty claimsをnative invariantで拒否、pending work audit-only | V2→R3 operational resource migration | accounted-for | designed | planned |
 | DO-PER-004H | AC-PER-002 | JG-PER-TRANCHE-DAG | full | SD-MOD-EXE-006, SD-PRF-EXE-003 | architecture/contract | same-WP依存を過剰package扱い、tranche self/cycle、review-readyが未accepted dependency参照 | expansion checker | accounted-for | designed | planned |
 
-新規canonical definitionは46件です。R3 definitionのdirect dependencyからaccepted dependencyのdirect dependencyまでを
+新規canonical definitionは62件です。R3 definitionのdirect dependencyからaccepted dependencyのdirect dependencyまでを
 再帰展開した完全closureをcontent-addressed review inputへ固定し、checkerが全source completeness、status、row deletion、self-referenceを検証します。
 
 ## 4. Effect Graph
@@ -102,7 +105,7 @@ storage engine、transaction API、process/IPC、fairness/priority、capacity数
 ## 7. Testable acceptance criteria
 
 1. 2 parent ACが16 DOへ完全分解され、各DOはexact-one assignment、full/designed/plannedを持つ。
-2. accepted V1/V2のdefinition hash/approvalが不変で、46 R3 draft definitionだけが新規review対象である。
+2. accepted V1/V2のdefinition hash/approvalが不変で、62 R3 draft definitionだけが新規review対象である。
 3. 全causal edge、consumer/issuer/source/statusがclosedで、cycle/self-causal/unknown ref/既存consumer遡及変更を全体拒否する。
 4. 全dependency/guard前はnot-ready。同値Effect二件は別identity。capacity/lease/resource順はsemantic readinessへ影響しない。
 5. physical identityとprofile evidenceを分離し、同identity異profileはmismatch、全algebra/named/recovery claimをpure fixtureで証明する。
@@ -111,12 +114,19 @@ storage engine、transaction API、process/IPC、fairness/priority、capacity数
 8. deadline双方のattempt/generation/timer identityが完全相関し、normal/deadline resultが一winner、late/conflictを隔離する。
 9. named use-count Ruleが専用Transition/UoWを通り、claim/result composition内でreplay/holder terminal/releaseをCASする。
 10. active V2全store/variant/fieldをaudit injectionと一意operational mapへ写し、pending workの二重mutable表現を作らない。
-11. activationがinjection validation、operational maps/occupancy/evidence、control/reducerを一CASし、exhaustive migration表外edgeなし。
-12. tranche cycle fixtureがstatus/orderで先に落ちずproduction checkerのcycle branchへ到達し、self/unacceptedも拒否する。
-13. covered ACの実slice copyをpartial siblingへ変異し、production completion checkerがaccepted non-Pilot full set不足を拒否する。
-14. dependency manifestがdraft/accepted全sourceの再帰的canonical reference closure、status、row deletion、self-referenceを検証する。
-15. review inputsのhash/WORKTREE再生成一致、obligation→definition closure、`git diff --check`がPASSする。
-16. proofはplannedのまま、production/passing/release/FIXを主張しない。FIXは未完了packageを理由にexpected FAILする。
+11. STA004だけがattempt coordination、accepted STA002だけがV2 data/tail/inbox/cursor/outbox、STA005だけがV2-for-R3 phase/gate/apply authorization/publication fenceを所有する。
+12. RequestPauseはattempt作成とnew V2PauseRequestedForR3 gate-close/apply-stopを原子commitし、racing V2 dispatch/normal applyとexact一winnerになる。
+13. Abortはattempt Aborted+V2CatchingUpAfterAbortForR3を一commitし、exact-next V2 reducer catch-up後のexact-tail CASだけでgateを開く。
+14. activationがV2PausedForR3+CandidateValidated+latest V2 tuple+全closed publication claimをCASし、HandedOffToR3+Activated+R3 Stateを一括commitする。
+15. Abort後はPER019のV2 catch-up、Activate後だけR3 catch-upを使い、accepted V1→V2 pause/abort Decisionを流用しない。
+16. R3Active後はcanonical tail key absence+revision/sequence/digest CASでappendし、duplicate/conflictはtail不変、snapshotは非ownerとする。
+17. R3 catch-up中new ingress tailを追随し、prefix==tailのexact tuple CAS時だけgateを開く。
+18. tranche cycle fixtureがstatus/orderで先に落ちずproduction checkerのcycle branchへ到達し、self/unacceptedも拒否する。
+19. covered ACの実slice copyをpartial siblingへ変異し、production completion checkerがaccepted non-Pilot full set不足を拒否する。
+20. dependency manifestがdraft/accepted全sourceの再帰的canonical reference closure、status、row deletion、self-referenceを検証する。
+21. review inputsのhash/WORKTREE再生成一致、obligation→definition closure、`git diff --check`がPASSする。
+22. claim identityは(intent,generation)、old generation immutable、running/aborted Openのlatest DefinitelyNotSentだけ同一法則でg+1 re-arm可とし、parallel/pause race一winner、他closed statusは拒否する。
+23. proofはplannedのまま、production/passing/release/FIXを主張しない。FIXは未完了packageを理由にexpected FAILする。
 
 ## 8. Open questions and non-goals
 
