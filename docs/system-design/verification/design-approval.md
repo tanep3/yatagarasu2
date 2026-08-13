@@ -1,24 +1,31 @@
-# Design Approval Manifest
+# Design Approval Aggregation Manifest
 
-canonical contractの`accepted`を、同じ設計内容に対する独立審査とPrimary承認へ結び付けます。
-Pilot C完了後に三本を同一revisionで再審査するまで、このManifestは実行不能です。
+canonical contractの`accepted`を、審査対象のDesign ID、Version、canonical ref、definition hash、独立審査、Primary承認へ結び付けます。このManifestはglobal current system-design hashを承認単位にしません。
 
 | Field | Value |
 | --- | --- |
-| System design revision | `unfixed` |
-| Status | `draft-not-runnable` |
+| Manifest version | `1` |
+| Status | `active` |
+| Aggregation | `append-only-content-addressed-approval-sets` |
 
-| Pilot | Status | Design IDs Ref | Design IDs SHA-256 | Architecture review Ref | Review SHA-256 | Primary approval Ref | Approval SHA-256 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Pilot A | pending | — | — | — | — | — | — |
-| Pilot B | pending | — | — | — | — | — | — |
-| Pilot C | pending | — | — | — | — | — | — |
+| Approval set | Scope | Status | Design IDs Ref | Design IDs SHA-256 | Definitions Ref | Definitions SHA-256 | Architecture review Ref | Review SHA-256 | Primary approval Ref | Approval SHA-256 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| APR-PILOT-ABC-EE8F532A | Pilot A/B/C integrated change-set | accepted | docs/system-design/verification/approvals/SD-REV-PILOT-C-001-design-ids.txt | sha256:bb9634eedb025fe747e4e03829896861f8d2e94974431de2b5b5246d9cafd7b3 | docs/system-design/verification/approvals/SD-REV-PILOT-C-001-definitions.tsv | sha256:89c749815303b3aa6ca9e2bcf914dc36fa411c27fbb18f057ab84fb3cfea1fd9 | docs/system-design/verification/approvals/SD-ARCH-REVIEW-PILOTS-2026-08-13.md | sha256:47d2c87240afeec151860f3e35bfe847d6feb52c963c4e9a00887dc680cf329c | docs/system-design/verification/approvals/SD-OWNER-APPROVAL-PILOTS-2026-08-13.md | sha256:c9af5c289a9a7d566339cf02739785d04859ace6c557be3d3afca899bdb88674 |
 
-各Refは`verification/approvals/`配下のversion管理されたArtifactで、対象Pilot、現在の
-System design revision、判定、未解決Critical／High件数を記録します。Primary承認Artifactも
-同じrevisionを参照します。設計本体を変更するとrevisionが変わるため、古い承認は自動的に無効です。
-各Artifactには`Artifact type`、`Pilot`、`System design revision`を型付きfieldとして持たせ、
-Reviewは`Verdict=PASS`と`Unresolved Critical / High=0`、Primary側は
-`Primary approval=accepted`を持たせます。各Pilotは審査対象Design ID一覧とそのhashを持ち、
-Review／Primary Artifactも同じ一覧を参照します。三本の一覧の和集合をslice参照Design ID集合と
-完全照合します。同じRefの複数Pilotへの再利用は禁止します。
+## Aggregation rules
+
+- `Approval set`はDesign IDs fileとDefinitions fileの実内容をこの順に連結してSHA-256したcombined content identityの先頭8桁を大文字化したsuffixを持つ。ID、Version、ref、definition hashのいずれを変えても別Approval setになる。
+- 各Definitions Refは、Design ID、Version、canonical ref、definition block SHA-256を一行ずつ持つ。
+- ReviewとPrimary Artifactは同じApproval set、Design IDs Ref/hash、Definitions Ref/hashを参照する。
+- Definitions payloadは各ArtifactのreachableなSource commitから再生成でき、保存hashとcurrent canonical definitionの双方に一致しなければならない。
+- review履歴の機械再現はSource commitがrepositoryからreachableであることを前提とする。commit欠落時は承認済みと推測せず、checkerがApproval setとcommitを明示して停止する。
+- accepted trancheのReviewとPrimary Artifactは、同じ16列Obligation Review Ref/hashと、Tranche ID、Package ID exact set、親AC exact set、obligation semantic hash exact set、Approval set definitions exact setを一つのcontent-addressed Tranche Scope Refへ固定する。obligation reviewはreview Source commitとcurrentの双方から再生成一致を要求し、別trancheが無関係な既存Approval setを再利用することを禁止する。
+- obligationが参照する全Design IDはそのtrancheのApproval set definitionsに含まれなければならない。integrated/common lawを同じreviewで固定できるよう余分なapproved definitionは許容するが、余分なdefinitionもApproval set identityとnon-driftの対象から外れない。
+- 既存行、既存Artifact、既存Design ID file、既存Definitions fileへID／Versionを追加しない。後続trancheは新しいcontent-addressed行をappendする。
+- HEADに存在する過去Approval setのManifest行と参照Artifactはbyte-for-byte不変とし、削除・置換をcheckerが拒否する。
+- verification revisionはrootのmachine-readable TSVと`approvals/`直下のdefinition／obligation TSVも含み、承認入力の変更を検査revisionへ反映する。
+- 同じDesign ID/versionを複数Approval setが参照してよいが、異なるdefinition hashを同じDesign ID/versionへ承認できない。
+- 現在のauthorityに新しい`accepted` contractを加える場合、system-design FIXまでに少なくとも一つのaccepted Approval setがその現在のID/version/ref/hashを含まなければならない。
+- `draft` contractはapproval coverage対象外であり、承認Artifactだけで`accepted`へ昇格しない。
+
+Pilot checkerはPilot approval setのnon-driftだけを検査し、後続accepted contract追加でPilot承認を拡張しません。system-design FIX checkerは全accepted canonical definitionがManifestの和集合に含まれることを検査します。

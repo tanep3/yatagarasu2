@@ -5,6 +5,16 @@ repo_root="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$repo_root"
 
 docs/system-design/verification/check-design-pilot-gate.sh
+docs/system-design/verification/check-design-approvals.sh --require-all-accepted
+docs/system-design/verification/check-ac-expansion.sh
+
+pending_packages="$(awk -F '\t' 'NR > 1 && $6 != "accepted" { print $1 "=" $6 }' \
+  docs/system-design/verification/expansion-packages.tsv)"
+if test -n "$pending_packages"; then
+  echo 'system-design FIX pending: every expansion package must be accepted' >&2
+  printf '%s\n' "$pending_packages" >&2
+  exit 1
+fi
 
 field_value() {
   local file="$1" field="$2"
@@ -16,7 +26,10 @@ field_value() {
   ' "$file"
 }
 
-test -f docs/system-design/system-design-guide.md
+if ! test -f docs/system-design/system-design-guide.md; then
+  echo 'system-design FIX pending: docs/system-design/system-design-guide.md is not complete' >&2
+  exit 1
+fi
 rg -q '\]\([^)]*contracts/[^#)]+#sd-[a-z]+-[a-z]+-[0-9]+' docs/system-design/system-design-guide.md
 
 awk -F '|' '

@@ -115,13 +115,28 @@ Design Pilot Gate通過後も、Proof=`passing`でない義務を実装済み・
 
 ## 現在の判定
 
-| Pilot | Architecture review | Design slice | Evidence | 判定 |
+| Pilot | Architecture review | Design slice | Proof | 判定 |
 | --- | --- | --- | --- | --- |
-| Pilot A | current change-set再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
-| Pilot B | current change-set再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
-| Pilot C | 再審査待ち | 改訂済み・未承認 | planned／blocked-by-spike | 保留 |
+| Pilot A | current integrated change-set PASS | accepted | planned／blocked-by-spike | PASS |
+| Pilot B | current integrated change-set PASS | accepted | planned／blocked-by-spike | PASS |
+| Pilot C | current integrated change-set PASS | accepted | planned／blocked-by-spike | PASS |
 
-Pilot A/B/Cは共通Execution vocabulary、Guard Fact、revision-use、runtime BindingUse、Recovery custodyを変更する[SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)の同一revisionで再審査します。旧Pilot A/Bの単独PASSはhistorical evidenceでありcurrent change-setの承認ではありません。
-構造索引の機械PASSは意味整合、Atomic Design Obligationの十分性、architecture review PASSを
-証明しません。Pilot Cの再審査とPrimary承認、参照canonical contractの`accepted`昇格が終わるまで、
-三本全体のDesign Pilot GateをPASSと表示しません。
+Design Pilot Gate: **PASS（2026-08-13）**
+
+判定根拠は次のとおりです。
+
+- [SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)の519 Design IDはauthorityのaccepted集合と完全一致する。
+- reviewed content revisionは`sha256:f0c85ec41234afc5399ba4e6d1ce464b1ae4bca30050a2f240ca5ec09ef60705`である。
+- 独立architecture challengerはcurrent integrated change-setをCritical 0／High 0でPASSとした。
+- Primary／Ownerは2026-08-13に「レビュー通過、問題なし、先へ」と承認した。
+- 三sliceの184 atomic obligationはAccounting=`accounted-for`、Design=`designed`で、Proofは`planned`または`blocked-by-spike`である。
+- Gate対象obligationは`SD-REV-PILOT-C-001-obligations.tsv`の固定184行だけである。このsnapshotはroutingだけでなくJoint group、Parent contribution、meaning hash、Design IDs、proof type、negative case、target scope、Accounting／Design／Proof／blockerをreview Source commitから固定する。current行とのmeaning non-driftも必須で、後続slice、tranche、Design IDの追加はこの承認範囲を変更しない。
+- Pilot snapshotは後続accepted trancheと同じObligation Review schema／source-current再生成法則を使う。各DOのDesign IDはPilot Approval setの部分集合であり、共通lawとして同時審査された余分definitionsはscopeへ固定したうえで許容する。
+- 構造検査、Design ID/version/definition hash、承認Artifactはappend-only
+  [Design Approval Aggregation Manifest](design-approval.md)、`check-design-approvals.sh`、
+  `check-design-pilot-gate.sh`で照合する。後続accepted contractは別Approval setへ追加され、Pilot集合を拡張しない。
+- `check-design-pilot-gate.sh`は固定subsetの判定前に`check-system-design.sh`を実行し、global structural invariantの退行を見逃さない。
+
+このPASSは、[全214 AC横展開](ac-expansion-plan.md)の開始だけを許可します。Proof=`planned`／
+`blocked-by-spike`を`passing`へ昇格せず、production code、実機成立、releaseを承認しません。
+Implementation / Evidence Gateは未評価です。

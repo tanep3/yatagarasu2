@@ -109,11 +109,14 @@ canonical Design IDへリンクし、新しいpayload、owner、guard、要件�
 
 ## 現在のGate
 
-現在は「system design pilot」段階です。三本の縦断設計がDesign Pilot Gateを通るまで、
-全214受入条件への構造横展開とcrate/module固定を開始しません。Gate通過後に全system designを
-横展開・FIXし、その後にproduction implementationへ進みます。実装とrelease証拠の合否は
-Implementation / Evidence Gateで別に管理します。
+三本の縦断設計は2026-08-13に[Design Pilot Gate](verification/pilot-gate.md)を通過しました。
+全214受入条件への構造横展開は
+[AC横展開実施契約](verification/ac-expansion-plan.md)に従って開始できます。これはproduction
+implementation、実機成立、releaseを承認するものではありません。全system designを横展開・FIXした後に
+production implementationへ進み、実装とrelease証拠の合否はImplementation / Evidence Gateで別に管理します。
+accepted contractは[Design Approval Aggregation Manifest](verification/design-approval.md)の
+content-addressed subsetへID／Version／definition hash単位で追加し、過去のPilot承認範囲を拡張しません。
 
-Pilot Aは[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)、Pilot Bは[有限Conversation・外部Thread・SemanticMemoryのcanonical contract](contracts/finite-conversation.md)と[Pilot B slice](slices/02-finite-conversation.md)、Pilot Cは[設定適用契約](contracts/configuration-application.md)、[runtime binding契約](contracts/runtime-binding.md)、[routing契約](contracts/routing-policy.md)、[migration／restart契約](contracts/migration-and-restart.md)と[Pilot C slice](slices/03-configuration-capability.md)で設計します。三sliceともcurrent change-setの再審査待ちであり、構造索引PASSだけでDesign Pilot Gateを完了表示しません。
+Pilot Aは[カメラ移動・撮影・画像解釈のcanonical contract](contracts/camera-observation.md)と[Pilot A slice](slices/01-camera-observation.md)、Pilot Bは[有限Conversation・外部Thread・SemanticMemoryのcanonical contract](contracts/finite-conversation.md)と[Pilot B slice](slices/02-finite-conversation.md)、Pilot Cは[設定適用契約](contracts/configuration-application.md)、[runtime binding契約](contracts/runtime-binding.md)、[routing契約](contracts/routing-policy.md)、[migration／restart契約](contracts/migration-and-restart.md)と[Pilot C slice](slices/03-configuration-capability.md)で設計しました。三sliceと共通contractはcurrent change-setの同一revisionで審査・承認済みです。
 
 技術spike待ちのIPC、process数、storage engine、Web更新transport、Skill権限強制方式、実測数値は、仮の既定値として設計へ紛れ込ませません。

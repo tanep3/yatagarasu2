@@ -5,10 +5,10 @@
 - Requirement: 62件
 - Acceptance Criteria: 214件
 - Source locator: `4df6fb1:<file>:<line>`
-- Accounting status: Pilot A/B対象92件は`accounted-for`、残り122件は`inventoried`
-- Coverage status: Pilot A/B対象92件は`partial`、残り122件は`unmapped`
+- Accounting status: Pilot A/B/C対象128件は`accounted-for`、残り86件は`inventoried`
+- Coverage status: Pilot A/B/C対象128件は`partial`、残り86件は`unmapped`
 
-`inventoried`は入口に存在することだけを意味し、`accounted-for`は少なくとも一つのAtomic Design Obligationへ接続されたことだけを意味します。`partial`は親ACに未設計の兄弟義務または未完了Pilotが残る状態であり、設計済み・実装済み・試験済みを意味しません。要件基準を変更した場合は、要件変更またはAccepted ADRとともにこの索引を再生成し、差分を確認します。
+`inventoried`は入口に存在することだけを意味し、`accounted-for`は少なくとも一つのAtomic Design Obligationへ接続されたことだけを意味します。`partial`は親ACに未設計の兄弟義務または横展開で確認すべき残余がある状態であり、実装済み・試験済みを意味しません。Pilot契約のaccepted昇格だけで親ACを`covered`へ変えず、[AC横展開実施契約](ac-expansion-plan.md)で全兄弟義務を再監査します。要件基準を変更した場合は、要件変更またはAccepted ADRとともにこの索引を再生成し、差分を確認します。
 
 | Requirement | AC | Source locator | Obligation group | Accounting status | Coverage status |
 | --- | --- | --- | --- | --- | --- |

@@ -1,0 +1,9 @@
+Package ID	AC prefixes	Dependencies	Parent AC tranche limit	Obligation tranche limit	Review status
+WP-01	ACOU,ARC,EFX,PER,FUT	—	12	30	pilot-partial
+WP-02	PRD,FR	WP-01	12	30	pilot-partial
+WP-03	PHY,QPR,NFR	WP-01,WP-02	12	30	pilot-partial
+WP-04	API,DAT,SCP,NET	WP-01	12	30	pilot-partial
+WP-05	CNV,QLI,SET,OUT	WP-01,WP-04	12	30	pilot-partial
+WP-06	MEM,AGT,SKL,SEC	WP-01,WP-04,WP-05	12	30	pilot-partial
+WP-07	CFG	WP-01,WP-04	12	30	pilot-partial
+WP-08	OPS,LOG	WP-01,WP-02,WP-03,WP-04,WP-05,WP-06,WP-07	12	30	pilot-partial

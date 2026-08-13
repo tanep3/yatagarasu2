@@ -1,13 +1,22 @@
 # SD-REV-PILOT-C-001 — Pilot C統合変更集合
 
-このArtifactは、Pilot C再審査へ投入するcanonical Design ID集合とsystem-design content revisionを固定します。architecture承認、contractのaccepted昇格、実装証拠ではありません。
+このArtifactは、Pilot A/B/Cの統合審査対象となったcanonical Design ID集合とsystem-design content revisionを固定します。architecture承認とPrimary承認は[Design Approval Manifest](../design-approval.md)へ分離し、実装証拠は主張しません。
 
 ## 固定revision
 
 - 要件基準commit: `4df6fb1`
 - system-design content revision: `sha256:f0c85ec41234afc5399ba4e6d1ce464b1ae4bca30050a2f240ca5ec09ef60705`
 - structural verification policy revision: `sha256:617f6a338fba5b3a71a9a11dee6eade42204e57454df947e7f6d2904ac87681a`
-- lifecycle: `review-pending`
+- lifecycle: `accepted`
+- approval set: `APR-PILOT-ABC-EE8F532A`
+- Design IDs Ref: `docs/system-design/verification/approvals/SD-REV-PILOT-C-001-design-ids.txt`
+- Design IDs SHA-256: `sha256:bb9634eedb025fe747e4e03829896861f8d2e94974431de2b5b5246d9cafd7b3`
+- Definitions Ref: `docs/system-design/verification/approvals/SD-REV-PILOT-C-001-definitions.tsv`
+- Definitions SHA-256: `sha256:89c749815303b3aa6ca9e2bcf914dc36fa411c27fbb18f057ab84fb3cfea1fd9`
+- Pilot Obligations Ref: `docs/system-design/verification/approvals/SD-REV-PILOT-C-001-obligations.tsv`
+- Pilot Obligations SHA-256: `sha256:8019edd384e1fdbaa78072f05f3a4465ff4bed54e48cbdc103a8efe37ed9fc50`
+- Tranche Scope Ref: `docs/system-design/verification/approvals/TR-PILOT-ABC-scope.tsv`
+- Tranche Scope SHA-256: `sha256:0c48ae0bb74a06f90de4986884c1965e45b4a697f16f8f573c37c63eea24cf43`
 
 ## 集合の境界
 
@@ -600,9 +609,22 @@ QuarantinedはBusy／Quarantinedとして扱います。missing／Superseded／B
 自動生成を禁止し、同一Absent keyの並行admission、同値replay、profile supersede競合を同じruntime／RCP／
 EXE revision境界で一意に解決します。
 
+## 受理記録
+
+- 審査対象commit: `1eafd3deab687e29c3d81609ae0959823e246165`
+- 独立architecture challenger: 2026-08-13、Critical 0／High 0、PASS
+- Primary／Owner承認: 2026-08-13、「レビュー通過、問題なし、先へ」
+- canonical lifecycle: この集合と一致する519 Design ID/version/definition hashを`accepted`へ昇格
+- Design Pilot Gate: PASS
+- Implementation / Evidence Gate: 未評価
+
+acceptedへのlifecycle変更は、固定revisionで審査されたcanonical定義の意味を変更しません。
+受理ArtifactはIDだけでなくVersion、canonical ref、定義block hashを固定し、
+[Design Approval Manifest](../design-approval.md)がappend-only approval setとして集約します。
+
 ## 除外
 
 - verification表やscenarioが新しいDomain意味を定義すること
-- architecture review PASSまたはPrimary承認の推測
+- 記録にないarchitecture review PASSまたはPrimary承認の推測
 - production implementation、実機、外部runtime、測定Proof
 - このrevision以外の同名Design ID定義

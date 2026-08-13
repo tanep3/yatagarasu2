@@ -4,101 +4,80 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$repo_root"
 
+pilot_set=APR-PILOT-ABC-EE8F532A
+pilot_tranche=TR-PILOT-ABC
+pilot_ids=docs/system-design/verification/approvals/SD-REV-PILOT-C-001-design-ids.txt
+pilot_definitions=docs/system-design/verification/approvals/SD-REV-PILOT-C-001-definitions.tsv
+pilot_obligations=docs/system-design/verification/approvals/SD-REV-PILOT-C-001-obligations.tsv
+pilot_obligations_sha=sha256:8019edd384e1fdbaa78072f05f3a4465ff4bed54e48cbdc103a8efe37ed9fc50
+pilot_scope=docs/system-design/verification/approvals/TR-PILOT-ABC-scope.tsv
+pilot_scope_sha=sha256:0c48ae0bb74a06f90de4986884c1965e45b4a697f16f8f573c37c63eea24cf43
+assignments=docs/system-design/verification/obligation-assignments.tsv
+tranches=docs/system-design/verification/expansion-tranches.tsv
+
+docs/system-design/verification/check-design-approvals.sh
 docs/system-design/verification/check-system-design.sh
-
-for slice in \
-  docs/system-design/slices/01-camera-observation.md \
-  docs/system-design/slices/02-finite-conversation.md \
-  docs/system-design/slices/03-configuration-capability.md; do
-  if ! test -f "$slice"; then
-    echo "Design Pilot Gate pending: missing $slice" >&2
-    exit 1
-  fi
-done
-
-awk -F '|' '
-  /^\| DO-/ {
-    for (i = 2; i <= 12; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
-    if ($10 != "accounted-for" || $11 != "designed" ||
-        $12 !~ /^(planned|implemented|passing|blocked-by-spike)$/) {
-      print "Design Pilot Gate pending: " $2 " -> " $10 "/" $11 "/" $12 > "/dev/stderr"; exit 1
-    }
-  }
-' docs/system-design/slices/*.md
 
 check_tmp="$(mktemp -d)"
 trap 'rm -r "$check_tmp"' EXIT
 
-rg -o --no-filename 'SD-[A-Z]+-[A-Z]+-[0-9]+' docs/system-design/slices/*.md \
-  | sort -u > "$check_tmp/referenced-design"
-awk -F '|' '
-  /^\| SD-/ {
-    for (i = 2; i <= 10; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
-    if ($9 == "accepted") print $2
-  }
-' docs/system-design/00-design-authority.md | sort -u > "$check_tmp/accepted-design"
-comm -23 "$check_tmp/referenced-design" "$check_tmp/accepted-design" > "$check_tmp/not-accepted"
-if test -s "$check_tmp/not-accepted"; then
-  echo 'Design Pilot Gate pending: referenced canonical contracts are not accepted' >&2
+test "sha256:$(sha256sum "$pilot_obligations" | awk '{print $1}')" = "$pilot_obligations_sha"
+test "sha256:$(sha256sum "$pilot_scope" | awk '{print $1}')" = "$pilot_scope_sha"
+test "$(tail -n +2 "$pilot_obligations" | wc -l)" -eq 184
+tail -n +2 "$pilot_obligations" | cut -f1 | sort > "$check_tmp/pilot-obligation-ids"
+sort -u "$check_tmp/pilot-obligation-ids" > "$check_tmp/pilot-obligation-ids-unique"
+diff -u "$check_tmp/pilot-obligation-ids" "$check_tmp/pilot-obligation-ids-unique"
+
+# Future tranche/slice rows are outside this Gate. Review-time and current meaning must both match
+# the immutable 184-row Pilot snapshot, including routing, obligation semantics and proof design.
+pilot_source_commit=1eafd3deab687e29c3d81609ae0959823e246165
+docs/system-design/verification/obligation-review-set.sh \
+  "$assignments" "$pilot_tranche" "$pilot_source_commit" > "$check_tmp/reviewed-pilot-obligations"
+diff -u "$pilot_obligations" "$check_tmp/reviewed-pilot-obligations"
+docs/system-design/verification/obligation-review-set.sh \
+  "$assignments" "$pilot_tranche" WORKTREE > "$check_tmp/current-pilot-obligations"
+diff -u "$pilot_obligations" "$check_tmp/current-pilot-obligations"
+
+> "$check_tmp/pilot-design-refs-all"
+while IFS=$'\t' read -r obligation_id parent_ac package_id tranche_id storage_ref meaning_sha joint_group contribution design_refs proof_type negative_case target_scope accounting design proof blocker; do
+  test "$tranche_id" = "$pilot_tranche"
+  storage_file="${storage_ref%%::*}"
+  storage_id="${storage_ref##*::}"
+  test "$storage_id" = "$obligation_id"
+  test -f "$storage_file"
+  if test "$accounting" != accounted-for || test "$design" != designed || \
+     ! printf '%s\n' "$proof" | rg -q '^(planned|implemented|passing|blocked-by-spike)$'; then
+    echo "Design Pilot Gate pending: $obligation_id -> $accounting/$design/$proof" >&2
+    exit 1
+  fi
+  printf '%s\n' "$design_refs" | tr ',' '\n' | sed 's/^[[:space:]]*//' \
+    >> "$check_tmp/pilot-design-refs-all"
+done < <(tail -n +2 "$pilot_obligations")
+
+sort -u "$check_tmp/pilot-design-refs-all" > "$check_tmp/pilot-design-refs"
+sort -u "$pilot_ids" > "$check_tmp/pilot-approved-design"
+comm -23 "$check_tmp/pilot-design-refs" "$check_tmp/pilot-approved-design" \
+  > "$check_tmp/unapproved-pilot-refs"
+if test -s "$check_tmp/unapproved-pilot-refs"; then
+  echo 'Pilot obligation references outside immutable approval set:' >&2
+  cat "$check_tmp/unapproved-pilot-refs" >&2
   exit 1
 fi
 
-approval=docs/system-design/verification/design-approval.md
-current_revision="$(docs/system-design/verification/system-design-revision.sh)"
-field_value() {
-  local file="$1" field="$2"
-  awk -F '|' -v field="$field" '
-    /^\|/ {
-      for (i = 2; i <= NF - 1; i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i)
-      if ($2 == field) print $3
-    }
-  ' "$file"
-}
-recorded_revision="$(field_value "$approval" 'System design revision')"
-test "$recorded_revision" = "$current_revision"
+tranche_row="$(awk -F '\t' -v id="$pilot_tranche" 'NR > 1 && $1 == id { print }' "$tranches")"
+test "$(printf '%s\n' "$tranche_row" | wc -l)" -eq 1
+IFS=$'\t' read -r tranche_id package_ids parent_count obligation_count parent_limit obligation_limit dependencies review_status approval_set limit_exception reviewed_revision provenance <<< "$tranche_row"
+test "$parent_count" -eq 128
+test "$obligation_count" -eq 184
+test "$review_status" = accepted
+test "$approval_set" = "$pilot_set"
+test "$limit_exception" = design-pilot-baseline
 
-> "$check_tmp/approval-refs"
-> "$check_tmp/reviewed-design-all"
-for pilot in A B C; do
-  row="$(awk -F '|' -v pilot="Pilot $pilot" '
-    /^\| Pilot/ {
-      for (i = 2; i <= 9; i++) gsub(/^[[:space:]`]+|[[:space:]`]+$/, "", $i)
-      if ($2 == pilot) print $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9
-    }
-  ' "$approval")"
-  test "$(printf '%s\n' "$row" | wc -l)" -eq 1
-  IFS=$'\t' read -r status design_ids_ref design_ids_sha review_ref review_sha owner_ref owner_sha <<< "$row"
-  test "$status" = "accepted"
-  case "$design_ids_ref" in docs/system-design/verification/approvals/design-sets/*) ;; *) exit 1 ;; esac
-  test -f "$design_ids_ref"
-  test "$design_ids_sha" = "sha256:$(sha256sum "$design_ids_ref" | awk '{print $1}')"
-  test ! -s <(comm -23 <(sort -u "$design_ids_ref") "$check_tmp/referenced-design")
-  cat "$design_ids_ref" >> "$check_tmp/reviewed-design-all"
-  for pair in "$review_ref|$review_sha" "$owner_ref|$owner_sha"; do
-    ref="${pair%%|*}"; expected="${pair#*|}"
-    case "$ref" in docs/system-design/verification/approvals/*) ;; *) exit 1 ;; esac
-    test -f "$ref"
-    test "$expected" = "sha256:$(sha256sum "$ref" | awk '{print $1}')"
-    test "$(field_value "$ref" 'Pilot')" = "Pilot $pilot"
-    test "$(field_value "$ref" 'System design revision')" = "$current_revision"
-    printf '%s\n' "$ref" >> "$check_tmp/approval-refs"
-  done
-  test "$(field_value "$review_ref" 'Artifact type')" = "architecture-review"
-  test "$(field_value "$review_ref" 'Design IDs Ref')" = "$design_ids_ref"
-  test "$(field_value "$review_ref" 'Design IDs SHA-256')" = "$design_ids_sha"
-  test "$(field_value "$review_ref" 'Verdict')" = "PASS"
-  test "$(field_value "$review_ref" 'Unresolved Critical / High')" = "0"
-  test "$(field_value "$owner_ref" 'Artifact type')" = "primary-approval"
-  test "$(field_value "$owner_ref" 'Design IDs Ref')" = "$design_ids_ref"
-  test "$(field_value "$owner_ref" 'Design IDs SHA-256')" = "$design_ids_sha"
-  test "$(field_value "$owner_ref" 'Primary approval')" = "accepted"
-done
+docs/system-design/verification/tranche-review-set.sh \
+  "$assignments" "$tranches" "$pilot_tranche" "$pilot_definitions" "$pilot_obligations" \
+  > "$check_tmp/current-pilot-scope"
+diff -u "$pilot_scope" "$check_tmp/current-pilot-scope"
 
-sort "$check_tmp/approval-refs" > "$check_tmp/approval-refs-all"
-sort -u "$check_tmp/approval-refs-all" > "$check_tmp/approval-refs-unique"
-diff -u "$check_tmp/approval-refs-all" "$check_tmp/approval-refs-unique"
-sort -u "$check_tmp/reviewed-design-all" > "$check_tmp/reviewed-design-union"
-diff -u "$check_tmp/referenced-design" "$check_tmp/reviewed-design-union"
-
-printf 'PASS(design-pilot-gate) revision=%s\n' \
-  "$current_revision"
+printf 'PASS(design-pilot-gate) approval_set=%s definitions=%s obligations=%s\n' \
+  "$pilot_set" "sha256:89c749815303b3aa6ca9e2bcf914dc36fa411c27fbb18f057ab84fb3cfea1fd9" \
+  "$(wc -l < "$check_tmp/pilot-obligation-ids")"

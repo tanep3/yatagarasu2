@@ -6,6 +6,14 @@
 
 全214 ACの入口は[全受入条件入口索引](ac-inventory.md)に固定します。
 
+Atomic Design Obligationのcanonical storageは、現在は三本の`docs/system-design/slices/*.md`にある
+`| DO-* |`行だけです。[obligation assignments](obligation-assignments.tsv)はstorage ref、package、trancheを
+参照する派生索引であり、Obligation本文、Design contract、Proof、negative case、statusを再定義しません。
+各trancheのContract write ownerが、そのtrancheで触れるcanonical obligation行の唯一のwrite authorityです。
+同一DO行を複数sliceまたはpackage artifactへ複製せず、移動は旧行削除と新行追加を同一change-setで行います。
+accepted reviewでは、routing列に加えてJoint group、Parent contribution、Design IDs、Proof type、negative case、target scope、Accounting／Design／Proof、blockerをSource commitからimmutable snapshotへ固定します。current DO行がこの意味snapshotからdriftした場合、同じ承認を再利用できません。
+全accepted trancheに同じ16列snapshotを要求します。各obligationのDesign IDsはApproval set definitionsの部分集合でなければならず、欠落はclosure違反です。共通lawを同一審査で固定する余分なdefinitionsは許容しますが、scope Artifactへexact setとして含めます。
+
 ### AC index
 
 一つのACにつき一行を持つ入口索引です。この行だけではcoverageを証明しません。
@@ -93,4 +101,13 @@ Evidence Refとして保存します。
 
 全214 ACの入口索引は、要件基準commit `4df6fb1`からpilot設計前に固定します。Requirement、AC、source anchorを一対一で記録し、要件側の[トレーサビリティ](../../requirements/traceability.md)と機械照合します。
 
-atomic obligationへの分解は三本のpilot sliceで進めています。Pilot Cは変更集合[SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)として、設定、Capability binding、routing、restart、migrationと、Pilot A/Bへ及ぶrevision-use法則を同一revisionで追跡します。Pilot C再審査後に全ACへの横展開可否を判定します。入口索引の追加、脱落、重複、source移動は、基準commitとの差分として明示しない限りGateを通しません。
+Requirement／ACの安定provenanceは[requirements baseline](requirements-baseline.tsv)が、基準commitから
+再構成したRequirement本文hash、AC本文hash、Requirement↔AC、file/line locatorを保持します。
+`check-ac-expansion.sh`はこのArtifactを毎回`4df6fb1`から再生成し、入口索引との一致を検査します。
+
+三本のpilot sliceにある184 atomic obligationは、変更集合[SD-REV-PILOT-C-001](change-sets/SD-REV-PILOT-C-001.md)として、設定、Capability binding、routing、restart、migrationと、Pilot A/Bへ及ぶrevision-use法則を同一revisionで追跡し、Design Pilot Gateを通過しました。
+
+残る全214 ACへの分解と再監査は[AC横展開実施契約](ac-expansion-plan.md)に従います。pilotで
+`accounted-for`の親ACも、未発見の兄弟義務がないことを横展開packageで確認するまで
+`covered`へ自動昇格しません。入口索引の追加、脱落、重複、source移動は、基準commitとの差分として
+明示しない限りGateを通しません。

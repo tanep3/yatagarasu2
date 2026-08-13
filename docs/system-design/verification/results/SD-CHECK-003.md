@@ -5,22 +5,28 @@
 - 要件基準commit: `4df6fb1`
 - 設計変更集合: [SD-REV-PILOT-C-001](../change-sets/SD-REV-PILOT-C-001.md)
 - 設計対象: Pilot C（設定更新・Capability binding・routing・restart・migration）
-- 検査日: 2026-08-11
+- 検査日: 2026-08-13
 
 ## 再現command
 
 ```text
 docs/system-design/verification/check-system-design.sh
+docs/system-design/verification/check-design-approvals.sh
+docs/system-design/verification/check-design-pilot-gate.sh
+docs/system-design/verification/check-ac-expansion.sh
 git diff --check
 ```
 
 ## 結果
 
 ```text
-PASS(structural-index) REQ=62 AC=214 canonical=519 states=30 stateOwners=30 parentAC=128 obligations=184 revision=sha256:f0c85ec41234afc5399ba4e6d1ce464b1ae4bca30050a2f240ca5ec09ef60705
+PASS(structural-index) REQ=62 AC=214 canonical=519 states=30 stateOwners=30 parentAC=128 obligations=184 revision=sha256:748a0f741e82cb004a3d92f8ec48181d7bb3fcaf1f1961920a291ccde859f482
+PASS(design-approvals) sets=1 definitions=519 require_all=false
+PASS(design-pilot-gate) approval_set=APR-PILOT-ABC-EE8F532A definitions=sha256:89c749815303b3aa6ca9e2bcf914dc36fa411c27fbb18f057ab84fb3cfea1fd9 obligations=184
+PASS(ac-expansion) requirements=62 ac=214 packages=8 obligations=184 tranches=1 covered=0
 git diff --check: PASS
 change-set exact canonical Design ID coverage: PASS (519/519)
-verification revision: sha256:617f6a338fba5b3a71a9a11dee6eade42204e57454df947e7f6d2904ac87681a
+verification revision: sha256:fe928cef2252fa3c21c8fafea40c3806294af703ad60059f62ebd2e3de8cdc9d
 ```
 
 このPASSは、canonical Design IDの単一定義、State owner索引、正式Transition参照、
@@ -30,10 +36,22 @@ production code、外部runtime、実機、測定値の成立を証明するも�
 
 ## Architecture reviewとGate
 
-- Pilot C architecture review: 再審査待ち
-- Pilot C Design slice: 改訂済み・未承認
+- reviewed content commit: `1eafd3deab687e29c3d81609ae0959823e246165`
+- reviewed content revision: `sha256:f0c85ec41234afc5399ba4e6d1ce464b1ae4bca30050a2f240ca5ec09ef60705`
+- independent architecture challenger: PASS（Critical 0／High 0）
+- Primary／Owner approval: 2026-08-13「レビュー通過、問題なし、先へ」
+- accepted canonical Design ID: 519/519
+- accepted canonical definition non-drift: 519/519 ID/version/ref/hash
+- approval aggregation: `APR-PILOT-ABC-EE8F532A` immutable subset
+- reviewed definitions: Source commitから519 definitionを再生成し保存payload／currentと一致
+- reviewed Pilot obligations: Source commitから184 routing／meaning／proof行を再生成しcurrent non-drift
+- accepted tranche scope: package／親AC／obligation／definition exact setをReview／Owner Artifactで固定
+- obligation definition closure: 184 DOが参照する401 Design IDはApproval definitions 519件に全包含。余分118件はintegrated/common lawとしてscope固定
+- requirements baseline: 62 Requirement／214 ACを`4df6fb1`から本文hash付きで再構成
+- expansion mapping: 8 package、214 AC exact-one、184 pilot obligation exact-one、1 accepted pilot tranche
+- Pilot A/B/C Design slice: accepted
 - Proof: production code未実装のため`planned`または`blocked-by-spike`
-- 三本全体のDesign Pilot Gate: 保留
+- 三本全体のDesign Pilot Gate: PASS
 - Implementation / Evidence Gate: 未評価
 
 管理操作のExecution correlation、Guard Fact lifecycle、設定保存、revision use、runtime readiness、
@@ -72,4 +90,6 @@ activationまたは安全なRejected終端だけがslotを解放し、cleanup終
 revision 0のHeld entryをcompare-not-exists CASでgeneration／RCP use／Graph／leaseと同時生成します。
 missing／Superseded／Blocked／key mismatch Profileからの生成、Quarantined entryのAbsent扱いを拒否し、
 同一Absent keyの並行admission、同値replay、profile supersede競合を機械検査対象にしました。
-このArtifactは再審査の入力であり、architecture承認記録ではありません。
+このArtifactは、構造検査とDesign Pilot Gateの実行結果です。architecture reviewとPrimary承認の
+原本およびhashは[Design Approval Manifest](../design-approval.md)が保持します。Proof=`planned`／
+`blocked-by-spike`は実装・実機passingを意味しません。
